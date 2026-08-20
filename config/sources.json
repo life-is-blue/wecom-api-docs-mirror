@@ -1,0 +1,12 @@
+{
+  "sources": [
+    {
+      "id": "wecom",
+      "site_root": "https://developer.work.weixin.qq.com",
+      "seed_path": "/document/path/90664",
+      "sentinel_ids": ["90664"],
+      "doc_path_prefix": "/document/path/",
+      "output_subdir": "wecom"
+    }
+  ]
+}

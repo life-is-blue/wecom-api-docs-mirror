@@ -1,0 +1,19 @@
+branch:
+  - reg: ^main$
+    buttons:
+      - name: Sync WeCom API Docs
+        description: 立即同步企业微信开发文档到 docs 目录
+        event: web_trigger.sync_docs
+        isDefault: true
+        inputs:
+          STRICT_FETCH:
+            name: Strict Fetch
+            description: "1=严格模式（任意抓取失败即失败），0=容错模式"
+            type: select
+            required: true
+            default: "0"
+            options:
+              - name: Tolerant
+                value: "0"
+              - name: Strict
+                value: "1"

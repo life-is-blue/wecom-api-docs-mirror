@@ -1,0 +1,83 @@
+name: Update WeCom API Docs Mirror
+
+on:
+  push:
+    paths:
+      - "scripts/**"
+      - "config/**"
+      - "tests/**"
+      - ".github/workflows/update-docs.yml"
+  pull_request:
+    paths:
+      - "scripts/**"
+      - "config/**"
+      - "tests/**"
+      - ".github/workflows/update-docs.yml"
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+    inputs:
+      strict_fetch:
+        description: "1=fail on any fetch error, 0=tolerant mode"
+        required: false
+        default: "0"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wecom-api-docs-mirror
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements-dev.txt
+
+      - name: Run offline unit tests
+        run: pytest tests/ -v
+
+  sync:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Fetch docs
+        env:
+          STRICT_FETCH: ${{ github.event.inputs.strict_fetch || '0' }}
+        run: python scripts/fetch_wecom_docs.py
+
+      - name: Commit and push when changed
+        run: |
+          if [[ -z "$(git status --porcelain docs/)" ]]; then
+            echo "No docs changes."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/
+          git commit -m "chore: sync docs $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          git push

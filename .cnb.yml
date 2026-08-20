@@ -1,0 +1,65 @@
+.verify-fetcher: &verify-fetcher
+  name: verify-wecom-docs-fetcher
+  ifModify:
+    - .cnb.yml
+    - .cnb/web_trigger.yml
+    - config/**
+    - scripts/**
+    - tests/**
+  docker:
+    image: python:3.11
+  stages:
+    - name: install-dependencies
+      script:
+        - python -V
+        - pip install --upgrade pip
+        - pip install -r scripts/requirements-dev.txt
+    - name: offline-unit-tests
+      script:
+        - pytest tests/ -v
+
+.sync-wecom-docs: &sync-wecom-docs
+  name: sync-wecom-docs
+  lock:
+    key: wecom-api-docs-mirror-sync
+    wait: true
+    timeout: 7200
+  retry: 2
+  docker:
+    image: python:3.11
+  stages:
+    - name: install-dependencies
+      script:
+        - python -V
+        - pip install --upgrade pip
+        - pip install -r scripts/requirements.txt
+    - name: fetch-wecom-docs
+      script:
+        - STRICT_FETCH=${STRICT_FETCH:-0} python scripts/fetch_wecom_docs.py
+    - name: commit-and-push
+      script:
+        - |
+          set -euo pipefail
+
+          if [ -z "$(git status --porcelain docs/)" ]; then
+            echo "No docs changes."
+            exit 0
+          fi
+
+          git config user.name "${CNB_USER_NAME:-cnb-bot}"
+          git config user.email "${CNB_USER_NAME:-cnb-bot}@users.noreply.cnb.cool"
+          git add docs/
+          git commit -m "chore: sync docs $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+
+          target_branch="${CNB_BRANCH:-main}"
+          git push origin "HEAD:${target_branch}"
+
+main:
+  push:
+    - <<: *verify-fetcher
+  pull_request:
+    - <<: *verify-fetcher
+  "crontab: 0 0 * * *":
+    - <<: *sync-wecom-docs
+  web_trigger.sync_docs:
+    - <<: *sync-wecom-docs
