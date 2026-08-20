@@ -477,6 +477,18 @@ def load_existing_manifest(path: Path) -> Dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def cleanup_stale_temp_files(root: Path) -> None:
+    """Remove `write_text_atomic`/`write_json_atomic` temp files orphaned by
+    a process that got SIGKILLed (CI timeout, manual TaskStop) between the
+    temp-file write and the rename -- exactly the interruption scenario
+    --resume exists to survive. Left alone, one would eventually get swept
+    up by a later `git add docs/` and committed permanently."""
+    for tmp_file in root.rglob(".*.tmp*"):
+        if tmp_file.is_file():
+            print(f"[INFO] removing orphaned temp file from a previous interrupted run: {tmp_file}")
+            tmp_file.unlink()
+
+
 def remove_empty_dirs(start: Path, stop: Path) -> None:
     current = start
     while current != stop and current.exists():
@@ -536,12 +548,11 @@ def main() -> int:
             "Only fetch this many docs, evenly sampled across the discovered "
             "set (for a quick, low-traffic smoke test). Discovery itself is "
             "never limited, so the circuit breaker's drop-threshold check "
-            "still sees the true site-wide count; only the failure-rate "
-            "check becomes meaningless in this mode since the denominator "
-            "is the full count, not the sampled one. Do not use --limit for "
-            "a real sync -- it leaves most manifest entries stale. Not "
-            "combined with --resume: a limited run never reaches full "
-            "completion, so it never writes a resumable checkpoint."
+            "still sees the true site-wide count. Do not use --limit for a "
+            "real sync -- it leaves most manifest entries stale. Ignores "
+            "docs/sync_progress.json entirely, even if --resume is also "
+            "passed: never reads, writes, or deletes it, so it's always "
+            "safe to run without disturbing a real in-progress sync."
         ),
     )
     parser.add_argument(
@@ -564,14 +575,18 @@ def main() -> int:
     strict_fetch = os.environ.get("STRICT_FETCH", "0") == "1"
 
     DOCS_ROOT.mkdir(parents=True, exist_ok=True)
+    cleanup_stale_temp_files(DOCS_ROOT)
     sources = load_sources(CONFIG_PATH)
     existing_manifest = load_existing_manifest(MANIFEST_PATH)
     existing_files: Dict[str, Dict] = existing_manifest.get("files", {})
 
     progress = load_progress(PROGRESS_PATH) if args.resume else {}
-    if not args.resume and PROGRESS_PATH.exists():
-        # Fresh run explicitly requested: don't let a stale checkpoint from
-        # an old interrupted attempt leak into it.
+    if args.limit is None and not args.resume and PROGRESS_PATH.exists():
+        # Fresh full run explicitly requested: don't let a stale checkpoint
+        # from an old interrupted attempt leak into it. Never touch the
+        # checkpoint in --limit mode -- a sampled smoke-test run is neither
+        # a real resume nor a real fresh full attempt, and must not clobber
+        # whatever real, in-progress sync state happens to exist.
         PROGRESS_PATH.unlink()
 
     new_files: Dict[str, Dict] = {}
@@ -620,14 +635,15 @@ def main() -> int:
 
         checkpoint = progress.get(source.source_id) if args.limit is None else None
         resuming = bool(checkpoint and checkpoint.get("discovered_doc_ids") == doc_ids)
-        # `source_failed_pages` is scoped to this source, unlike the
-        # module-wide `failed_pages` list, so the mid-loop circuit breaker
-        # below reacts to this source's own recent failure rate instead of
-        # being diluted by (or contaminated by) any other source processed
-        # in the same run.
+        # `source_failed_pages` / `source_files` are scoped to this source
+        # (and, unlike `done_doc_ids`, persist across --resume invocations),
+        # unlike the module-wide `failed_pages` / `new_files`, so a
+        # checkpoint save never has to re-filter the whole cumulative
+        # `new_files` dict -- it already has exactly this source's slice.
         if resuming:
             done_doc_ids = set(checkpoint.get("done_doc_ids", []))
-            new_files.update(checkpoint.get("files", {}))
+            source_files: Dict[str, Dict] = dict(checkpoint.get("files", {}))
+            new_files.update(source_files)
             source_failed_pages: List[Tuple[str, str]] = [
                 tuple(pair) for pair in checkpoint.get("failed", [])
             ]
@@ -645,6 +661,7 @@ def main() -> int:
                     f"starting this source fresh instead of resuming"
                 )
             done_doc_ids = set()
+            source_files = {}
             source_failed_pages = []
             run_started_at = now_iso()
 
@@ -653,10 +670,24 @@ def main() -> int:
                 "run_started_at": run_started_at,
                 "discovered_doc_ids": doc_ids,
                 "done_doc_ids": sorted(done_doc_ids),
-                "files": {k: v for k, v in new_files.items() if k.startswith(f"{source.output_subdir}/")},
+                "files": source_files,
                 "failed": [list(pair) for pair in source_failed_pages],
             }
             write_json_atomic(PROGRESS_PATH, progress)
+
+        # Scoped to *this process's own attempts*, unlike `source_failed_pages`
+        # above which accumulates across every --resume invocation for this
+        # source's lifetime. The circuit breaker below must judge only this
+        # session's recent failure rate: if it judged the cumulative rate
+        # instead, one CAPTCHA cascade months ago would keep re-tripping the
+        # breaker after just a single new attempt on every future --resume,
+        # since attempted-so-far would already be well past the minimum
+        # sample size. `min_sample` also shrinks to the number of docs left
+        # for a small source, so a source with fewer than 10 total docs still
+        # gets checked once it's fully attempted instead of never at all.
+        session_attempted = 0
+        session_failed_pages: List[Tuple[str, str]] = []
+        min_sample = min(10, len(doc_ids) - len(done_doc_ids))
 
         for doc_id in doc_ids:
             if doc_id in done_doc_ids:
@@ -673,6 +704,7 @@ def main() -> int:
                 print(f"[WARN] failed url={page.url} err={outcome.error}")
                 failed_pages.append((page.url, outcome.error))
                 source_failed_pages.append((page.url, outcome.error))
+                session_failed_pages.append((page.url, outcome.error))
                 if existing_entry:
                     # Keep last-known-good content and manifest record; just
                     # bump the failure counter so persistent failures are
@@ -680,6 +712,7 @@ def main() -> int:
                     carried = dict(existing_entry)
                     carried["fetch_failures"] = int(existing_entry.get("fetch_failures", 0)) + 1
                     new_files[manifest_key] = carried
+                    source_files[manifest_key] = carried
             else:
                 entry = outcome.manifest_entry
                 dest = source_root / page.rel_path
@@ -687,27 +720,29 @@ def main() -> int:
                 if existing_entry.get("sha256") != entry["sha256"] or not dest.exists():
                     write_text_atomic(dest, outcome.markdown_text)
                 new_files[manifest_key] = entry
+                source_files[manifest_key] = entry
                 successful_pages += 1
                 print(f"[OK] {manifest_key}")
 
             done_doc_ids.add(doc_id)
+            session_attempted += 1
             if args.limit is None:
                 save_checkpoint()
 
-            attempted = len(done_doc_ids)
-            if attempted >= 10:
-                # Denominator is docs attempted so far, not total discovered
-                # -- we want this to react fast to a CAPTCHA cascade, not get
-                # diluted into meaninglessness by a large total page count.
-                failure_rate = len(source_failed_pages) / attempted
+            if min_sample > 0 and session_attempted >= min_sample:
+                # Denominator is docs attempted in *this process*, not the
+                # cumulative total across every --resume invocation -- see
+                # the comment on session_attempted above for why.
+                failure_rate = len(session_failed_pages) / session_attempted
                 if failure_rate > FAILURE_RATE_THRESHOLD:
                     print(
                         f"[PAUSED] circuit breaker: failure rate {failure_rate:.1%} exceeds "
-                        f"{FAILURE_RATE_THRESHOLD:.0%} after {attempted} attempts (this pattern -- a "
-                        f"run of successes followed by a run of failures -- has empirically matched a "
-                        f"CAPTCHA block, not a real breakage). Progress up to this point is "
-                        f"checkpointed to {PROGRESS_PATH}; CI should commit it as-is and a future "
-                        f"`--resume` run (e.g. tomorrow's cron) will continue from here."
+                        f"{FAILURE_RATE_THRESHOLD:.0%} over the last {session_attempted} attempts "
+                        f"this run (this pattern -- a run of successes followed by a run of failures "
+                        f"-- has empirically matched a CAPTCHA block, not a real breakage). Progress "
+                        f"up to this point is checkpointed to {PROGRESS_PATH}; CI should commit it "
+                        f"as-is and a future `--resume` run (e.g. tomorrow's cron) will continue from "
+                        f"here."
                     )
                     # Not a hard failure in tolerant mode: this is the
                     # expected shape of a multi-day resumable sync against a
@@ -770,8 +805,10 @@ def main() -> int:
     # Every source ran its doc_ids loop to completion (no circuit breaker
     # returned early above), so this sync is fully done -- the checkpoint's
     # job is finished and stale progress must not linger for a future
-    # --resume to misread.
-    if PROGRESS_PATH.exists():
+    # --resume to misread. Never true of a --limit run, which only ever
+    # visits a sampled subset -- it must not clear a real checkpoint just
+    # because *it* happened to reach the end of its own (partial) doc_ids.
+    if args.limit is None and PROGRESS_PATH.exists():
         PROGRESS_PATH.unlink()
 
     print("\n[SUMMARY]")
@@ -783,8 +820,14 @@ def main() -> int:
         print("[ERROR] STRICT_FETCH=1 and failures detected")
         return 1
 
-    if successful_pages == 0:
-        print("[ERROR] No documents fetched successfully")
+    if not new_files:
+        # Deliberately not `successful_pages == 0`: a --resume run whose
+        # remaining doc_ids were all already checkpointed as done (or where
+        # every newly-attempted doc happens to fail) can legitimately finish
+        # a fully-populated manifest while fetching zero *new* docs this
+        # process. What actually indicates a broken sync is an empty
+        # manifest, not an empty this-invocation delta.
+        print("[ERROR] No documents in the resulting manifest")
         return 1
 
     return 0

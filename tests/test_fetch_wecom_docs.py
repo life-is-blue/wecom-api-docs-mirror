@@ -206,9 +206,12 @@ def test_load_progress_treats_corrupt_file_as_absent(tmp_path):
 def test_resume_skips_already_done_docs_and_completes(tmp_path, monkeypatch):
     """End-to-end main() run simulating a checkpoint left by an earlier,
     interrupted attempt: docs 1 and 2 are already marked done, so a
-    `--resume` run should only fetch 3, 4, 5 -- and doc 3's fetch failure
-    (with no prior manifest entry) should not appear in the final manifest,
-    while the checkpoint should be cleared once the source fully completes.
+    `--resume` run should only fetch 3, 4, 5, carry the checkpointed 1/2
+    entries through untouched, and clear the checkpoint once the source
+    fully completes. (All-success on purpose: a mixed-outcome variant lives
+    in the dedicated circuit-breaker tests below, since a small sample with
+    even one failure is exactly what's supposed to trip the breaker now --
+    see min_sample in main().)
     """
     docs_root = tmp_path / "docs"
     docs_root.mkdir(parents=True)
@@ -246,8 +249,6 @@ def test_resume_skips_already_done_docs_and_completes(tmp_path, monkeypatch):
 
     def fake_fetch_one_doc(source, page, existing):
         fetched_ids.append(page.doc_id)
-        if page.doc_id == "3":
-            return fw.FetchOutcome(failed=True, error="simulated failure")
         markdown = f"# doc {page.doc_id}\n"
         return fw.FetchOutcome(
             manifest_entry={
@@ -297,7 +298,7 @@ def test_resume_skips_already_done_docs_and_completes(tmp_path, monkeypatch):
 
     manifest = json.loads(fw.MANIFEST_PATH.read_text(encoding="utf-8"))
     files = manifest["files"]
-    assert set(files.keys()) == {"wecom/1.md", "wecom/2.md", "wecom/4.md", "wecom/5.md"}
+    assert set(files.keys()) == {"wecom/1.md", "wecom/2.md", "wecom/3.md", "wecom/4.md", "wecom/5.md"}
     assert files["wecom/1.md"]["sha256"] == "seed1"  # carried through from checkpoint untouched
 
     # Sync fully completed (ran every discovered doc_id), so the checkpoint
@@ -377,3 +378,148 @@ def test_mid_sync_failure_spike_fails_the_job_under_strict_fetch(tmp_path, monke
 
     assert rc == 1  # STRICT_FETCH=1 means "tell me about any imperfection"
     assert fw.PROGRESS_PATH.exists()  # still checkpointed, so --resume still works next time
+
+
+def test_resume_where_every_doc_was_already_done_still_succeeds(tmp_path, monkeypatch):
+    """Regression test: a --resume run whose entire doc_ids set is already
+    in the checkpoint's done_doc_ids fetches nothing new this process, but
+    must still finish successfully -- `successful_pages` (this invocation's
+    count) staying 0 must not be confused with the manifest being empty."""
+    docs_root = tmp_path / "docs"
+    docs_root.mkdir(parents=True)
+    monkeypatch.setattr(fw, "DOCS_ROOT", docs_root)
+    monkeypatch.setattr(fw, "MANIFEST_PATH", docs_root / "docs_manifest.json")
+    monkeypatch.setattr(fw, "PROGRESS_PATH", docs_root / "sync_progress.json")
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MIN_SECONDS", 0.0)
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MAX_SECONDS", 0.0)
+
+    source = fw.Source(
+        source_id="wecom", site_root="https://example.invalid",
+        seed_path="/document/path/1", sentinel_ids=(),
+        doc_path_prefix="/document/path/", output_subdir="wecom",
+    )
+    monkeypatch.setattr(fw, "load_sources", lambda path: [source])
+    monkeypatch.setattr(fw, "check_robots_allowed", lambda *a, **k: True)
+
+    pages = {
+        str(i): fw.DocPage(
+            doc_id=str(i), label=f"doc{i}", sections=("s",),
+            url=f"https://example.invalid/document/path/{i}", rel_path=f"{i}.md",
+        )
+        for i in range(1, 4)
+    }
+    monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
+
+    def fail_if_called(*a, **k):
+        raise AssertionError("fetch_one_doc should not be called -- every doc is already done")
+
+    monkeypatch.setattr(fw, "fetch_one_doc", fail_if_called)
+
+    doc_ids = sorted(pages.keys())
+    fw.write_json_atomic(
+        fw.PROGRESS_PATH,
+        {
+            "wecom": {
+                "run_started_at": fw.now_iso(),
+                "discovered_doc_ids": doc_ids,
+                "done_doc_ids": doc_ids,
+                "files": {
+                    f"wecom/{i}.md": {"doc_id": str(i), "sha256": f"seed{i}", "section": "s"}
+                    for i in range(1, 4)
+                },
+                "failed": [],
+            }
+        },
+    )
+
+    monkeypatch.setattr(sys, "argv", ["fetch_wecom_docs.py", "--resume"])
+    rc = fw.main()
+
+    assert rc == 0  # NOT 1 -- would previously false-fail on successful_pages == 0
+    manifest = json.loads(fw.MANIFEST_PATH.read_text(encoding="utf-8"))
+    assert set(manifest["files"].keys()) == {"wecom/1.md", "wecom/2.md", "wecom/3.md"}
+    assert not fw.PROGRESS_PATH.exists()  # fully completed, checkpoint cleared
+
+
+def test_limit_run_does_not_touch_an_unrelated_real_checkpoint(tmp_path, monkeypatch):
+    """Regression test: `--limit` (a low-traffic smoke test, per --help) must
+    never delete or overwrite a real in-progress sync's checkpoint, whether
+    at startup (the "fresh run" cleanup) or at the end (the "sync fully
+    completed" cleanup) -- a --limit run never represents a full attempt."""
+    docs_root = tmp_path / "docs"
+    docs_root.mkdir(parents=True)
+    monkeypatch.setattr(fw, "DOCS_ROOT", docs_root)
+    monkeypatch.setattr(fw, "MANIFEST_PATH", docs_root / "docs_manifest.json")
+    monkeypatch.setattr(fw, "PROGRESS_PATH", docs_root / "sync_progress.json")
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MIN_SECONDS", 0.0)
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MAX_SECONDS", 0.0)
+
+    source = fw.Source(
+        source_id="wecom", site_root="https://example.invalid",
+        seed_path="/document/path/1", sentinel_ids=(),
+        doc_path_prefix="/document/path/", output_subdir="wecom",
+    )
+    monkeypatch.setattr(fw, "load_sources", lambda path: [source])
+    monkeypatch.setattr(fw, "check_robots_allowed", lambda *a, **k: True)
+
+    pages = {
+        str(i): fw.DocPage(
+            doc_id=str(i), label=f"doc{i}", sections=("s",),
+            url=f"https://example.invalid/document/path/{i}", rel_path=f"{i}.md",
+        )
+        for i in range(1, 6)
+    }
+    monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
+
+    def fake_fetch_one_doc(source, page, existing):
+        markdown = f"# doc {page.doc_id}\n"
+        return fw.FetchOutcome(
+            manifest_entry={
+                "source": source.source_id, "doc_id": page.doc_id, "slug": page.doc_id,
+                "label": page.label, "section": "s", "all_sections": ["s"],
+                "url": page.url, "sha256": fw.sha256_text(markdown),
+                "bytes": len(markdown.encode("utf-8")), "converter_version": fw.CONVERTER_VERSION,
+                "first_seen_at": fw.now_iso(), "last_verified_at": fw.now_iso(),
+                "fetched_at": fw.now_iso(), "missing_since": None, "fetch_failures": 0,
+            },
+            markdown_text=markdown,
+        )
+
+    monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
+
+    real_checkpoint = {
+        "wecom": {
+            "run_started_at": fw.now_iso(),
+            "discovered_doc_ids": ["1", "2", "3", "4", "5", "6", "7"],  # an unrelated, larger sync
+            "done_doc_ids": ["1"],
+            "files": {"wecom/1.md": {"doc_id": "1", "sha256": "real-progress", "section": "s"}},
+            "failed": [],
+        }
+    }
+    fw.write_json_atomic(fw.PROGRESS_PATH, real_checkpoint)
+
+    monkeypatch.setattr(sys, "argv", ["fetch_wecom_docs.py", "--limit", "2"])
+    rc = fw.main()
+
+    assert rc == 0
+    assert fw.PROGRESS_PATH.exists()
+    assert json.loads(fw.PROGRESS_PATH.read_text(encoding="utf-8")) == real_checkpoint
+
+
+def test_cleanup_stale_temp_files_removes_orphans_but_not_real_files(tmp_path):
+    docs_root = tmp_path / "docs"
+    (docs_root / "wecom").mkdir(parents=True)
+    real_md = docs_root / "wecom" / "90664.md"
+    real_md.write_text("# real content\n", encoding="utf-8")
+    orphan_top = docs_root / ".sync_progress.json.tmp12345"
+    orphan_top.write_text("{incomplete", encoding="utf-8")
+    orphan_nested = docs_root / "wecom" / ".90664.md.tmp6789"
+    orphan_nested.write_text("half-written", encoding="utf-8")
+
+    fw.cleanup_stale_temp_files(docs_root)
+
+    assert real_md.exists()
+    assert not orphan_top.exists()
+    assert not orphan_nested.exists()

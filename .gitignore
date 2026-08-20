@@ -4,3 +4,8 @@ __pycache__/
 *.pyo
 *.pyd
 .pytest_cache/
+
+# Orphaned atomic-write temp files from a killed run (fetch_wecom_docs.py
+# also cleans these up on startup; this is a safety net in case a `git add`
+# happens before the fetcher gets to run again).
+docs/**/.*.tmp*
