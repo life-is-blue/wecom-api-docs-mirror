@@ -18,6 +18,14 @@ agy's "read an official index file", failure modes are wider. This script is
 deliberately conservative about applying deletions: see `validate_discovery`
 and the `missing_since` handling in `main` for the safeguards against a
 parser regression / bad response wiping out a good local mirror.
+
+It's also built to be interrupted: a polite per-request delay still gets
+CAPTCHA-blocked by WeCom's anti-bot gate after a couple dozen requests
+(empirically observed), so a full sync can take hours and may not finish in
+one process lifetime. `docs/sync_progress.json` is checkpointed atomically
+after every doc and committed (not gitignored, since CI runners don't
+persist state between runs); pass `--resume` to continue from it instead of
+re-fetching everything. See "Resumable, checkpointed syncs" in the README.
 """
 
 from __future__ import annotations
@@ -47,6 +55,13 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = REPO_ROOT / "config" / "sources.json"
 DOCS_ROOT = REPO_ROOT / "docs"
 MANIFEST_PATH = DOCS_ROOT / "docs_manifest.json"
+# Tracks per-source progress of an in-flight sync so `--resume` can continue
+# after a CAPTCHA block / CI timeout / kill without re-fetching docs we
+# already have. Deliberately committed to git (not gitignored): CI runners
+# are ephemeral, so a checkpoint that doesn't survive in the repo itself
+# can't survive between one cron run and the next. Cleared (and its removal
+# committed) once a source's sync fully completes.
+PROGRESS_PATH = DOCS_ROOT / "sync_progress.json"
 
 USER_AGENT = (
     "wecom-api-docs-mirror/1.0 "
@@ -113,6 +128,31 @@ class CircuitBreaker(RuntimeError):
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def write_text_atomic(path: Path, text: str) -> None:
+    """Write via a temp file + os.replace so a killed process never leaves a
+    half-written file at `path` -- the file is either the old content or the
+    fully-new content, never a truncated in-between."""
+    tmp_path = path.with_name(f".{path.name}.tmp{os.getpid()}")
+    tmp_path.write_text(text, encoding="utf-8")
+    os.replace(tmp_path, path)
+
+
+def write_json_atomic(path: Path, data: Dict) -> None:
+    write_text_atomic(path, json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+
+
+def load_progress(path: Path) -> Dict:
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        # A corrupt/partial progress file (e.g. process killed mid-write
+        # despite the atomic rename, or hand-edited) is not worth resuming
+        # from -- treat it as absent and start the source fresh.
+        return {}
 
 
 def load_sources(config_path: Path) -> List[Source]:
@@ -499,7 +539,24 @@ def main() -> int:
             "still sees the true site-wide count; only the failure-rate "
             "check becomes meaningless in this mode since the denominator "
             "is the full count, not the sampled one. Do not use --limit for "
-            "a real sync -- it leaves most manifest entries stale."
+            "a real sync -- it leaves most manifest entries stale. Not "
+            "combined with --resume: a limited run never reaches full "
+            "completion, so it never writes a resumable checkpoint."
+        ),
+    )
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help=(
+            "Continue an interrupted sync (e.g. one killed mid-run by a "
+            "CAPTCHA block or a CI timeout) using docs/sync_progress.json "
+            "instead of starting over. Safe to pass unconditionally in "
+            "automation: if there's no matching checkpoint, this is a no-op "
+            "and behaves like a normal fresh run. If the checkpoint's "
+            "discovered doc-id set doesn't match a fresh discovery (site "
+            "changed since the interrupted attempt), the stale checkpoint "
+            "is discarded and the source starts fresh rather than resuming "
+            "against a mismatched id set."
         ),
     )
     args = parser.parse_args()
@@ -510,6 +567,12 @@ def main() -> int:
     sources = load_sources(CONFIG_PATH)
     existing_manifest = load_existing_manifest(MANIFEST_PATH)
     existing_files: Dict[str, Dict] = existing_manifest.get("files", {})
+
+    progress = load_progress(PROGRESS_PATH) if args.resume else {}
+    if not args.resume and PROGRESS_PATH.exists():
+        # Fresh run explicitly requested: don't let a stale checkpoint from
+        # an old interrupted attempt leak into it.
+        PROGRESS_PATH.unlink()
 
     new_files: Dict[str, Dict] = {}
     if args.limit is not None:
@@ -555,7 +618,50 @@ def main() -> int:
             doc_ids = doc_ids[::step][: args.limit]
             print(f"[INFO] --limit {args.limit}: sampling {len(doc_ids)} of {len(pages)} discovered docs")
 
+        checkpoint = progress.get(source.source_id) if args.limit is None else None
+        resuming = bool(checkpoint and checkpoint.get("discovered_doc_ids") == doc_ids)
+        # `source_failed_pages` is scoped to this source, unlike the
+        # module-wide `failed_pages` list, so the mid-loop circuit breaker
+        # below reacts to this source's own recent failure rate instead of
+        # being diluted by (or contaminated by) any other source processed
+        # in the same run.
+        if resuming:
+            done_doc_ids = set(checkpoint.get("done_doc_ids", []))
+            new_files.update(checkpoint.get("files", {}))
+            source_failed_pages: List[Tuple[str, str]] = [
+                tuple(pair) for pair in checkpoint.get("failed", [])
+            ]
+            failed_pages.extend(source_failed_pages)
+            run_started_at = checkpoint.get("run_started_at", now_iso())
+            print(
+                f"[INFO] --resume: continuing checkpoint for source={source.source_id} "
+                f"({len(done_doc_ids)}/{len(doc_ids)} already attempted)"
+            )
+        else:
+            if checkpoint:
+                print(
+                    f"[WARN] --resume: checkpoint for source={source.source_id} doesn't match "
+                    f"current discovery (site changed since the interrupted attempt); "
+                    f"starting this source fresh instead of resuming"
+                )
+            done_doc_ids = set()
+            source_failed_pages = []
+            run_started_at = now_iso()
+
+        def save_checkpoint() -> None:
+            progress[source.source_id] = {
+                "run_started_at": run_started_at,
+                "discovered_doc_ids": doc_ids,
+                "done_doc_ids": sorted(done_doc_ids),
+                "files": {k: v for k, v in new_files.items() if k.startswith(f"{source.output_subdir}/")},
+                "failed": [list(pair) for pair in source_failed_pages],
+            }
+            write_json_atomic(PROGRESS_PATH, progress)
+
         for doc_id in doc_ids:
+            if doc_id in done_doc_ids:
+                continue
+
             page = pages[doc_id]
             manifest_key = f"{source.output_subdir}/{page.rel_path}"
             existing_entry = existing_files.get(manifest_key, {})
@@ -566,6 +672,7 @@ def main() -> int:
             if outcome.failed:
                 print(f"[WARN] failed url={page.url} err={outcome.error}")
                 failed_pages.append((page.url, outcome.error))
+                source_failed_pages.append((page.url, outcome.error))
                 if existing_entry:
                     # Keep last-known-good content and manifest record; just
                     # bump the failure counter so persistent failures are
@@ -573,24 +680,41 @@ def main() -> int:
                     carried = dict(existing_entry)
                     carried["fetch_failures"] = int(existing_entry.get("fetch_failures", 0)) + 1
                     new_files[manifest_key] = carried
-                continue
+            else:
+                entry = outcome.manifest_entry
+                dest = source_root / page.rel_path
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                if existing_entry.get("sha256") != entry["sha256"] or not dest.exists():
+                    write_text_atomic(dest, outcome.markdown_text)
+                new_files[manifest_key] = entry
+                successful_pages += 1
+                print(f"[OK] {manifest_key}")
 
-            entry = outcome.manifest_entry
-            dest = source_root / page.rel_path
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            if existing_entry.get("sha256") != entry["sha256"] or not dest.exists():
-                dest.write_text(outcome.markdown_text, encoding="utf-8")
-            new_files[manifest_key] = entry
-            successful_pages += 1
-            print(f"[OK] {manifest_key}")
+            done_doc_ids.add(doc_id)
+            if args.limit is None:
+                save_checkpoint()
 
-        failure_rate = len(failed_pages) / total_pages if total_pages else 0.0
-        if failure_rate > FAILURE_RATE_THRESHOLD:
-            print(
-                f"[ERROR] circuit breaker: failure rate {failure_rate:.1%} exceeds "
-                f"{FAILURE_RATE_THRESHOLD:.0%}; aborting without updating manifest or deleting files"
-            )
-            return 1
+            attempted = len(done_doc_ids)
+            if attempted >= 10:
+                # Denominator is docs attempted so far, not total discovered
+                # -- we want this to react fast to a CAPTCHA cascade, not get
+                # diluted into meaninglessness by a large total page count.
+                failure_rate = len(source_failed_pages) / attempted
+                if failure_rate > FAILURE_RATE_THRESHOLD:
+                    print(
+                        f"[PAUSED] circuit breaker: failure rate {failure_rate:.1%} exceeds "
+                        f"{FAILURE_RATE_THRESHOLD:.0%} after {attempted} attempts (this pattern -- a "
+                        f"run of successes followed by a run of failures -- has empirically matched a "
+                        f"CAPTCHA block, not a real breakage). Progress up to this point is "
+                        f"checkpointed to {PROGRESS_PATH}; CI should commit it as-is and a future "
+                        f"`--resume` run (e.g. tomorrow's cron) will continue from here."
+                    )
+                    # Not a hard failure in tolerant mode: this is the
+                    # expected shape of a multi-day resumable sync against a
+                    # site with a tight anti-bot budget, not a bug to alert
+                    # on. STRICT_FETCH=1 still treats it as a failure, since
+                    # that mode means "tell me about any imperfection".
+                    return 1 if strict_fetch else 0
 
     # Delayed deletion: only drop files that have been missing for
     # MISSING_CONFIRM_RUNS consecutive runs, never on a single run.
@@ -641,7 +765,14 @@ def main() -> int:
         "files": {k: new_files[k] for k in sorted(new_files.keys())},
     }
 
-    MANIFEST_PATH.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    write_json_atomic(MANIFEST_PATH, manifest)
+
+    # Every source ran its doc_ids loop to completion (no circuit breaker
+    # returned early above), so this sync is fully done -- the checkpoint's
+    # job is finished and stale progress must not linger for a future
+    # --resume to misread.
+    if PROGRESS_PATH.exists():
+        PROGRESS_PATH.unlink()
 
     print("\n[SUMMARY]")
     print(f"total_pages={total_pages}")

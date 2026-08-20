@@ -47,9 +47,44 @@ plays for Markdown-native doc sites.
 A doc id that disappears from discovery is **not** deleted immediately — it
 has to be missing for several consecutive runs first (`missing_since` /
 `missing_run_count` in the manifest), so a single bad crawl can't wipe out
-a good local mirror. A run whose failure rate or discovery drop exceeds a
-threshold aborts entirely without touching `docs/` (see `CircuitBreaker` in
-the script).
+a good local mirror. A discovery-time drop or missing-sentinel check aborts
+entirely without touching `docs/` (see `CircuitBreaker` in the script).
+
+## Resumable, checkpointed syncs
+
+Empirically (2026-08-20), even a polite per-request delay (1.5–3s) got the
+fetcher CAPTCHA-blocked by WeCom's anti-bot gate after ~24 requests. Pulled
+the delay back hard (8–15s) in response, which means a full sync over ~700+
+docs can take hours — and may still get blocked mid-way, since we don't
+actually know the site's exact tolerance. The fetcher is built around that
+reality rather than assuming a sync completes in one shot:
+
+- **Checkpointed as it goes**: after every doc, `docs/sync_progress.json`
+  (per source: which doc ids are done, their manifest entries so far, which
+  failed) is rewritten atomically. `docs/docs_manifest.json` and each `.md`
+  file are also written via atomic temp-file-then-rename, so a killed
+  process never leaves a half-written file behind.
+- **`--resume` continues instead of restarting**: skips doc ids already
+  checkpointed, so a second attempt doesn't re-spend request budget on docs
+  it already has. It's a no-op (identical to a fresh run) when there's no
+  matching checkpoint, so it's safe to pass unconditionally — both CI
+  workflows always pass it.
+- **A failure-rate spike mid-sync pauses, it doesn't fail the job**: if the
+  recent per-doc failure rate crosses the threshold (the empirical shape of
+  a CAPTCHA cascade — a run of successes followed by a run of failures), the
+  fetcher stops early, exits 0 in tolerant mode, and leaves the checkpoint
+  in place for the next `--resume` run to pick up. `STRICT_FETCH=1` still
+  treats this as a failure, since that mode means "tell me about any
+  imperfection."
+- **`docs/sync_progress.json` is committed, not gitignored**: CI runners are
+  ephemeral, so a checkpoint that only lives on local disk wouldn't survive
+  between one day's cron run and the next. Its presence in the repo means a
+  sync is mid-flight and `docs_manifest.json` may lag behind some already
+  fetched `.md` files until the source finishes and the checkpoint is
+  cleared.
+- **Deletions still wait for a fully completed pass**: the missing-doc /
+  delayed-deletion bookkeeping only runs after every discovered doc id has
+  been attempted (possibly across several `--resume` runs), never mid-sync.
 
 ## Sources
 
@@ -72,14 +107,16 @@ Configured in `config/sources.json`:
 
 ```bash
 pip install -r scripts/requirements-dev.txt
-pytest tests/                       # offline, no network
-python3 scripts/fetch_wecom_docs.py # live fetch
+pytest tests/                                # offline, no network
+python3 scripts/fetch_wecom_docs.py --resume # live fetch, continues any checkpoint
 ```
 
-Optional strict mode (fails the run on any per-page fetch error):
+Other useful flags:
 
 ```bash
-STRICT_FETCH=1 python3 scripts/fetch_wecom_docs.py
+STRICT_FETCH=1 python3 scripts/fetch_wecom_docs.py         # fail on any per-page fetch error
+python3 scripts/fetch_wecom_docs.py --limit 20              # quick low-traffic smoke test;
+                                                              # see --help, not meant for a real sync
 ```
 
 ## Automation
@@ -90,6 +127,10 @@ STRICT_FETCH=1 python3 scripts/fetch_wecom_docs.py
 - Push / PR validation on `main` runs the offline test suite only
   (`scripts/**`, `config/**`, `tests/**`, CI files) — it never hits the live
   site, to avoid tripping WeCom's anti-bot protections on every commit.
+- Both sync workflows always pass `--resume` (see "Resumable, checkpointed
+  syncs" above) and commit whatever changed in `docs/` — including a
+  still-in-progress `sync_progress.json` when a run paused mid-sync, not
+  just a fully completed manifest.
 
 ## Notes
 

@@ -8,6 +8,7 @@ cron / manual sync, not in verify-fetcher CI).
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -177,3 +178,202 @@ def test_conversion_preserves_json_code_block_language():
 
     assert "```json" in markdown
     assert '"touser" : "UserID1|UserID2|UserID3"' in markdown
+
+
+# --------------------------------------------------------------------------
+# Atomic writes + checkpoint/resume
+# --------------------------------------------------------------------------
+
+def test_write_text_atomic_leaves_no_temp_file_behind(tmp_path):
+    target = tmp_path / "out.md"
+    fw.write_text_atomic(target, "hello\n")
+    assert target.read_text(encoding="utf-8") == "hello\n"
+    assert list(tmp_path.iterdir()) == [target]
+
+
+def test_write_json_atomic_round_trips(tmp_path):
+    target = tmp_path / "out.json"
+    fw.write_json_atomic(target, {"a": 1, "b": ["x", "y"]})
+    assert json.loads(target.read_text(encoding="utf-8")) == {"a": 1, "b": ["x", "y"]}
+
+
+def test_load_progress_treats_corrupt_file_as_absent(tmp_path):
+    target = tmp_path / "sync_progress.json"
+    target.write_text("{not valid json", encoding="utf-8")
+    assert fw.load_progress(target) == {}
+
+
+def test_resume_skips_already_done_docs_and_completes(tmp_path, monkeypatch):
+    """End-to-end main() run simulating a checkpoint left by an earlier,
+    interrupted attempt: docs 1 and 2 are already marked done, so a
+    `--resume` run should only fetch 3, 4, 5 -- and doc 3's fetch failure
+    (with no prior manifest entry) should not appear in the final manifest,
+    while the checkpoint should be cleared once the source fully completes.
+    """
+    docs_root = tmp_path / "docs"
+    docs_root.mkdir(parents=True)
+    monkeypatch.setattr(fw, "DOCS_ROOT", docs_root)
+    monkeypatch.setattr(fw, "MANIFEST_PATH", docs_root / "docs_manifest.json")
+    monkeypatch.setattr(fw, "PROGRESS_PATH", docs_root / ".sync_progress.json")
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MIN_SECONDS", 0.0)
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MAX_SECONDS", 0.0)
+
+    source = fw.Source(
+        source_id="wecom",
+        site_root="https://example.invalid",
+        seed_path="/document/path/1",
+        sentinel_ids=(),
+        doc_path_prefix="/document/path/",
+        output_subdir="wecom",
+    )
+    monkeypatch.setattr(fw, "load_sources", lambda path: [source])
+    monkeypatch.setattr(fw, "check_robots_allowed", lambda *a, **k: True)
+
+    pages = {
+        str(i): fw.DocPage(
+            doc_id=str(i),
+            label=f"doc{i}",
+            sections=("s",),
+            url=f"https://example.invalid/document/path/{i}",
+            rel_path=f"{i}.md",
+        )
+        for i in range(1, 6)
+    }
+    monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
+
+    fetched_ids = []
+
+    def fake_fetch_one_doc(source, page, existing):
+        fetched_ids.append(page.doc_id)
+        if page.doc_id == "3":
+            return fw.FetchOutcome(failed=True, error="simulated failure")
+        markdown = f"# doc {page.doc_id}\n"
+        return fw.FetchOutcome(
+            manifest_entry={
+                "source": source.source_id,
+                "doc_id": page.doc_id,
+                "slug": page.doc_id,
+                "label": page.label,
+                "section": "s",
+                "all_sections": ["s"],
+                "url": page.url,
+                "sha256": fw.sha256_text(markdown),
+                "bytes": len(markdown.encode("utf-8")),
+                "converter_version": fw.CONVERTER_VERSION,
+                "first_seen_at": fw.now_iso(),
+                "last_verified_at": fw.now_iso(),
+                "fetched_at": fw.now_iso(),
+                "missing_since": None,
+                "fetch_failures": 0,
+            },
+            markdown_text=markdown,
+        )
+
+    monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
+
+    doc_ids = sorted(pages.keys())
+    fw.write_json_atomic(
+        fw.PROGRESS_PATH,
+        {
+            "wecom": {
+                "run_started_at": fw.now_iso(),
+                "discovered_doc_ids": doc_ids,
+                "done_doc_ids": ["1", "2"],
+                "files": {
+                    "wecom/1.md": {"doc_id": "1", "sha256": "seed1", "section": "s"},
+                    "wecom/2.md": {"doc_id": "2", "sha256": "seed2", "section": "s"},
+                },
+                "failed": [],
+            }
+        },
+    )
+
+    monkeypatch.setattr(sys, "argv", ["fetch_wecom_docs.py", "--resume"])
+    rc = fw.main()
+
+    assert rc == 0
+    assert fetched_ids == ["3", "4", "5"]  # 1 and 2 were skipped, not refetched
+
+    manifest = json.loads(fw.MANIFEST_PATH.read_text(encoding="utf-8"))
+    files = manifest["files"]
+    assert set(files.keys()) == {"wecom/1.md", "wecom/2.md", "wecom/4.md", "wecom/5.md"}
+    assert files["wecom/1.md"]["sha256"] == "seed1"  # carried through from checkpoint untouched
+
+    # Sync fully completed (ran every discovered doc_id), so the checkpoint
+    # must be cleared rather than left around for a future --resume to
+    # misread as still in progress.
+    assert not fw.PROGRESS_PATH.exists()
+
+
+def _run_main_with_one_failure_in_ten(tmp_path, monkeypatch, strict_fetch):
+    """Shared setup for the two mid-loop circuit-breaker tests below: 10
+    docs, 1 fails -- a 10% failure rate, which exceeds FAILURE_RATE_THRESHOLD
+    (5%) right as the minimum sample size (10 attempts) is reached."""
+    docs_root = tmp_path / "docs"
+    docs_root.mkdir(parents=True)
+    monkeypatch.setattr(fw, "DOCS_ROOT", docs_root)
+    monkeypatch.setattr(fw, "MANIFEST_PATH", docs_root / "docs_manifest.json")
+    monkeypatch.setattr(fw, "PROGRESS_PATH", docs_root / "sync_progress.json")
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MIN_SECONDS", 0.0)
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MAX_SECONDS", 0.0)
+    monkeypatch.setenv("STRICT_FETCH", "1" if strict_fetch else "0")
+
+    source = fw.Source(
+        source_id="wecom",
+        site_root="https://example.invalid",
+        seed_path="/document/path/1",
+        sentinel_ids=(),
+        doc_path_prefix="/document/path/",
+        output_subdir="wecom",
+    )
+    monkeypatch.setattr(fw, "load_sources", lambda path: [source])
+    monkeypatch.setattr(fw, "check_robots_allowed", lambda *a, **k: True)
+
+    pages = {
+        str(i): fw.DocPage(
+            doc_id=str(i), label=f"doc{i}", sections=("s",),
+            url=f"https://example.invalid/document/path/{i}", rel_path=f"{i}.md",
+        )
+        for i in range(1, 11)
+    }
+    monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
+
+    def fake_fetch_one_doc(source, page, existing):
+        if page.doc_id == "5":
+            return fw.FetchOutcome(failed=True, error="simulated CAPTCHA-shaped failure")
+        markdown = f"# doc {page.doc_id}\n"
+        return fw.FetchOutcome(
+            manifest_entry={
+                "source": source.source_id, "doc_id": page.doc_id, "slug": page.doc_id,
+                "label": page.label, "section": "s", "all_sections": ["s"],
+                "url": page.url, "sha256": fw.sha256_text(markdown),
+                "bytes": len(markdown.encode("utf-8")), "converter_version": fw.CONVERTER_VERSION,
+                "first_seen_at": fw.now_iso(), "last_verified_at": fw.now_iso(),
+                "fetched_at": fw.now_iso(), "missing_since": None, "fetch_failures": 0,
+            },
+            markdown_text=markdown,
+        )
+
+    monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
+    monkeypatch.setattr(sys, "argv", ["fetch_wecom_docs.py"])
+    return fw.main()
+
+
+def test_mid_sync_failure_spike_pauses_without_error_in_tolerant_mode(tmp_path, monkeypatch):
+    rc = _run_main_with_one_failure_in_ten(tmp_path, monkeypatch, strict_fetch=False)
+
+    assert rc == 0  # a paused, resumable sync is not a CI failure in tolerant mode
+    assert not fw.MANIFEST_PATH.exists()  # never reached the finalize step
+    assert fw.PROGRESS_PATH.exists()  # checkpoint preserved for a future --resume
+
+    checkpoint = json.loads(fw.PROGRESS_PATH.read_text(encoding="utf-8"))
+    assert len(checkpoint["wecom"]["done_doc_ids"]) == 10
+
+
+def test_mid_sync_failure_spike_fails_the_job_under_strict_fetch(tmp_path, monkeypatch):
+    rc = _run_main_with_one_failure_in_ten(tmp_path, monkeypatch, strict_fetch=True)
+
+    assert rc == 1  # STRICT_FETCH=1 means "tell me about any imperfection"
+    assert fw.PROGRESS_PATH.exists()  # still checkpointed, so --resume still works next time

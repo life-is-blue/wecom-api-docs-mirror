@@ -65,9 +65,14 @@ jobs:
         run: pip install -r scripts/requirements.txt
 
       - name: Fetch docs
+        # --resume is always safe: a no-op with no checkpoint present, and
+        # continues an interrupted run (see docs/sync_progress.json) instead
+        # of re-fetching from scratch, which matters a lot on a runner that
+        # doesn't persist state between jobs -- see fetch_wecom_docs.py's
+        # module docstring / README for why this is committed, not gitignored.
         env:
           STRICT_FETCH: ${{ github.event.inputs.strict_fetch || '0' }}
-        run: python scripts/fetch_wecom_docs.py
+        run: python scripts/fetch_wecom_docs.py --resume
 
       - name: Commit and push when changed
         run: |

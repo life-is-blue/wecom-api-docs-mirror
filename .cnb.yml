@@ -35,7 +35,13 @@
         - pip install -r scripts/requirements.txt
     - name: fetch-wecom-docs
       script:
-        - STRICT_FETCH=${STRICT_FETCH:-0} python scripts/fetch_wecom_docs.py
+        # --resume is always safe to pass: a no-op if there's no checkpoint
+        # (normal completed-sync state), and picks up where an interrupted
+        # run left off otherwise (see docs/sync_progress.json). A run that
+        # pauses mid-sync (anti-bot circuit breaker) exits 0 in tolerant
+        # mode -- see commit-and-push below, it still runs and commits the
+        # checkpoint so tomorrow's cron continues instead of restarting.
+        - STRICT_FETCH=${STRICT_FETCH:-0} python scripts/fetch_wecom_docs.py --resume
     - name: commit-and-push
       script:
         - |
