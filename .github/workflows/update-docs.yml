@@ -60,7 +60,14 @@ jobs:
     runs-on: ubuntu-latest
     concurrency:
       group: wecom-api-docs-mirror-sync
-      cancel-in-progress: true
+      # false, not true: the checkpoint is only durable once "Commit and
+      # push when changed" below actually runs -- everything fetch_wecom_docs.py
+      # wrote up to that point lives solely on this ephemeral runner's disk.
+      # Cancelling an in-flight sync (e.g. a manual dispatch racing today's
+      # cron) would silently discard that whole run's progress with no
+      # commit and no error. Queue instead of cancelling; CNB's equivalent
+      # job already does this via `wait: true` in .cnb.yml.
+      cancel-in-progress: false
 
     steps:
       - name: Checkout

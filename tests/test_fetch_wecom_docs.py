@@ -12,6 +12,7 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
 from bs4 import BeautifulSoup
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
@@ -320,7 +321,6 @@ def test_resume_skips_already_done_docs_and_completes(tmp_path, monkeypatch):
                 "slug": page.doc_id,
                 "label": page.label,
                 "section": "s",
-                "all_sections": ["s"],
                 "url": page.url,
                 "sha256": fw.sha256_text(markdown),
                 "bytes": len(markdown.encode("utf-8")),
@@ -337,6 +337,13 @@ def test_resume_skips_already_done_docs_and_completes(tmp_path, monkeypatch):
     monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
 
     doc_ids = sorted(pages.keys())
+    # Checkpointed as done must also actually exist on disk -- main() now
+    # verifies that on resume rather than trusting the checkpoint blindly
+    # (see the stale_keys handling there), so a realistic fixture needs the
+    # files, not just the JSON claiming they exist.
+    (docs_root / "wecom").mkdir(parents=True, exist_ok=True)
+    (docs_root / "wecom" / "1.md").write_text("# doc 1\n", encoding="utf-8")
+    (docs_root / "wecom" / "2.md").write_text("# doc 2\n", encoding="utf-8")
     fw.write_json_atomic(
         fw.PROGRESS_PATH,
         {
@@ -368,6 +375,78 @@ def test_resume_skips_already_done_docs_and_completes(tmp_path, monkeypatch):
     # must be cleared rather than left around for a future --resume to
     # misread as still in progress.
     assert not fw.PROGRESS_PATH.exists()
+
+
+def test_resume_refetches_checkpointed_doc_whose_file_is_missing_on_disk(tmp_path, monkeypatch):
+    """Regression test: a checkpoint claiming doc 1 is done must not be
+    trusted blindly if wecom/1.md doesn't actually exist (hand-edited
+    checkpoint, partial checkout, manually deleted file, ...) -- it should
+    be re-fetched instead of silently ending up "done" with no content."""
+    docs_root = tmp_path / "docs"
+    docs_root.mkdir(parents=True)
+    monkeypatch.setattr(fw, "DOCS_ROOT", docs_root)
+    monkeypatch.setattr(fw, "MANIFEST_PATH", docs_root / "docs_manifest.json")
+    monkeypatch.setattr(fw, "PROGRESS_PATH", docs_root / "sync_progress.json")
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MIN_SECONDS", 0.0)
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MAX_SECONDS", 0.0)
+
+    source = fw.Source(
+        source_id="wecom", site_root="https://example.invalid",
+        seed_path="/document/path/1", sentinel_ids=(),
+        doc_path_prefix="/document/path/", output_subdir="wecom",
+    )
+    monkeypatch.setattr(fw, "load_sources", lambda path: [source])
+    monkeypatch.setattr(fw, "check_robots_allowed", lambda *a, **k: True)
+
+    pages = {
+        "1": fw.DocPage(
+            doc_id="1", label="doc1", sections=("s",),
+            url="https://example.invalid/document/path/1", rel_path="1.md",
+        ),
+    }
+    monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
+
+    fetched_ids = []
+
+    def fake_fetch_one_doc(source, page, existing):
+        fetched_ids.append(page.doc_id)
+        markdown = "# doc 1\n"
+        return fw.FetchOutcome(
+            manifest_entry={
+                "source": source.source_id, "doc_id": page.doc_id, "slug": page.doc_id,
+                "label": page.label, "section": "s", "url": page.url,
+                "sha256": fw.sha256_text(markdown), "bytes": len(markdown.encode("utf-8")),
+                "converter_version": fw.CONVERTER_VERSION, "first_seen_at": fw.now_iso(),
+                "last_verified_at": fw.now_iso(), "fetched_at": fw.now_iso(),
+                "missing_since": None, "fetch_failures": 0,
+            },
+            markdown_text=markdown,
+        )
+
+    monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
+
+    # Checkpoint claims doc 1 is done, but deliberately don't create
+    # wecom/1.md -- that's the drift being tested.
+    fw.write_json_atomic(
+        fw.PROGRESS_PATH,
+        {
+            "wecom": {
+                "run_started_at": fw.now_iso(),
+                "discovered_doc_ids": ["1"],
+                "done_doc_ids": ["1"],
+                "files": {"wecom/1.md": {"doc_id": "1", "sha256": "seed1", "section": "s"}},
+                "failed": [],
+            }
+        },
+    )
+
+    monkeypatch.setattr(sys, "argv", ["fetch_wecom_docs.py", "--resume"])
+    rc = fw.main()
+
+    assert rc == 0
+    assert fetched_ids == ["1"]  # re-fetched despite being "done" in the checkpoint
+    assert (docs_root / "wecom" / "1.md").exists()
 
 
 def _run_main_with_one_failure_in_ten(tmp_path, monkeypatch, strict_fetch):
@@ -411,7 +490,7 @@ def _run_main_with_one_failure_in_ten(tmp_path, monkeypatch, strict_fetch):
         return fw.FetchOutcome(
             manifest_entry={
                 "source": source.source_id, "doc_id": page.doc_id, "slug": page.doc_id,
-                "label": page.label, "section": "s", "all_sections": ["s"],
+                "label": page.label, "section": "s",
                 "url": page.url, "sha256": fw.sha256_text(markdown),
                 "bytes": len(markdown.encode("utf-8")), "converter_version": fw.CONVERTER_VERSION,
                 "first_seen_at": fw.now_iso(), "last_verified_at": fw.now_iso(),
@@ -441,6 +520,153 @@ def test_mid_sync_failure_spike_fails_the_job_under_strict_fetch(tmp_path, monke
 
     assert rc == 1  # STRICT_FETCH=1 means "tell me about any imperfection"
     assert fw.PROGRESS_PATH.exists()  # still checkpointed, so --resume still works next time
+
+
+def test_breaker_forgives_an_early_failure_once_it_ages_out_of_the_window(tmp_path, monkeypatch):
+    """The breaker measures a sliding window (FAILURE_WINDOW_SIZE), not a
+    whole-session average -- a single failure right at the start must not
+    keep counting against the run forever once enough later successes have
+    pushed it out of the window."""
+    docs_root = tmp_path / "docs"
+    docs_root.mkdir(parents=True)
+    monkeypatch.setattr(fw, "DOCS_ROOT", docs_root)
+    monkeypatch.setattr(fw, "MANIFEST_PATH", docs_root / "docs_manifest.json")
+    monkeypatch.setattr(fw, "PROGRESS_PATH", docs_root / "sync_progress.json")
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MIN_SECONDS", 0.0)
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MAX_SECONDS", 0.0)
+    monkeypatch.setenv("STRICT_FETCH", "0")
+
+    source = fw.Source(
+        source_id="wecom", site_root="https://example.invalid",
+        seed_path="/document/path/1", sentinel_ids=(),
+        doc_path_prefix="/document/path/", output_subdir="wecom",
+    )
+    monkeypatch.setattr(fw, "load_sources", lambda path: [source])
+    monkeypatch.setattr(fw, "check_robots_allowed", lambda *a, **k: True)
+
+    total = fw.FAILURE_WINDOW_SIZE * 3  # comfortably larger than the window
+    width = len(str(total))  # main() does doc_ids = sorted(pages.keys()) -- a
+    # *string* sort, so ids must be zero-padded for that order to match the
+    # intended numeric processing order this test depends on.
+    doc_id = lambda i: str(i).zfill(width)
+    pages = {
+        doc_id(i): fw.DocPage(
+            doc_id=doc_id(i), label=f"doc{i}", sections=("s",),
+            url=f"https://example.invalid/document/path/{i}", rel_path=f"{doc_id(i)}.md",
+        )
+        for i in range(1, total + 1)
+    }
+    monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
+
+    def fake_fetch_one_doc(source, page, existing):
+        if page.doc_id == doc_id(1):  # only the very first attempt fails
+            return fw.FetchOutcome(failed=True, error="one-off transient error")
+        markdown = f"# doc {page.doc_id}\n"
+        return fw.FetchOutcome(
+            manifest_entry={
+                "source": source.source_id, "doc_id": page.doc_id, "slug": page.doc_id,
+                "label": page.label, "section": "s", "url": page.url,
+                "sha256": fw.sha256_text(markdown), "bytes": len(markdown.encode("utf-8")),
+                "converter_version": fw.CONVERTER_VERSION, "first_seen_at": fw.now_iso(),
+                "last_verified_at": fw.now_iso(), "fetched_at": fw.now_iso(),
+                "missing_since": None, "fetch_failures": 0,
+            },
+            markdown_text=markdown,
+        )
+
+    monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
+    monkeypatch.setattr(sys, "argv", ["fetch_wecom_docs.py"])
+    rc = fw.main()
+
+    assert rc == 0
+    assert fw.MANIFEST_PATH.exists()  # ran to completion, breaker never tripped
+    manifest = json.loads(fw.MANIFEST_PATH.read_text(encoding="utf-8"))
+    # total - 1: doc 1 failed on its very first-ever attempt (no prior
+    # content to carry forward), so it legitimately has no manifest entry --
+    # the point of this test is that the *run* completes despite it, not
+    # that the failed doc grows one.
+    assert len(manifest["files"]) == total - 1
+
+
+def test_breaker_reacts_quickly_to_a_cascade_after_a_long_clean_streak(tmp_path, monkeypatch):
+    """A cumulative whole-session average would need many consecutive
+    failures to outweigh a long prior success streak; the sliding window
+    should react within roughly a couple of failures instead, since that's
+    what actually matters for not hammering a live CAPTCHA wall."""
+    docs_root = tmp_path / "docs"
+    docs_root.mkdir(parents=True)
+    monkeypatch.setattr(fw, "DOCS_ROOT", docs_root)
+    monkeypatch.setattr(fw, "MANIFEST_PATH", docs_root / "docs_manifest.json")
+    monkeypatch.setattr(fw, "PROGRESS_PATH", docs_root / "sync_progress.json")
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MIN_SECONDS", 0.0)
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MAX_SECONDS", 0.0)
+    monkeypatch.setenv("STRICT_FETCH", "0")
+
+    source = fw.Source(
+        source_id="wecom", site_root="https://example.invalid",
+        seed_path="/document/path/1", sentinel_ids=(),
+        doc_path_prefix="/document/path/", output_subdir="wecom",
+    )
+    monkeypatch.setattr(fw, "load_sources", lambda path: [source])
+    monkeypatch.setattr(fw, "check_robots_allowed", lambda *a, **k: True)
+
+    window = fw.FAILURE_WINDOW_SIZE
+    n_success = window * 4  # a long clean streak before the cascade starts
+    # Minimum consecutive failures for the window's rate to cross the
+    # threshold, computed from the real constants rather than hardcoded.
+    fails_needed = 0
+    while fails_needed / window <= fw.FAILURE_RATE_THRESHOLD:
+        fails_needed += 1
+    total = n_success + fails_needed + 5  # a few extra the run should never reach
+    width = len(str(total))  # see the matching comment in the "ages out of
+    # the window" test above -- doc_id order must match numeric i order.
+    doc_id = lambda i: str(i).zfill(width)
+
+    pages = {
+        doc_id(i): fw.DocPage(
+            doc_id=doc_id(i), label=f"doc{i}", sections=("s",),
+            url=f"https://example.invalid/document/path/{i}", rel_path=f"{doc_id(i)}.md",
+        )
+        for i in range(1, total + 1)
+    }
+    monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
+
+    def fake_fetch_one_doc(source, page, existing):
+        if int(page.doc_id) > n_success:  # everything after the clean streak fails
+            return fw.FetchOutcome(failed=True, error="simulated CAPTCHA-shaped failure")
+        markdown = f"# doc {page.doc_id}\n"
+        return fw.FetchOutcome(
+            manifest_entry={
+                "source": source.source_id, "doc_id": page.doc_id, "slug": page.doc_id,
+                "label": page.label, "section": "s", "url": page.url,
+                "sha256": fw.sha256_text(markdown), "bytes": len(markdown.encode("utf-8")),
+                "converter_version": fw.CONVERTER_VERSION, "first_seen_at": fw.now_iso(),
+                "last_verified_at": fw.now_iso(), "fetched_at": fw.now_iso(),
+                "missing_since": None, "fetch_failures": 0,
+            },
+            markdown_text=markdown,
+        )
+
+    monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
+    monkeypatch.setattr(sys, "argv", ["fetch_wecom_docs.py"])
+    rc = fw.main()
+
+    assert rc == 0  # paused tolerantly, not a hard CI failure
+    assert not fw.MANIFEST_PATH.exists()  # never reached the finalize step
+    checkpoint = json.loads(fw.PROGRESS_PATH.read_text(encoding="utf-8"))
+    # Stopped right at the trip point -- not after grinding through every
+    # failing doc up to `total`, and nowhere near the ~11-failure point a
+    # whole-session cumulative average would have needed here.
+    assert len(checkpoint["wecom"]["done_doc_ids"]) == n_success + fails_needed
+
+
+def test_limit_rejects_non_positive_values(monkeypatch):
+    for bad_value in ("0", "-1"):
+        monkeypatch.setattr(sys, "argv", ["fetch_wecom_docs.py", "--limit", bad_value])
+        with pytest.raises(SystemExit):
+            fw.main()
 
 
 def test_resume_where_every_doc_was_already_done_still_succeeds(tmp_path, monkeypatch):
@@ -480,6 +706,12 @@ def test_resume_where_every_doc_was_already_done_still_succeeds(tmp_path, monkey
     monkeypatch.setattr(fw, "fetch_one_doc", fail_if_called)
 
     doc_ids = sorted(pages.keys())
+    # See the matching comment in test_resume_skips_already_done_docs_and_completes:
+    # a checkpointed "done" doc must actually have its file on disk, or main()
+    # now (correctly) treats it as stale and re-fetches it.
+    (docs_root / "wecom").mkdir(parents=True, exist_ok=True)
+    for i in range(1, 4):
+        (docs_root / "wecom" / f"{i}.md").write_text(f"# doc {i}\n", encoding="utf-8")
     fw.write_json_atomic(
         fw.PROGRESS_PATH,
         {
@@ -541,7 +773,7 @@ def test_limit_run_does_not_touch_an_unrelated_real_checkpoint(tmp_path, monkeyp
         return fw.FetchOutcome(
             manifest_entry={
                 "source": source.source_id, "doc_id": page.doc_id, "slug": page.doc_id,
-                "label": page.label, "section": "s", "all_sections": ["s"],
+                "label": page.label, "section": "s",
                 "url": page.url, "sha256": fw.sha256_text(markdown),
                 "bytes": len(markdown.encode("utf-8")), "converter_version": fw.CONVERTER_VERSION,
                 "first_seen_at": fw.now_iso(), "last_verified_at": fw.now_iso(),

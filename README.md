@@ -79,9 +79,13 @@ reality rather than assuming a sync completes in one shot:
 - **`docs/sync_progress.json` is committed, not gitignored**: CI runners are
   ephemeral, so a checkpoint that only lives on local disk wouldn't survive
   between one day's cron run and the next. Its presence in the repo means a
-  sync is mid-flight and `docs_manifest.json` may lag behind some already
-  fetched `.md` files until the source finishes and the checkpoint is
-  cleared.
+  sync is mid-flight, and `docs_manifest.json` lags behind the `.md` files
+  it should describe until the source finishes a full pass over every
+  discovered doc id and the checkpoint is cleared -- on a fresh clone of
+  this repo, that means **`docs/docs_manifest.json` may not exist at all
+  yet**, even though `docs/<output_subdir>/*.md` already has real content.
+  Check for `docs/sync_progress.json` first if the manifest looks missing
+  or stale; its presence explains why.
 - **Deletions still wait for a fully completed pass**: the missing-doc /
   delayed-deletion bookkeeping only runs after every discovered doc id has
   been attempted (possibly across several `--resume` runs), never mid-sync.
@@ -99,9 +103,9 @@ Configured in `config/sources.json`:
 - `tests/test_fetch_wecom_docs.py`: offline unit tests (no network access)
 - `config/sources.json`: source definitions
 - `docs/`: mirrored markdown content and manifest
-- `.cnb.yml`: CNB scheduled + manual sync workflow (offline tests run on every push/PR; live fetch only on cron / manual trigger)
+- `.cnb.yml`: CNB scheduled + manual sync workflow (offline tests run on every push/PR; live fetch only on cron / manual trigger) -- **not currently wired to a live CNB trigger**; GitHub Actions is the only automation actually running in production right now
 - `.cnb/web_trigger.yml`: CNB page button configuration
-- `.github/workflows/update-docs.yml`: same split, for GitHub Actions
+- `.github/workflows/update-docs.yml`: same verify/sync split as `.cnb.yml`, plus a third `debug-capture-raw-html` job (manual-only, see "Debugging / spot-checking conversion quality" below) that CNB doesn't have
 
 ## Run locally
 
@@ -121,9 +125,13 @@ python3 scripts/fetch_wecom_docs.py --limit 20              # quick low-traffic 
 
 ## Automation
 
-- CNB scheduled sync daily: `main -> "crontab: 0 0 * * *"`
-- CNB manual sync button on `main` branch page: **Sync WeCom API Docs**
-- GitHub Actions scheduled sync daily: `.github/workflows/update-docs.yml`
+- **GitHub Actions is the only live automation right now**: scheduled sync
+  daily via `.github/workflows/update-docs.yml`, plus manual
+  `workflow_dispatch` for urgent refreshes.
+- `.cnb.yml` defines the equivalent CNB scheduled sync
+  (`main -> "crontab: 0 0 * * *"`) and manual sync button (**Sync WeCom API
+  Docs**), but CNB isn't actually connected to a live trigger yet — treat
+  those as "ready to enable," not "currently running."
 - Push / PR validation on `main` runs the offline test suite only
   (`scripts/**`, `config/**`, `tests/**`, CI files) — it never hits the live
   site, to avoid tripping WeCom's anti-bot protections on every commit.
@@ -131,6 +139,23 @@ python3 scripts/fetch_wecom_docs.py --limit 20              # quick low-traffic 
   syncs" above) and commit whatever changed in `docs/` — including a
   still-in-progress `sync_progress.json` when a run paused mid-sync, not
   just a fully completed manifest.
+- The `sync` job's GitHub Actions concurrency group has
+  `cancel-in-progress: false`: the checkpoint is only durable once that
+  job's commit step runs, so a second trigger (e.g. a manual dispatch
+  racing the daily cron) queues behind an in-flight sync instead of
+  cancelling it and silently losing that run's progress.
+
+### Debugging / spot-checking conversion quality
+
+`scripts/debug_capture_raw_html.py` fetches a small, explicit list of doc
+ids' *raw* HTML (no conversion) into `raw_html/<section path>/<id>.html`, so
+it can be diffed against the corresponding `docs/wecom/<id>.md` by hand.
+Not part of the daily sync -- trigger it via the `debug-capture-raw-html`
+GitHub Actions job (`workflow_dispatch` with the `debug_doc_ids` input, e.g.
+`97322,93651`), then download the `raw-html-capture` artifact. Capped at 15
+ids per run and kept well under the site's empirical anti-bot request
+budget; output is gitignored (`/raw_html/`), it's a local/CI scratch aid,
+not part of the public mirror.
 
 ## Notes
 

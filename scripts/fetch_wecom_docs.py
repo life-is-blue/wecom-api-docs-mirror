@@ -39,6 +39,7 @@ import re
 import ssl
 import sys
 import time
+from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -83,15 +84,20 @@ REQUEST_DELAY_MAX_SECONDS = 15.0
 # Discovery is trusted only if it doesn't shrink by more than this fraction
 # versus the previous manifest, and every configured sentinel id is present.
 DISCOVERY_DROP_THRESHOLD = 0.10
-# Per-run fetch failure rate above this trips the circuit breaker.
+# Per-run fetch failure rate above this trips the circuit breaker, measured
+# over the last FAILURE_WINDOW_SIZE attempts *this process* (a true sliding
+# window, not a whole-session average -- an average over every attempt since
+# --resume started would let one early transient failure trip the breaker
+# almost immediately, while also taking many consecutive failures to react
+# once a long clean streak has built up a large denominator; a window reacts
+# to a real CAPTCHA cascade within a couple of failures either way).
 FAILURE_RATE_THRESHOLD = 0.05
+FAILURE_WINDOW_SIZE = 30
 # A doc must be missing from discovery this many consecutive runs before
 # its file is actually deleted.
 MISSING_CONFIRM_RUNS = 3
 
 SSL_CONTEXT = ssl.create_default_context(cafile=certifi.where())
-
-DOC_ID_RE = re.compile(r"^(\d+)$")
 
 
 @dataclass(frozen=True)
@@ -119,7 +125,6 @@ class FetchOutcome:
     markdown_text: str = ""
     failed: bool = False
     error: str = ""
-    invalid_page: bool = False
 
 
 class CircuitBreaker(RuntimeError):
@@ -528,7 +533,7 @@ def fetch_one_doc(source: Source, page: DocPage, existing: Dict) -> FetchOutcome
 
     article = extract_article_soup(html)
     if article is None:
-        return FetchOutcome(failed=True, invalid_page=True, error="content container not found / too short")
+        return FetchOutcome(failed=True, error="content container not found / too short")
 
     try:
         markdown = convert_article_to_markdown(article, source)
@@ -542,7 +547,6 @@ def fetch_one_doc(source: Source, page: DocPage, existing: Dict) -> FetchOutcome
         "slug": page.doc_id,
         "label": page.label,
         "section": "/".join(page.sections),
-        "all_sections": ["/".join(page.sections)],
         "url": page.url,
         "sha256": digest,
         "bytes": len(markdown.encode("utf-8")),
@@ -556,11 +560,18 @@ def fetch_one_doc(source: Source, page: DocPage, existing: Dict) -> FetchOutcome
     return FetchOutcome(manifest_entry=entry, markdown_text=markdown)
 
 
+def _positive_int(value: str) -> int:
+    parsed = int(value)
+    if parsed < 1:
+        raise argparse.ArgumentTypeError(f"must be a positive integer, got {value!r}")
+    return parsed
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--limit",
-        type=int,
+        type=_positive_int,
         default=None,
         help=(
             "Only fetch this many docs, evenly sampled across the discovered "
@@ -661,6 +672,24 @@ def main() -> int:
         if resuming:
             done_doc_ids = set(checkpoint.get("done_doc_ids", []))
             source_files: Dict[str, Dict] = dict(checkpoint.get("files", {}))
+            # The checkpoint claims each of these keys has a written .md file
+            # on disk; don't just trust that -- a hand edit, a partial
+            # checkout, or a manually deleted file would otherwise let a
+            # missing doc silently end up "done" in the final manifest with
+            # no corresponding content. Re-fetch anything that doesn't
+            # actually exist instead.
+            stale_keys = {key for key in source_files if not (DOCS_ROOT / key).exists()}
+            if stale_keys:
+                stale_ids = {key.rsplit("/", 1)[-1].removesuffix(".md") for key in stale_keys}
+                print(
+                    f"[WARN] --resume: {len(stale_keys)} checkpointed doc(s) for "
+                    f"source={source.source_id} are missing their .md file on disk "
+                    f"(deleted or never written out-of-band?) -- re-fetching instead of "
+                    f"trusting the checkpoint: {sorted(stale_ids)}"
+                )
+                for key in stale_keys:
+                    del source_files[key]
+                done_doc_ids -= stale_ids
             new_files.update(source_files)
             source_failed_pages: List[Tuple[str, str]] = [
                 tuple(pair) for pair in checkpoint.get("failed", [])
@@ -700,12 +729,16 @@ def main() -> int:
         # instead, one CAPTCHA cascade months ago would keep re-tripping the
         # breaker after just a single new attempt on every future --resume,
         # since attempted-so-far would already be well past the minimum
-        # sample size. `min_sample` also shrinks to the number of docs left
-        # for a small source, so a source with fewer than 10 total docs still
-        # gets checked once it's fully attempted instead of never at all.
-        session_attempted = 0
-        session_failed_pages: List[Tuple[str, str]] = []
-        min_sample = min(10, len(doc_ids) - len(done_doc_ids))
+        # sample size. A real sliding window (not a whole-session average)
+        # so one early transient failure can't trip the breaker on its own,
+        # while a genuine cascade later in a long run is still caught within
+        # a couple of failures instead of needing to outweigh a large
+        # cumulative denominator. `min_sample` also shrinks to the number of
+        # docs left for a small source, so a source with fewer total docs
+        # than the window still gets checked once fully attempted instead of
+        # never at all.
+        recent_outcomes: "deque[bool]" = deque(maxlen=FAILURE_WINDOW_SIZE)  # True = failed
+        min_sample = min(FAILURE_WINDOW_SIZE, len(doc_ids) - len(done_doc_ids))
 
         for doc_id in doc_ids:
             if doc_id in done_doc_ids:
@@ -722,7 +755,7 @@ def main() -> int:
                 print(f"[WARN] failed url={page.url} err={outcome.error}")
                 failed_pages.append((page.url, outcome.error))
                 source_failed_pages.append((page.url, outcome.error))
-                session_failed_pages.append((page.url, outcome.error))
+                recent_outcomes.append(True)
                 if existing_entry:
                     # Keep last-known-good content and manifest record; just
                     # bump the failure counter so persistent failures are
@@ -741,21 +774,21 @@ def main() -> int:
                 source_files[manifest_key] = entry
                 successful_pages += 1
                 print(f"[OK] {manifest_key}")
+                recent_outcomes.append(False)
 
             done_doc_ids.add(doc_id)
-            session_attempted += 1
             if args.limit is None:
                 save_checkpoint()
 
-            if min_sample > 0 and session_attempted >= min_sample:
-                # Denominator is docs attempted in *this process*, not the
-                # cumulative total across every --resume invocation -- see
-                # the comment on session_attempted above for why.
-                failure_rate = len(session_failed_pages) / session_attempted
+            if min_sample > 0 and len(recent_outcomes) >= min_sample:
+                # Denominator is a sliding window of docs attempted in *this
+                # process*, not the cumulative total across every --resume
+                # invocation -- see the comment on recent_outcomes above.
+                failure_rate = sum(recent_outcomes) / len(recent_outcomes)
                 if failure_rate > FAILURE_RATE_THRESHOLD:
                     print(
                         f"[PAUSED] circuit breaker: failure rate {failure_rate:.1%} exceeds "
-                        f"{FAILURE_RATE_THRESHOLD:.0%} over the last {session_attempted} attempts "
+                        f"{FAILURE_RATE_THRESHOLD:.0%} over the last {len(recent_outcomes)} attempts "
                         f"this run (this pattern -- a run of successes followed by a run of failures "
                         f"-- has empirically matched a CAPTCHA block, not a real breakage). Progress "
                         f"up to this point is checkpointed to {PROGRESS_PATH}; CI should commit it "
