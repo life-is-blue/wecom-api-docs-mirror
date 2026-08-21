@@ -1,0 +1,125 @@
+<div class="ep-doc-area-cherry cherry-markdown cherry-wecom" id="js-ep-doc-cnt-md"><div data-code-block-theme="coy" data-inline-code-theme="red"><p data-lines="1" data-sign="e5005653f23cd1d9ac9bbbdc85b0c686" data-type="p">该接口用于读取收集表的答案</p><p data-lines="3" data-sign="314f4315a16f4d01fd4f3eedcbb0db91" data-type="p"><strong>请求方式</strong>：POST（<strong>HTTPS</strong>）<br/><strong>请求地址</strong>:  https://qyapi.weixin.qq.com/cgi-bin/wedoc/get_form_answer?access_token=ACCESS_TOKEN </p><p data-lines="2" data-sign="8a9affe8c49f861be4739ea1170e480a" data-type="p"><strong>请求包体</strong></p><div data-lines="9" data-sign="f339e19de3d6bf45249dde1e62fe6d0f" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token property">"repeated_id"</span><span class="token operator">:</span><span class="token string">"REPEATED_ID1"</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"answer_ids"</span><span class="token operator">:</span><span class="token punctuation">[</span></span>
+<span class="code-line">        <span class="token number">1</span></span>
+<span class="code-line">    <span class="token punctuation">]</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><p data-lines="2" data-sign="54d2f7abd4f226094d9bdd35b3129b56" data-type="p"><strong>参数说明</strong></p><div class="cherry-table-container" data-lines="4" data-sign="ee9dd738abb94642064f5b4218280e7e">
+<table class="cherry-table"><thead><tr><th>参数</th><th>类型</th><th>是否必须</th><th>说明</th></tr></thead><tbody><tr><td>repeated_id</td><td>string</td><td>是</td><td>操作的收集表周期id</td></tr><tr><td>answer_ids</td><td>uint64[]</td><td>是</td><td>需要拉取的答案列表，批次大小最大100</td></tr></tbody></table></div><p data-lines="1" data-sign="fd1c44250d466f3563712de3fc0f1925" data-type="p"><strong>权限说明</strong></p><ul class="cherry-list__default" data-lines="4" data-sign="4851a9809619de3c07d2d68f5db08f1alist4"><li>自建应用需配置到“<a href="#43883" rel="nofollow">可调用应用</a>”列表中的应用secret所获取的accesstoken来调用（<a href="#10013/%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A%E8%8E%B7%E5%8F%96access_token" rel="nofollow">accesstoken如何获取？</a>）</li><li>第三方应用需具有“文档”权限</li><li>代开发自建应用需具有“文档”权限</li><li>只能操作该应用创建的文档</li></ul><p data-lines="1" data-sign="6394de01a40b78c07ec7af6eaecac7f9" data-type="p"><strong>返回示例</strong></p><div data-lines="117" data-sign="73aac9a24f2e468c5044e1c16d2f4e6c" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">  <span class="token property">"errcode"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span></span>
+<span class="code-line">  <span class="token property">"errmsg"</span><span class="token operator">:</span> <span class="token string">"ok"</span><span class="token punctuation">,</span></span>
+<span class="code-line">  <span class="token property">"answer"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token property">"answer_list"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">      <span class="token punctuation">{</span></span>
+<span class="code-line">        <span class="token property">"answer_id"</span><span class="token operator">:</span> <span class="token number">15</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"user_name"</span><span class="token operator">:</span> <span class="token string">"USER_NAME1"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"ctime"</span><span class="token operator">:</span> <span class="token number">1668430580</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"mtime"</span><span class="token operator">:</span> <span class="token number">1668430580</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"reply"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">          <span class="token property">"items"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">            <span class="token punctuation">{</span></span>
+<span class="code-line">              <span class="token property">"question_id"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">              <span class="token property">"text_reply"</span><span class="token operator">:</span> <span class="token string">"Ndjnd"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token punctuation">{</span></span>
+<span class="code-line">              <span class="token property">"question_id"</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span></span>
+<span class="code-line">              <span class="token property">"option_reply"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                <span class="token number">2</span></span>
+<span class="code-line">              <span class="token punctuation">]</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token punctuation">{</span></span>
+<span class="code-line">              <span class="token property">"question_id"</span><span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span></span>
+<span class="code-line">              <span class="token property">"text_reply"</span><span class="token operator">:</span> <span class="token string">"20:53"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token punctuation">{</span></span>
+<span class="code-line">              <span class="token property">"question_id"</span><span class="token operator">:</span> <span class="token number">4</span><span class="token punctuation">,</span></span>
+<span class="code-line">              <span class="token property">"text_reply"</span><span class="token operator">:</span> <span class="token string">"73℃"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token punctuation">{</span></span>
+<span class="code-line">              <span class="token property">"question_id"</span><span class="token operator">:</span> <span class="token number">5</span><span class="token punctuation">,</span></span>
+<span class="code-line">              <span class="token property">"file_extend_reply"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                <span class="token punctuation">{</span></span>
+<span class="code-line">                  <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"FILE_NAME1"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                  <span class="token property">"fileid"</span><span class="token operator">:</span> <span class="token string">"FILEID1"</span></span>
+<span class="code-line">                <span class="token punctuation">}</span></span>
+<span class="code-line">              <span class="token punctuation">]</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token punctuation">{</span></span>
+<span class="code-line">              <span class="token property">"question_id"</span><span class="token operator">:</span> <span class="token number">6</span><span class="token punctuation">,</span></span>
+<span class="code-line">              <span class="token property">"text_reply"</span><span class="token operator">:</span> <span class="token string">"四川省/成都市/武侯区/天府三街(峰汇中心)"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token punctuation">{</span></span>
+<span class="code-line">              <span class="token property">"question_id"</span><span class="token operator">:</span> <span class="token number">7</span><span class="token punctuation">,</span></span>
+<span class="code-line">              <span class="token property">"text_reply"</span><span class="token operator">:</span> <span class="token string">"test"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token punctuation">{</span></span>
+<span class="code-line">              <span class="token property">"question_id"</span><span class="token operator">:</span> <span class="token number">8</span><span class="token punctuation">,</span></span>
+<span class="code-line">              <span class="token property">"option_reply"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                <span class="token number">1</span></span>
+<span class="code-line">              <span class="token punctuation">]</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token punctuation">{</span></span>
+<span class="code-line">              <span class="token property">"question_id"</span><span class="token operator">:</span> <span class="token number">9</span><span class="token punctuation">,</span></span>
+<span class="code-line">              <span class="token property">"text_reply"</span><span class="token operator">:</span> <span class="token string">"2022年11月"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token punctuation">{</span></span>
+<span class="code-line">              <span class="token property">"question_id"</span><span class="token operator">:</span> <span class="token number">10</span><span class="token punctuation">,</span></span>
+<span class="code-line">              <span class="token property">"option_reply"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                <span class="token number">5</span></span>
+<span class="code-line">              <span class="token punctuation">]</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token punctuation">{</span></span>
+<span class="code-line">              <span class="token property">"question_id"</span><span class="token operator">:</span> <span class="token number">11</span><span class="token punctuation">,</span></span>
+<span class="code-line">              <span class="token property">"option_reply"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                <span class="token number">3</span></span>
+<span class="code-line">              <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">              <span class="token property">"option_extend_reply"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                <span class="token punctuation">{</span></span>
+<span class="code-line">                  <span class="token property">"option_reply"</span><span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span></span>
+<span class="code-line">                  <span class="token property">"extend_text"</span><span class="token operator">:</span> <span class="token string">"test"</span></span>
+<span class="code-line">                <span class="token punctuation">}</span></span>
+<span class="code-line">              <span class="token punctuation">]</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token punctuation">{</span></span>
+<span class="code-line">              <span class="token property">"question_id"</span><span class="token operator">:</span> <span class="token number">12</span><span class="token punctuation">,</span></span>
+<span class="code-line">              <span class="token property">"department_reply"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token property">"list"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                  <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token property">"department_id"</span><span class="token operator">:</span> <span class="token number">3</span></span>
+<span class="code-line">                  <span class="token punctuation">}</span></span>
+<span class="code-line">                <span class="token punctuation">]</span></span>
+<span class="code-line">              <span class="token punctuation">}</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token punctuation">{</span></span>
+<span class="code-line">              <span class="token property">"question_id"</span><span class="token operator">:</span> <span class="token number">13</span><span class="token punctuation">,</span></span>
+<span class="code-line">              <span class="token property">"member_reply"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token property">"list"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                  <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token property">"userid"</span><span class="token operator">:</span> <span class="token string">"zhangsan"</span></span>
+<span class="code-line">                  <span class="token punctuation">}</span></span>
+<span class="code-line">                <span class="token punctuation">]</span></span>
+<span class="code-line">              <span class="token punctuation">}</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token punctuation">{</span></span>
+<span class="code-line">              <span class="token property">"question_id"</span><span class="token operator">:</span> <span class="token number">14</span><span class="token punctuation">,</span></span>
+<span class="code-line">              <span class="token property">"duration_reply"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token property">"begin_time"</span><span class="token operator">:</span> <span class="token number">1586136317</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token property">"end_time"</span><span class="token operator">:</span> <span class="token number">1586236317</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token property">"time_scale"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token property">"day_range"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token property">"days"</span><span class="token operator">:</span> <span class="token number">1.0</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token property">"hours"</span><span class="token operator">:</span> <span class="token number">2.5</span></span>
+<span class="code-line">              <span class="token punctuation">}</span></span>
+<span class="code-line">            <span class="token punctuation">}</span></span>
+<span class="code-line">          <span class="token punctuation">]</span></span>
+<span class="code-line">        <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"answer_status"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"tmp_external_userid"</span><span class="token operator">:</span> <span class="token string">"TMP_EXTERNAL_USERID1"</span></span>
+<span class="code-line">      <span class="token punctuation">}</span></span>
+<span class="code-line">    <span class="token punctuation">]</span></span>
+<span class="code-line">  <span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><p data-lines="2" data-sign="54d2f7abd4f226094d9bdd35b3129b56" data-type="p"><strong>参数说明</strong></p><div class="cherry-table-container" data-lines="37" data-sign="55a58273b0023bcd43dd36edb02dc198">
+<table class="cherry-table"><thead><tr><th>参数</th><th>类型</th><th>说明</th></tr></thead><tbody><tr><td>errcode</td><td>int32</td><td>错误码</td></tr><tr><td>errmsg</td><td>string</td><td>错误码说明</td></tr><tr><td>answer</td><td>object</td><td>答案</td></tr><tr><td>answer_list</td><td>object[]</td><td>答案列表</td></tr><tr><td>answer_id</td><td>uint64</td><td>答案id</td></tr><tr><td>user_name</td><td>string</td><td>用户名</td></tr><tr><td>ctime</td><td>uint64</td><td>创建时间</td></tr><tr><td>mtime</td><td>uint64</td><td>修改时间</td></tr><tr><td>reply</td><td>object</td><td>该用户的答案明细</td></tr><tr><td>items</td><td>object[]</td><td>每个问题的答案</td></tr><tr><td>question_id</td><td>uint64</td><td>问题id</td></tr><tr><td>text_reply</td><td>string</td><td>答案</td></tr><tr><td>option_reply</td><td>uint32[]</td><td>选择题答案，多选题有多个答案</td></tr><tr><td>option_extend_reply</td><td>object[]</td><td>选择题，其他选项列表</td></tr><tr><td>option_extend_reply.option_reply</td><td>uint32</td><td>其他选项的答案id</td></tr><tr><td>option_extend_reply.extend_text</td><td>string</td><td>其他选项的答案字符串</td></tr><tr><td>file_extend_reply</td><td>object[]</td><td>文件题答案列表</td></tr><tr><td>file_extend_reply.name</td><td>string</td><td>文件题答案的文件名</td></tr><tr><td>file_extend_reply.fileid</td><td>string</td><td>文件题答案的文件id</td></tr><tr><td>department_reply</td><td>object</td><td>部门题答案</td></tr><tr><td>department_reply.list</td><td>object[]</td><td>部门题选择的部门列表</td></tr><tr><td>department_reply.list[].department_id</td><td>object[]</td><td>部门id</td></tr><tr><td>member_reply</td><td>object</td><td>成员题答案</td></tr><tr><td>member_reply.list</td><td>object[]</td><td>成员选择的成员列表</td></tr><tr><td>member_reply.list[].userid</td><td>object[]</td><td>成员id</td></tr><tr><td>duration_reply</td><td>object</td><td>时长题答案</td></tr><tr><td>duration_reply.begin_time</td><td>uint32</td><td>开始时间，时间戳</td></tr><tr><td>duration_reply.end_time</td><td>uint32</td><td>结束时间，时间戳</td></tr><tr><td>duration_reply.time_scale</td><td>uint32</td><td>时间刻度。1: 按天 2: 按小时</td></tr><tr><td>duration_reply.day_range</td><td>uint32</td><td>单位换算，多少小时/天。<code>time_scale</code>为<code>2</code>返回</td></tr><tr><td>duration_reply.days</td><td>float</td><td>天数。<code>time_scale</code>为<code>1</code>返回</td></tr><tr><td>duration_reply.hours</td><td>float</td><td>小时数。<code>time_scale</code>为<code>2</code>返回</td></tr><tr><td>answer_status</td><td>uint32</td><td>答案状态 1:正常  3:统计者移除此答案或删除</td></tr><tr><td>tmp_external_userid</td><td>string</td><td>外部用户临时id，匿名填写不返回，同一个用户在不同的收集表中返回的该id不一致。<br/>可进一步通过<a href="#46252" rel="nofollow">tmp_external_userid的转换</a>接口转换成外部联系人的external_userid，方便识别外部填写人的身份。</td></tr><tr><td>userid</td><td>string</td><td>用户id，匿名填写不返回</td></tr></tbody></table></div></div></div>

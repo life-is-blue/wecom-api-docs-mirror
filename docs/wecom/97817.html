@@ -1,0 +1,91 @@
+<div class="ep-doc-area-cherry cherry-markdown cherry-wecom" id="js-ep-doc-cnt-md"><div data-code-block-theme="coy" data-inline-code-theme="red"><p data-lines="1" data-sign="282113de28c4b81bc267c9afe6a62226" data-type="p">该接口用于读取收集表的信息</p><p data-lines="3" data-sign="9837d1135fedecbedf9bbaa2dee34812" data-type="p"><strong>请求方式</strong>：POST（<strong>HTTPS</strong>）<br/><strong>请求地址</strong>:  https://qyapi.weixin.qq.com/cgi-bin/wedoc/get_form_info?access_token=ACCESS_TOKEN </p><p data-lines="2" data-sign="8a9affe8c49f861be4739ea1170e480a" data-type="p"><strong>请求包体</strong></p><div data-lines="6" data-sign="389897a774d6c81509e9248e7d3cb516" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token property">"formid"</span><span class="token operator">:</span><span class="token string">"FORMID"</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><p data-lines="2" data-sign="54d2f7abd4f226094d9bdd35b3129b56" data-type="p"><strong>参数说明</strong></p><div class="cherry-table-container" data-lines="3" data-sign="69f6b6d22623daa25412eec438c5ceb0">
+<table class="cherry-table"><thead><tr><th>参数</th><th>类型</th><th>是否必须</th><th>说明</th></tr></thead><tbody><tr><td>formid</td><td>string</td><td>是</td><td>操作的收集表ID</td></tr></tbody></table></div><p data-lines="1" data-sign="fd1c44250d466f3563712de3fc0f1925" data-type="p"><strong>权限说明</strong></p><ul class="cherry-list__default" data-lines="4" data-sign="4851a9809619de3c07d2d68f5db08f1alist4"><li>自建应用需配置到“<a href="#43883" rel="nofollow">可调用应用</a>”列表中的应用secret所获取的accesstoken来调用（<a href="#10013/%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A%E8%8E%B7%E5%8F%96access_token" rel="nofollow">accesstoken如何获取？</a>）</li><li>第三方应用需具有“文档”权限</li><li>代开发自建应用需具有“文档”权限</li><li>只能操作该应用创建的文档</li></ul><p data-lines="1" data-sign="6394de01a40b78c07ec7af6eaecac7f9" data-type="p"><strong>返回示例</strong></p><div data-lines="86" data-sign="fdf8f6d8bcfd2c99f6a407b0478de535" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token property">"errcode"</span><span class="token operator">:</span><span class="token number">0</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"errmsg"</span><span class="token operator">:</span><span class="token string">"ok"</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"form_info"</span><span class="token operator">:</span><span class="token punctuation">{</span></span>
+<span class="code-line">        <span class="token property">"formid"</span><span class="token operator">:</span><span class="token string">"FORMID1"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"form_title"</span><span class="token operator">:</span><span class="token string">"api创建的收集表_周期"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"form_desc"</span><span class="token operator">:</span><span class="token string">"这是描述"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"form_header"</span><span class="token operator">:</span><span class="token string">"URL"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"form_question"</span><span class="token operator">:</span><span class="token punctuation">{</span></span>
+<span class="code-line">            <span class="token property">"items"</span><span class="token operator">:</span><span class="token punctuation">[</span></span>
+<span class="code-line">                <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token property">"question_id"</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"title"</span><span class="token operator">:</span><span class="token string">"问题1"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"pos"</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"status"</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"reply_type"</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"must_reply"</span><span class="token operator">:</span><span class="token boolean">true</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"note"</span><span class="token operator">:</span><span class="token string">"问题备注1"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"placeholder"</span><span class="token operator">:</span><span class="token string">"提示1"</span></span>
+<span class="code-line">                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token property">"question_id"</span><span class="token operator">:</span><span class="token number">2</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"title"</span><span class="token operator">:</span><span class="token string">"问题2"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"pos"</span><span class="token operator">:</span><span class="token number">2</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"status"</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"reply_type"</span><span class="token operator">:</span><span class="token number">2</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"must_reply"</span><span class="token operator">:</span><span class="token boolean">false</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"note"</span><span class="token operator">:</span><span class="token string">"问题备注2"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"option_item"</span><span class="token operator">:</span><span class="token punctuation">[</span></span>
+<span class="code-line">                        <span class="token punctuation">{</span></span>
+<span class="code-line">                            <span class="token property">"key"</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token property">"value"</span><span class="token operator">:</span><span class="token string">"A"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token property">"status"</span><span class="token operator">:</span><span class="token number">1</span></span>
+<span class="code-line">                        <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token punctuation">{</span></span>
+<span class="code-line">                            <span class="token property">"key"</span><span class="token operator">:</span><span class="token number">2</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token property">"value"</span><span class="token operator">:</span><span class="token string">"B"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token property">"status"</span><span class="token operator">:</span><span class="token number">1</span></span>
+<span class="code-line">                        <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token punctuation">{</span></span>
+<span class="code-line">                            <span class="token property">"key"</span><span class="token operator">:</span><span class="token number">3</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token property">"value"</span><span class="token operator">:</span><span class="token string">"C"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token property">"status"</span><span class="token operator">:</span><span class="token number">1</span></span>
+<span class="code-line">                        <span class="token punctuation">}</span></span>
+<span class="code-line">                    <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"placeholder"</span><span class="token operator">:</span><span class="token string">"提示2"</span></span>
+<span class="code-line">                <span class="token punctuation">}</span></span>
+<span class="code-line">            <span class="token punctuation">]</span></span>
+<span class="code-line">        <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"form_setting"</span><span class="token operator">:</span><span class="token punctuation">{</span></span>
+<span class="code-line">            <span class="token property">"fill_out_auth"</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token property">"fill_in_range"</span><span class="token operator">:</span><span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token property">"departmentids"</span><span class="token operator">:</span><span class="token punctuation">[</span></span>
+<span class="code-line">                    <span class="token number">1</span></span>
+<span class="code-line">                <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token property">"userids"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                    <span class="token string">"USERID1"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"USERID2"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token property">"setting_manager_range"</span><span class="token operator">:</span><span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token property">"userids"</span><span class="token operator">:</span><span class="token punctuation">[</span></span>
+<span class="code-line">                    <span class="token string">"USERID1"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"USERID2"</span></span>
+<span class="code-line">                <span class="token punctuation">]</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token property">"timed_repeat_info"</span><span class="token operator">:</span><span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token property">"enable"</span><span class="token operator">:</span><span class="token boolean">true</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token property">"remind_time"</span><span class="token operator">:</span><span class="token number">1668389400</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token property">"rule_ctime"</span><span class="token operator">:</span><span class="token number">1668418140</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token property">"rule_mtime"</span><span class="token operator">:</span><span class="token number">1668418140</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token property">"repeat_type"</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token property">"skip_holiday"</span><span class="token operator">:</span><span class="token boolean">false</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token property">"allow_multi_fill"</span><span class="token operator">:</span><span class="token boolean">false</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token property">"timed_finish"</span><span class="token operator">:</span><span class="token number">0</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token property">"can_anonymous"</span><span class="token operator">:</span><span class="token boolean">false</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token property">"can_notify_submit"</span><span class="token operator">:</span><span class="token boolean">true</span></span>
+<span class="code-line">        <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"repeated_id"</span><span class="token operator">:</span><span class="token punctuation">[</span></span>
+<span class="code-line">            <span class="token string">"REPEAT_ID1"</span></span>
+<span class="code-line">        <span class="token punctuation">]</span></span>
+<span class="code-line">    <span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><p data-lines="2" data-sign="54d2f7abd4f226094d9bdd35b3129b56" data-type="p"><strong>参数说明</strong></p><div class="cherry-table-container" data-lines="12" data-sign="d629370e43763c9209a1ad0843f25931">
+<table class="cherry-table"><thead><tr><th>参数</th><th>类型</th><th>说明</th></tr></thead><tbody><tr><td>errcode</td><td>int32</td><td>错误码</td></tr><tr><td>errmsg</td><td>string</td><td>错误码说明</td></tr><tr><td>form_info</td><td>object</td><td>收集表信息</td></tr><tr><td>formid</td><td>string</td><td>收集表id</td></tr><tr><td>form_title</td><td>string</td><td>收集表标题</td></tr><tr><td>form_desc</td><td>string</td><td>收集表描述</td></tr><tr><td>form_header</td><td>string</td><td>收集表表头背景图链接</td></tr><tr><td>form_question</td><td>object</td><td>收集表的问题列表</td></tr><tr><td>form_setting</td><td>object</td><td>收集表的设置</td></tr><tr><td>repeated_id</td><td>string[]</td><td>收集表的周期id，用于获取答案列表和具体的回答</td></tr></tbody></table></div></div></div>

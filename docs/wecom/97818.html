@@ -1,0 +1,74 @@
+<div class="ep-doc-area-cherry cherry-markdown cherry-wecom" id="js-ep-doc-cnt-md"><div data-code-block-theme="coy" data-inline-code-theme="red"><p data-lines="1" data-sign="9194ef4a9fb4e5911976e988a4ba1e85" data-type="p">该接口用于获取收集表的统计信息、已回答成员列表和未回答成员列表</p><p data-lines="3" data-sign="cfaae6301acff5de3288e1ae99c8ffad" data-type="p"><strong>请求方式</strong>：POST（<strong>HTTPS</strong>）<br/><strong>请求地址</strong>:  https://qyapi.weixin.qq.com/cgi-bin/wedoc/get_form_statistic?access_token=ACCESS_TOKEN </p><p data-lines="2" data-sign="8a9affe8c49f861be4739ea1170e480a" data-type="p"><strong>请求包体</strong></p><div data-lines="24" data-sign="535cf0b3312ffb9ed282c36574c16c4c" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token comment">// 仅获取统计结果</span></span>
+<span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token property">"repeated_id"</span><span class="token operator">:</span><span class="token string">"REPEATED_ID1"</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"req_type"</span><span class="token operator">:</span><span class="token number">1</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token comment">// 获取已提交的列表</span></span>
+<span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token property">"repeated_id"</span><span class="token operator">:</span><span class="token string">"REPEATED_ID2"</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"req_type"</span><span class="token operator">:</span><span class="token number">2</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"start_time"</span><span class="token operator">:</span><span class="token number">1667395287</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"end_time"</span><span class="token operator">:</span><span class="token number">1668418369</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"limit"</span><span class="token operator">:</span><span class="token number">20</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"cursor"</span><span class="token operator">:</span><span class="token number">1</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token comment">// 获取未提交的列表</span></span>
+<span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token property">"repeated_id"</span><span class="token operator">:</span><span class="token string">"REPEATED_ID3"</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"req_type"</span><span class="token operator">:</span><span class="token number">3</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"limit"</span><span class="token operator">:</span><span class="token number">20</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"cursor"</span><span class="token operator">:</span><span class="token number">1</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><p data-lines="2" data-sign="54d2f7abd4f226094d9bdd35b3129b56" data-type="p"><strong>参数说明</strong></p><div class="cherry-table-container" data-lines="8" data-sign="69102fcd96e493d7f6b7b688b4e9cc9d">
+<table class="cherry-table"><thead><tr><th>参数</th><th>类型</th><th>是否必须</th><th>说明</th></tr></thead><tbody><tr><td>repeated_id</td><td>string</td><td>是</td><td>操作的收集表的repeated_id,来源于get_form_info的返回</td></tr><tr><td>req_type</td><td>uint32</td><td>是</td><td>请求类型 1:只获取统计结果 2:获取已提交列表 3:获取未提交列表</td></tr><tr><td>start_time</td><td>uint64</td><td>否</td><td>拉取已提交列表时必填，其余type不填。筛选开始时间，以当天的00:00:00开始筛选</td></tr><tr><td>end_time</td><td>uint64</td><td>否</td><td>拉取已提交列表时必填，其余type不填。筛选结束时间，以当天的23:59:59结束筛选</td></tr><tr><td>limit</td><td>uint64</td><td>否</td><td>分页拉取时批次大小，最大10000</td></tr><tr><td>cursor</td><td>uint64</td><td>否</td><td>分页拉取的游标，首次不传</td></tr></tbody></table></div><p data-lines="1" data-sign="fd1c44250d466f3563712de3fc0f1925" data-type="p"><strong>权限说明</strong></p><ul class="cherry-list__default" data-lines="4" data-sign="4851a9809619de3c07d2d68f5db08f1alist4"><li>自建应用需配置到“<a href="#43883" rel="nofollow">可调用应用</a>”列表中的应用secret所获取的accesstoken来调用（<a href="#10013/%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A%E8%8E%B7%E5%8F%96access_token" rel="nofollow">accesstoken如何获取？</a>）</li><li>第三方应用需具有“文档”权限</li><li>代开发自建应用需具有“文档”权限</li><li>只能操作该应用创建的文档</li></ul><p data-lines="1" data-sign="6394de01a40b78c07ec7af6eaecac7f9" data-type="p"><strong>返回示例</strong></p><div data-lines="51" data-sign="46b2fef46f8fc75ae6db16ce76b93838" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token comment">// req_type = 1 仅获取统计信息</span></span>
+<span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token property">"errcode"</span><span class="token operator">:</span><span class="token number">0</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"errmsg"</span><span class="token operator">:</span><span class="token string">"ok"</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"fill_cnt"</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"fill_user_cnt"</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"unfill_user_cnt"</span><span class="token operator">:</span><span class="token number">90</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token comment">// req_type = 2,获取已提交列表</span></span>
+<span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token property">"errcode"</span><span class="token operator">:</span><span class="token number">0</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"errmsg"</span><span class="token operator">:</span><span class="token string">"ok"</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"fill_cnt"</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"fill_user_cnt"</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"unfill_user_cnt"</span><span class="token operator">:</span><span class="token number">90</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"submit_users"</span><span class="token operator">:</span><span class="token punctuation">[</span></span>
+<span class="code-line">        <span class="token punctuation">{</span></span>
+<span class="code-line">            <span class="token property">"userid"</span><span class="token operator">:</span><span class="token string">"USERID1"</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token property">"submit_time"</span><span class="token operator">:</span><span class="token number">1668418200</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token property">"answer_id"</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token property">"user_name"</span><span class="token operator">:</span><span class="token string">"USER_NAME1"</span></span>
+<span class="code-line">        <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token punctuation">{</span></span>
+<span class="code-line">            <span class="token property">"tmp_external_userid"</span><span class="token operator">:</span><span class="token string">"TMP_EXTERNAL_USERID1"</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token property">"submit_time"</span><span class="token operator">:</span><span class="token number">1668418200</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token property">"answer_id"</span><span class="token operator">:</span><span class="token number">2</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token property">"user_name"</span><span class="token operator">:</span><span class="token string">"USER_NAME2"</span></span>
+<span class="code-line">        <span class="token punctuation">}</span></span>
+<span class="code-line">     <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"has_more"</span><span class="token operator">:</span><span class="token boolean">false</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"cursor"</span><span class="token operator">:</span><span class="token number">1</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token comment">// req_type = 3,获取未提交列表，仅当限制提交范围时有结果</span></span>
+<span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token property">"errcode"</span><span class="token operator">:</span><span class="token number">0</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"errmsg"</span><span class="token operator">:</span><span class="token string">"ok"</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"fill_cnt"</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"fill_user_cnt"</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"unfill_user_cnt"</span><span class="token operator">:</span><span class="token number">90</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"unfill_users"</span><span class="token operator">:</span><span class="token punctuation">[</span></span>
+<span class="code-line">        <span class="token punctuation">{</span></span>
+<span class="code-line">            <span class="token property">"userid"</span><span class="token operator">:</span><span class="token string">"USERID1"</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token property">"user_name"</span><span class="token operator">:</span><span class="token string">"USER_NAME1"</span></span>
+<span class="code-line">        <span class="token punctuation">}</span></span>
+<span class="code-line">    <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"has_more"</span><span class="token operator">:</span><span class="token boolean">false</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"cursor"</span><span class="token operator">:</span><span class="token number">1</span></span>
+<span class="code-line"><span class="token punctuation">}</span> </span></code></pre>
+</div><p data-lines="2" data-sign="54d2f7abd4f226094d9bdd35b3129b56" data-type="p"><strong>参数说明</strong></p><div class="cherry-table-container" data-lines="19" data-sign="7d5f524d0e37ba07d179db60e078c627">
+<table class="cherry-table"><thead><tr><th>参数</th><th>类型</th><th>说明</th></tr></thead><tbody><tr><td>errcode</td><td>int32</td><td>错误码</td></tr><tr><td>errmsg</td><td>string</td><td>错误码说明</td></tr><tr><td>fill_cnt</td><td>uint64</td><td>已填写次数</td></tr><tr><td>fill_user_cnt</td><td>uint64</td><td>已填写人数</td></tr><tr><td>unfill_user_cnt</td><td>uint64</td><td>未填写人数</td></tr><tr><td>submit_users</td><td>object[]</td><td>已填写人列表</td></tr><tr><td>tmp_external_userid</td><td>string</td><td>外部用户临时id，匿名填写不返回，同一个用户在不同的收集表中返回的该id不一致。<br/>可进一步通过<a href="#46252" rel="nofollow">tmp_external_userid的转换</a>接口转换成external_userid，方便识别外部填写人的身份。</td></tr><tr><td>userid</td><td>string</td><td>企业内成员的id，匿名填写不返回</td></tr><tr><td>submit_time</td><td>uint64</td><td>提交时间</td></tr><tr><td>answer_id</td><td>uint64</td><td>答案id</td></tr><tr><td>user_name</td><td>string</td><td>名字，匿名填写不返回</td></tr><tr><td>userid</td><td>string</td><td>企业内成员的id，匿名填写不返回</td></tr><tr><td>unfill_users</td><td>object[]</td><td>未填写人列表</td></tr><tr><td>user_name</td><td>string</td><td>名字</td></tr><tr><td>userid</td><td>string</td><td>企业内成员的id</td></tr><tr><td>has_more</td><td>bool</td><td>是否还有更多</td></tr><tr><td>cursor</td><td>uint64</td><td>上次分页拉取返回的cursor</td></tr></tbody></table></div></div></div>
