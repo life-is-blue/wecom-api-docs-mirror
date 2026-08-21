@@ -398,14 +398,25 @@ def _rewrite_internal_links(article: Tag, source: Source) -> None:
             a["href"] = f"./{match.group(1)}.md"
 
 
+_ADMONITION_ICON_SRC_PREFIX = "data:image/svg+xml;base64,"
+
+
+def _is_decorative_admonition_icon(img: Tag, src: str) -> bool:
+    # Observed in the wild: cherry-markdown's admonition/callout marker icons
+    # (e.g. right before "注意") are inline base64 SVGs with no alt text --
+    # never real document content, since real screenshots in this corpus are
+    # always external URLs. Matched narrowly on that exact signature rather
+    # than "any data: URI" so a genuine embedded image (a different mime
+    # type, or one with meaningful alt text) is kept, not silently dropped.
+    if not src.startswith(_ADMONITION_ICON_SRC_PREFIX):
+        return False
+    return not (img.get("alt") or "").strip()
+
+
 def _fix_images(article: Tag, site_root: str) -> None:
     for img in article.find_all("img"):
         src = img.get("data-src") or img.get("src") or ""
-        if src.startswith("data:"):
-            # Observed in the wild: small inline base64 SVGs are cherry-markdown's
-            # admonition/callout marker icons (e.g. right before "注意"), never real
-            # document content -- real screenshots are always external URLs. Keeping
-            # them just bloats the markdown with no informational value.
+        if _is_decorative_admonition_icon(img, src):
             img.decompose()
             continue
         if src.startswith("//"):

@@ -167,6 +167,52 @@ def test_conversion_drops_inline_base64_admonition_icons():
     assert "注意事项说明" in markdown
 
 
+def test_conversion_keeps_data_uri_image_with_real_alt_text():
+    # A data: URI alone isn't the admonition-icon signature -- meaningful
+    # alt text means a human captioned it, i.e. it's actual content, not a
+    # decorative marker. Must not be silently dropped like the icons are.
+    html = (
+        '<div class="ep-doc-area-cherry">'
+        '<p><img alt="架构图" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0i" />说明文字内容</p>'
+        '</div>'
+    )
+    article = fw.extract_article_soup(html)
+    markdown = fw.convert_article_to_markdown(article, SOURCE)
+
+    assert "data:image" in markdown
+    assert "架构图" in markdown
+
+
+def test_conversion_keeps_non_svg_data_uri_image():
+    # Only base64 SVG is the observed decorative-icon shape; a PNG/JPEG
+    # data: URI is out of scope for that heuristic and must be kept.
+    html = (
+        '<div class="ep-doc-area-cherry">'
+        '<p><img src="data:image/png;base64,iVBORw0KGgoAAAA" />示例截图说明</p>'
+        '</div>'
+    )
+    article = fw.extract_article_soup(html)
+    markdown = fw.convert_article_to_markdown(article, SOURCE)
+
+    assert "data:image/png" in markdown
+
+
+def test_conversion_drops_admonition_icon_inside_complex_table_without_losing_cell_text():
+    html = (
+        '<div class="ep-doc-area-cherry"><table class="cherry-table">'
+        '<tr><td rowspan="2">before</td>'
+        '<td><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0i" />after</td></tr>'
+        '<tr><td>second row second cell</td></tr>'
+        '</table></div>'
+    )
+    article = fw.extract_article_soup(html)
+    markdown = fw.convert_article_to_markdown(article, SOURCE)
+
+    assert "data:image" not in markdown
+    assert "before" in markdown
+    assert "after" in markdown
+
+
 def test_conversion_keeps_simple_table_as_markdown_table():
     html = load_fixture("article_code_table.html")
     article = fw.extract_article_soup(html)

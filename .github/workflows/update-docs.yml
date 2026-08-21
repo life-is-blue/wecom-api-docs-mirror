@@ -29,10 +29,13 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: wecom-api-docs-mirror
-  cancel-in-progress: true
-
+# Deliberately no workflow-level concurrency group: GitHub Actions applies a
+# workflow-level group to every job's *run*, so a job-level group on top of
+# it is additive, not a replacement -- three same-named-workflow runs still
+# fight over the shared slot no matter what each job declares locally. Each
+# job below sets its own group instead, so verify/sync/debug-capture can
+# never cancel each other (verify is stateless and fast enough not to need
+# one at all).
 jobs:
   verify:
     if: github.event_name == 'push' || github.event_name == 'pull_request'
@@ -55,6 +58,9 @@ jobs:
   sync:
     if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.debug_doc_ids == '')
     runs-on: ubuntu-latest
+    concurrency:
+      group: wecom-api-docs-mirror-sync
+      cancel-in-progress: true
 
     steps:
       - name: Checkout
@@ -95,9 +101,8 @@ jobs:
     # Ad hoc audit path: fetch a handful of doc ids' raw HTML (see
     # scripts/debug_capture_raw_html.py) so it can be diffed against the
     # converted docs/wecom/*.md, without touching the real sync/checkpoint.
-    # Its own concurrency group -- deliberately not the shared
-    # wecom-api-docs-mirror one -- so triggering this never cancels an
-    # in-flight scheduled sync.
+    # Its own concurrency group, distinct from sync's, so triggering this
+    # can't cancel an in-flight scheduled sync (see the note above jobs:).
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.debug_doc_ids != ''
     runs-on: ubuntu-latest
     permissions:
