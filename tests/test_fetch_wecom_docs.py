@@ -65,6 +65,32 @@ def fake_success_outcome(source, page, markdown: str, html: str = "<div>x</div>"
 
 
 # --------------------------------------------------------------------------
+# Source config
+# --------------------------------------------------------------------------
+
+def test_load_sources_rejects_schema_version_as_a_source_id(tmp_path):
+    # save_checkpoint() writes {"schema_version": N, **progress} at the top
+    # level of docs/sync_progress.json; a source literally named this would
+    # collide with that key and silently corrupt every source's checkpoint
+    # (see test_load_progress_rejects_mismatched_schema_version for what
+    # that collision does once it happens) -- must be rejected up front.
+    config_path = tmp_path / "sources.json"
+    config_path.write_text(
+        json.dumps({
+            "sources": [{
+                "id": "schema_version",
+                "site_root": "https://example.invalid",
+                "seed_path": "/document/path/1",
+                "output_subdir": "wecom",
+            }]
+        }),
+        encoding="utf-8",
+    )
+    with pytest.raises(RuntimeError, match="reserved"):
+        fw.load_sources(config_path)
+
+
+# --------------------------------------------------------------------------
 # Nav-tree discovery
 # --------------------------------------------------------------------------
 

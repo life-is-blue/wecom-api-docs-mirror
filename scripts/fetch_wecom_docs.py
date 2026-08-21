@@ -200,6 +200,13 @@ def load_sources(config_path: Path) -> List[Source]:
 
         if not source_id or not site_root or not seed_path or not output_subdir:
             raise RuntimeError(f"Invalid source entry: {raw}")
+        if source_id == "schema_version":
+            # save_checkpoint() writes {"schema_version": N, **progress} at
+            # the top level of docs/sync_progress.json -- a source literally
+            # named this would collide with that key and get silently
+            # clobbered into it, corrupting the version tripwire for every
+            # source's checkpoint, not just this one.
+            raise RuntimeError('source id "schema_version" is reserved, pick a different id')
         if not doc_path_prefix.startswith("/") or not doc_path_prefix.endswith("/"):
             raise RuntimeError(f"doc_path_prefix must look like '/document/path/': {doc_path_prefix}")
 
