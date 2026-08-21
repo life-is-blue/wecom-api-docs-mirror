@@ -13,15 +13,13 @@ on:
       - "config/**"
       - "tests/**"
       - ".github/workflows/update-docs.yml"
-  # Paused 2026-08-21 while running the initial full backfill locally, so
-  # the daily cron doesn't race the local run for request budget against
-  # the same site or fight over pushing to main -- see docs/sync_progress.json
-  # for backfill status. Re-enable (uncomment) once the local backfill
-  # finishes a full pass, and switch this to weekly at the same time (docs
-  # change rarely; daily was only ever needed to grind through the initial
-  # 700+-doc backlog).
-  # schedule:
-  #   - cron: "0 0 * * *"
+  # Re-enabled 2026-08-21: the local backfill attempt turned out to be
+  # blocked at the network level (this sandbox's outbound IP got a CAPTCHA
+  # on the very first request, before any per-doc request budget even came
+  # into play), so there's no local run to race against -- CI is back to
+  # being the only thing driving progress on the ~700+-doc backlog.
+  schedule:
+    - cron: "0 0 * * *"
   workflow_dispatch:
     inputs:
       strict_fetch:
