@@ -21,6 +21,10 @@ on:
         description: "1=fail on any fetch error, 0=tolerant mode"
         required: false
         default: "0"
+      debug_doc_ids:
+        description: "Debug only: comma-separated doc ids to capture raw HTML for (leave empty for a normal sync run)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -49,7 +53,7 @@ jobs:
         run: pytest tests/ -v
 
   sync:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.debug_doc_ids == '')
     runs-on: ubuntu-latest
 
     steps:
@@ -86,3 +90,42 @@ jobs:
           git add docs/
           git commit -m "chore: sync docs $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           git push
+
+  debug-capture-raw-html:
+    # Ad hoc audit path: fetch a handful of doc ids' raw HTML (see
+    # scripts/debug_capture_raw_html.py) so it can be diffed against the
+    # converted docs/wecom/*.md, without touching the real sync/checkpoint.
+    # Its own concurrency group -- deliberately not the shared
+    # wecom-api-docs-mirror one -- so triggering this never cancels an
+    # in-flight scheduled sync.
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.debug_doc_ids != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    concurrency:
+      group: wecom-api-docs-mirror-debug
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Capture raw HTML
+        env:
+          DEBUG_DOC_IDS: ${{ github.event.inputs.debug_doc_ids }}
+        run: python scripts/debug_capture_raw_html.py --doc-ids "$DEBUG_DOC_IDS"
+
+      - name: Upload raw HTML as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: raw-html-capture
+          path: raw_html/
+          retention-days: 7

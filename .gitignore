@@ -9,3 +9,7 @@ __pycache__/
 # also cleans these up on startup; this is a safety net in case a `git add`
 # happens before the fetcher gets to run again).
 docs/**/.*.tmp*
+
+# scripts/debug_capture_raw_html.py output -- ad hoc audit copies, not part
+# of the public mirror (that's the converted docs/wecom/*.md).
+/raw_html/

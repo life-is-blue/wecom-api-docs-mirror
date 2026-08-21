@@ -68,7 +68,7 @@ USER_AGENT = (
     "(+https://github.com/search?q=wecom-api-docs-mirror; doc-mirror bot)"
 )
 
-CONVERTER_VERSION = "1"
+CONVERTER_VERSION = "2"
 
 REQUEST_TIMEOUT_SECONDS = 30
 MAX_RETRIES = 4
@@ -401,6 +401,13 @@ def _rewrite_internal_links(article: Tag, source: Source) -> None:
 def _fix_images(article: Tag, site_root: str) -> None:
     for img in article.find_all("img"):
         src = img.get("data-src") or img.get("src") or ""
+        if src.startswith("data:"):
+            # Observed in the wild: small inline base64 SVGs are cherry-markdown's
+            # admonition/callout marker icons (e.g. right before "注意"), never real
+            # document content -- real screenshots are always external URLs. Keeping
+            # them just bloats the markdown with no informational value.
+            img.decompose()
+            continue
         if src.startswith("//"):
             src = "https:" + src
         elif src.startswith("/"):

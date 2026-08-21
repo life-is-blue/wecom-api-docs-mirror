@@ -150,6 +150,23 @@ def test_conversion_normalizes_relative_image_src():
     assert "http://p.qpic.cn/pic_wework" in markdown
 
 
+def test_conversion_drops_inline_base64_admonition_icons():
+    # Observed in the live corpus: cherry-markdown renders callout markers
+    # (e.g. right before "注意") as a bare inline base64 SVG <img> with no
+    # alt text -- pure UI decoration, not document content. Real screenshots
+    # in this corpus are always external URLs, never data: URIs.
+    html = (
+        '<div class="ep-doc-area-cherry">'
+        '<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0i" />注意事项说明</p>'
+        '</div>'
+    )
+    article = fw.extract_article_soup(html)
+    markdown = fw.convert_article_to_markdown(article, SOURCE)
+
+    assert "data:image" not in markdown
+    assert "注意事项说明" in markdown
+
+
 def test_conversion_keeps_simple_table_as_markdown_table():
     html = load_fixture("article_code_table.html")
     article = fw.extract_article_soup(html)
