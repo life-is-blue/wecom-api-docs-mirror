@@ -267,6 +267,44 @@ def test_load_progress_treats_corrupt_file_as_absent(tmp_path):
     assert fw.load_progress(target) == {}
 
 
+def test_load_progress_accepts_legacy_file_with_no_schema_version(tmp_path):
+    # Every real checkpoint committed before schema_version existed (the
+    # ~420-doc production checkpoint in this repo included) has no such key
+    # -- it must load exactly as if it were the current version, not get
+    # rejected.
+    target = tmp_path / "sync_progress.json"
+    target.write_text(
+        json.dumps({"wecom": {"done_doc_ids": ["1"], "files": {}, "failed": []}}),
+        encoding="utf-8",
+    )
+    loaded = fw.load_progress(target)
+    assert loaded == {"wecom": {"done_doc_ids": ["1"], "files": {}, "failed": []}}
+
+
+def test_load_progress_rejects_mismatched_schema_version(tmp_path):
+    target = tmp_path / "sync_progress.json"
+    target.write_text(
+        json.dumps({"schema_version": 999, "wecom": {"done_doc_ids": ["1"]}}),
+        encoding="utf-8",
+    )
+    assert fw.load_progress(target) == {}
+
+
+def test_load_existing_manifest_accepts_legacy_file_with_no_schema_version(tmp_path):
+    target = tmp_path / "docs_manifest.json"
+    target.write_text(json.dumps({"files": {"wecom/1.md": {"doc_id": "1"}}}), encoding="utf-8")
+    assert fw.load_existing_manifest(target) == {"files": {"wecom/1.md": {"doc_id": "1"}}}
+
+
+def test_load_existing_manifest_rejects_mismatched_schema_version(tmp_path):
+    target = tmp_path / "docs_manifest.json"
+    target.write_text(
+        json.dumps({"schema_version": 999, "files": {"wecom/1.md": {"doc_id": "1"}}}),
+        encoding="utf-8",
+    )
+    assert fw.load_existing_manifest(target) == {"files": {}}
+
+
 def test_resume_skips_already_done_docs_and_completes(tmp_path, monkeypatch):
     """End-to-end main() run simulating a checkpoint left by an earlier,
     interrupted attempt: docs 1 and 2 are already marked done, so a
@@ -367,6 +405,7 @@ def test_resume_skips_already_done_docs_and_completes(tmp_path, monkeypatch):
     assert fetched_ids == ["3", "4", "5"]  # 1 and 2 were skipped, not refetched
 
     manifest = json.loads(fw.MANIFEST_PATH.read_text(encoding="utf-8"))
+    assert manifest["schema_version"] == fw.MANIFEST_SCHEMA_VERSION
     files = manifest["files"]
     assert set(files.keys()) == {"wecom/1.md", "wecom/2.md", "wecom/3.md", "wecom/4.md", "wecom/5.md"}
     assert files["wecom/1.md"]["sha256"] == "seed1"  # carried through from checkpoint untouched
@@ -512,6 +551,7 @@ def test_mid_sync_failure_spike_pauses_without_error_in_tolerant_mode(tmp_path, 
     assert fw.PROGRESS_PATH.exists()  # checkpoint preserved for a future --resume
 
     checkpoint = json.loads(fw.PROGRESS_PATH.read_text(encoding="utf-8"))
+    assert checkpoint["schema_version"] == fw.PROGRESS_SCHEMA_VERSION
     assert len(checkpoint["wecom"]["done_doc_ids"]) == 10
 
 

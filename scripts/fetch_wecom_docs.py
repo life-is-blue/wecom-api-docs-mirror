@@ -64,6 +64,16 @@ MANIFEST_PATH = DOCS_ROOT / "docs_manifest.json"
 # committed) once a source's sync fully completes.
 PROGRESS_PATH = DOCS_ROOT / "sync_progress.json"
 
+# Format version of docs/sync_progress.json and docs_manifest.json
+# respectively. Neither file has ever had more than one shape, so this is
+# deliberately just a tripwire (load_*() warns and starts fresh on a
+# mismatch) rather than a migration framework -- add real migration logic
+# only once a version 2 actually exists. A file with no schema_version key
+# at all (every real checkpoint/manifest before this was added) is treated
+# as the current version, not an error.
+PROGRESS_SCHEMA_VERSION = 1
+MANIFEST_SCHEMA_VERSION = 1
+
 USER_AGENT = (
     "wecom-api-docs-mirror/1.0 "
     "(+https://github.com/search?q=wecom-api-docs-mirror; doc-mirror bot)"
@@ -152,12 +162,24 @@ def load_progress(path: Path) -> Dict:
     if not path.exists():
         return {}
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        data = json.loads(path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError):
         # A corrupt/partial progress file (e.g. process killed mid-write
         # despite the atomic rename, or hand-edited) is not worth resuming
         # from -- treat it as absent and start the source fresh.
         return {}
+    if not isinstance(data, dict):
+        return {}
+    # No schema_version key at all means a checkpoint written before this
+    # field existed -- treat that as the current version, not a mismatch.
+    version = data.get("schema_version", PROGRESS_SCHEMA_VERSION)
+    if version != PROGRESS_SCHEMA_VERSION:
+        print(
+            f"[WARN] {path} has schema_version={version!r}, expected "
+            f"{PROGRESS_SCHEMA_VERSION} -- ignoring and starting fresh"
+        )
+        return {}
+    return {key: value for key, value in data.items() if key != "schema_version"}
 
 
 def load_sources(config_path: Path) -> List[Source]:
@@ -497,7 +519,22 @@ def sha256_text(content: str) -> str:
 def load_existing_manifest(path: Path) -> Dict:
     if not path.exists():
         return {"files": {}}
-    return json.loads(path.read_text(encoding="utf-8"))
+    # Deliberately no try/except here, unlike load_progress(): that's a
+    # pre-existing difference between the two loaders (a corrupt manifest
+    # crashing the run instead of being silently treated as absent), kept
+    # as-is -- adding new fallback behavior wasn't part of the schema_version
+    # tripwire this was scoped to.
+    data = json.loads(path.read_text(encoding="utf-8"))
+    # No schema_version key at all means a manifest written before this
+    # field existed -- treat that as the current version, not a mismatch.
+    version = data.get("schema_version", MANIFEST_SCHEMA_VERSION)
+    if version != MANIFEST_SCHEMA_VERSION:
+        print(
+            f"[WARN] {path} has schema_version={version!r}, expected "
+            f"{MANIFEST_SCHEMA_VERSION} -- ignoring existing manifest"
+        )
+        return {"files": {}}
+    return data
 
 
 def cleanup_stale_temp_files(root: Path) -> None:
@@ -567,6 +604,310 @@ def _positive_int(value: str) -> int:
     return parsed
 
 
+@dataclass
+class SourceSyncResult:
+    """What main() needs back from syncing one source: its contribution to
+    the run-wide totals, and -- if a hard error or a circuit-breaker pause
+    means the whole sync must stop right now -- the exit code to return.
+    `new_files` and `failed_pages` are *not* duplicated here: sync_source()
+    mutates the run-wide dict/list main() passes it, the same way the
+    inlined per-source loop this was extracted from always did."""
+    total_pages: int = 0
+    successful_pages: int = 0
+    stop_exit_code: Optional[int] = None
+
+
+def sync_source(
+    source: Source,
+    args: argparse.Namespace,
+    existing_files: Dict[str, Dict],
+    progress: Dict,
+    new_files: Dict[str, Dict],
+    failed_pages: List[Tuple[str, str]],
+    strict_fetch: bool,
+) -> SourceSyncResult:
+    """Discover and fetch every doc for one source. `new_files`, `failed_pages`,
+    and `progress` are shared across every source in the run and mutated in
+    place (matching the pre-extraction inlined loop); see SourceSyncResult
+    for what's returned instead."""
+    result = SourceSyncResult()
+    print(f"[INFO] source={source.source_id} site={source.site_root}")
+
+    if not check_robots_allowed(source.site_root, source.doc_path_prefix):
+        print(f"[ERROR] robots.txt no longer allows {source.doc_path_prefix}; aborting")
+        result.stop_exit_code = 1
+        return result
+
+    previous_count = sum(
+        1 for key, entry in existing_files.items()
+        if entry.get("source") == source.source_id and not entry.get("missing_since")
+    )
+
+    try:
+        pages = discover_doc_pages(source)
+        validate_discovery(pages, source, previous_count)
+    except CircuitBreaker as exc:
+        print(f"[ERROR] circuit breaker: {exc}")
+        result.stop_exit_code = 1
+        return result
+    except Exception as exc:  # noqa: BLE001
+        print(f"[ERROR] discovery failed: {exc}")
+        result.stop_exit_code = 1
+        return result
+
+    print(f"[INFO] source={source.source_id} discovered={len(pages)} (previous={previous_count})")
+    result.total_pages = len(pages)
+
+    source_root = DOCS_ROOT / source.output_subdir
+    source_root.mkdir(parents=True, exist_ok=True)
+
+    doc_ids = sorted(pages.keys())
+    if args.limit is not None and args.limit < len(doc_ids):
+        step = max(1, len(doc_ids) // args.limit)
+        doc_ids = doc_ids[::step][: args.limit]
+        print(f"[INFO] --limit {args.limit}: sampling {len(doc_ids)} of {len(pages)} discovered docs")
+
+    checkpoint = progress.get(source.source_id) if args.limit is None else None
+    resuming = bool(checkpoint and checkpoint.get("discovered_doc_ids") == doc_ids)
+    # `source_failed_pages` / `source_files` are scoped to this source
+    # (and, unlike `done_doc_ids`, persist across --resume invocations),
+    # unlike the run-wide `failed_pages` / `new_files`, so a checkpoint
+    # save never has to re-filter the whole cumulative `new_files` dict --
+    # it already has exactly this source's slice.
+    if resuming:
+        done_doc_ids = set(checkpoint.get("done_doc_ids", []))
+        source_files: Dict[str, Dict] = dict(checkpoint.get("files", {}))
+        # The checkpoint claims each of these keys has a written .md file
+        # on disk; don't just trust that -- a hand edit, a partial
+        # checkout, or a manually deleted file would otherwise let a
+        # missing doc silently end up "done" in the final manifest with
+        # no corresponding content. Re-fetch anything that doesn't
+        # actually exist instead.
+        stale_keys = {key for key in source_files if not (DOCS_ROOT / key).exists()}
+        if stale_keys:
+            stale_ids = {key.rsplit("/", 1)[-1].removesuffix(".md") for key in stale_keys}
+            print(
+                f"[WARN] --resume: {len(stale_keys)} checkpointed doc(s) for "
+                f"source={source.source_id} are missing their .md file on disk "
+                f"(deleted or never written out-of-band?) -- re-fetching instead of "
+                f"trusting the checkpoint: {sorted(stale_ids)}"
+            )
+            for key in stale_keys:
+                del source_files[key]
+            done_doc_ids -= stale_ids
+        new_files.update(source_files)
+        source_failed_pages: List[Tuple[str, str]] = [
+            tuple(pair) for pair in checkpoint.get("failed", [])
+        ]
+        failed_pages.extend(source_failed_pages)
+        run_started_at = checkpoint.get("run_started_at", now_iso())
+        print(
+            f"[INFO] --resume: continuing checkpoint for source={source.source_id} "
+            f"({len(done_doc_ids)}/{len(doc_ids)} already attempted)"
+        )
+    else:
+        if checkpoint:
+            print(
+                f"[WARN] --resume: checkpoint for source={source.source_id} doesn't match "
+                f"current discovery (site changed since the interrupted attempt); "
+                f"starting this source fresh instead of resuming"
+            )
+        done_doc_ids = set()
+        source_files = {}
+        source_failed_pages = []
+        run_started_at = now_iso()
+
+    def save_checkpoint() -> None:
+        progress[source.source_id] = {
+            "run_started_at": run_started_at,
+            "discovered_doc_ids": doc_ids,
+            "done_doc_ids": sorted(done_doc_ids),
+            "files": source_files,
+            "failed": [list(pair) for pair in source_failed_pages],
+        }
+        write_json_atomic(PROGRESS_PATH, {"schema_version": PROGRESS_SCHEMA_VERSION, **progress})
+
+    # Scoped to *this process's own attempts*, unlike `source_failed_pages`
+    # above which accumulates across every --resume invocation for this
+    # source's lifetime. The circuit breaker below must judge only this
+    # session's recent failure rate: if it judged the cumulative rate
+    # instead, one CAPTCHA cascade months ago would keep re-tripping the
+    # breaker after just a single new attempt on every future --resume,
+    # since attempted-so-far would already be well past the minimum
+    # sample size. A real sliding window (not a whole-session average)
+    # so one early transient failure can't trip the breaker on its own,
+    # while a genuine cascade later in a long run is still caught within
+    # a couple of failures instead of needing to outweigh a large
+    # cumulative denominator. `min_sample` also shrinks to the number of
+    # docs left for a small source, so a source with fewer total docs
+    # than the window still gets checked once fully attempted instead of
+    # never at all.
+    recent_outcomes: "deque[bool]" = deque(maxlen=FAILURE_WINDOW_SIZE)  # True = failed
+    min_sample = min(FAILURE_WINDOW_SIZE, len(doc_ids) - len(done_doc_ids))
+
+    for doc_id in doc_ids:
+        if doc_id in done_doc_ids:
+            continue
+
+        page = pages[doc_id]
+        manifest_key = f"{source.output_subdir}/{page.rel_path}"
+        existing_entry = existing_files.get(manifest_key, {})
+
+        time.sleep(random.uniform(REQUEST_DELAY_MIN_SECONDS, REQUEST_DELAY_MAX_SECONDS))
+        outcome = fetch_one_doc(source, page, existing_entry)
+
+        if outcome.failed:
+            print(f"[WARN] failed url={page.url} err={outcome.error}")
+            failed_pages.append((page.url, outcome.error))
+            source_failed_pages.append((page.url, outcome.error))
+            recent_outcomes.append(True)
+            if existing_entry:
+                # Keep last-known-good content and manifest record; just
+                # bump the failure counter so persistent failures are
+                # visible without deleting anything.
+                carried = dict(existing_entry)
+                carried["fetch_failures"] = int(existing_entry.get("fetch_failures", 0)) + 1
+                new_files[manifest_key] = carried
+                source_files[manifest_key] = carried
+        else:
+            entry = outcome.manifest_entry
+            dest = source_root / page.rel_path
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            if existing_entry.get("sha256") != entry["sha256"] or not dest.exists():
+                write_text_atomic(dest, outcome.markdown_text)
+            new_files[manifest_key] = entry
+            source_files[manifest_key] = entry
+            result.successful_pages += 1
+            print(f"[OK] {manifest_key}")
+            recent_outcomes.append(False)
+
+        done_doc_ids.add(doc_id)
+        if args.limit is None:
+            save_checkpoint()
+
+        if min_sample > 0 and len(recent_outcomes) >= min_sample:
+            # Denominator is a sliding window of docs attempted in *this
+            # process*, not the cumulative total across every --resume
+            # invocation -- see the comment on recent_outcomes above.
+            failure_rate = sum(recent_outcomes) / len(recent_outcomes)
+            if failure_rate > FAILURE_RATE_THRESHOLD:
+                print(
+                    f"[PAUSED] circuit breaker: failure rate {failure_rate:.1%} exceeds "
+                    f"{FAILURE_RATE_THRESHOLD:.0%} over the last {len(recent_outcomes)} attempts "
+                    f"this run (this pattern -- a run of successes followed by a run of failures "
+                    f"-- has empirically matched a CAPTCHA block, not a real breakage). Progress "
+                    f"up to this point is checkpointed to {PROGRESS_PATH}; CI should commit it "
+                    f"as-is and a future `--resume` run (e.g. tomorrow's cron) will continue from "
+                    f"here."
+                )
+                # Not a hard failure in tolerant mode: this is the
+                # expected shape of a multi-day resumable sync against a
+                # site with a tight anti-bot budget, not a bug to alert
+                # on. STRICT_FETCH=1 still treats it as a failure, since
+                # that mode means "tell me about any imperfection".
+                result.stop_exit_code = 1 if strict_fetch else 0
+                return result
+
+    return result
+
+
+def finalize_sync(
+    sources: List[Source],
+    args: argparse.Namespace,
+    existing_files: Dict[str, Dict],
+    new_files: Dict[str, Dict],
+    total_pages: int,
+    successful_pages: int,
+    failed_pages: List[Tuple[str, str]],
+    strict_fetch: bool,
+) -> int:
+    """Runs once every source's sync_source() call has completed normally
+    (never on a circuit-breaker pause or hard error, which return early from
+    main() before reaching this): delayed deletion, the final manifest
+    write, checkpoint clearing, and the run's exit code."""
+    # Delayed deletion: only drop files that have been missing for
+    # MISSING_CONFIRM_RUNS consecutive runs, never on a single run.
+    previous_keys = set(existing_files.keys())
+    current_keys = set(new_files.keys())
+    vanished_keys = previous_keys - current_keys
+
+    for key in vanished_keys:
+        old_entry = existing_files[key]
+        missing_since = old_entry.get("missing_since")
+        run_count = int(old_entry.get("missing_run_count", 0)) + 1
+        if missing_since is None:
+            missing_since = now_iso()
+        carried = dict(old_entry)
+        carried["missing_since"] = missing_since
+        carried["missing_run_count"] = run_count
+        if run_count >= MISSING_CONFIRM_RUNS:
+            file_path = DOCS_ROOT / key
+            if file_path.exists():
+                file_path.unlink()
+                remove_empty_dirs(file_path.parent, DOCS_ROOT)
+            print(f"[INFO] removed {key} after {run_count} consecutive runs missing")
+            continue
+        new_files[key] = carried
+        print(f"[INFO] {key} missing this run ({run_count}/{MISSING_CONFIRM_RUNS}); keeping file for now")
+
+    manifest = {
+        "schema_version": MANIFEST_SCHEMA_VERSION,
+        "generated_at": now_iso(),
+        "tool": "scripts/fetch_wecom_docs.py",
+        "converter_version": CONVERTER_VERSION,
+        "strict_fetch": strict_fetch,
+        "sources": [
+            {
+                "id": s.source_id,
+                "site_root": s.site_root,
+                "seed_path": s.seed_path,
+                "doc_path_prefix": s.doc_path_prefix,
+                "output_subdir": s.output_subdir,
+            }
+            for s in sources
+        ],
+        "stats": {
+            "total_pages": total_pages,
+            "successful_pages": successful_pages,
+            "failed_pages": len(failed_pages),
+        },
+        "failed": [{"url": url, "error": err} for url, err in failed_pages],
+        "files": {k: new_files[k] for k in sorted(new_files.keys())},
+    }
+
+    write_json_atomic(MANIFEST_PATH, manifest)
+
+    # Every source ran its doc_ids loop to completion (no circuit breaker
+    # returned early above), so this sync is fully done -- the checkpoint's
+    # job is finished and stale progress must not linger for a future
+    # --resume to misread. Never true of a --limit run, which only ever
+    # visits a sampled subset -- it must not clear a real checkpoint just
+    # because *it* happened to reach the end of its own (partial) doc_ids.
+    if args.limit is None and PROGRESS_PATH.exists():
+        PROGRESS_PATH.unlink()
+
+    print("\n[SUMMARY]")
+    print(f"total_pages={total_pages}")
+    print(f"successful_pages={successful_pages}")
+    print(f"failed_pages={len(failed_pages)}")
+
+    if failed_pages and strict_fetch:
+        print("[ERROR] STRICT_FETCH=1 and failures detected")
+        return 1
+
+    if not new_files:
+        # Deliberately not `successful_pages == 0`: a --resume run whose
+        # remaining doc_ids were all already checkpointed as done (or where
+        # every newly-attempted doc happens to fail) can legitimately finish
+        # a fully-populated manifest while fetching zero *new* docs this
+        # process. What actually indicates a broken sync is an empty
+        # manifest, not an empty this-invocation delta.
+        print("[ERROR] No documents in the resulting manifest")
+        return 1
+
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -629,259 +970,18 @@ def main() -> int:
     failed_pages: List[Tuple[str, str]] = []
 
     for source in sources:
-        print(f"[INFO] source={source.source_id} site={source.site_root}")
-
-        if not check_robots_allowed(source.site_root, source.doc_path_prefix):
-            print(f"[ERROR] robots.txt no longer allows {source.doc_path_prefix}; aborting")
-            return 1
-
-        previous_count = sum(
-            1 for key, entry in existing_files.items()
-            if entry.get("source") == source.source_id and not entry.get("missing_since")
+        result = sync_source(
+            source, args, existing_files, progress, new_files, failed_pages, strict_fetch
         )
+        total_pages += result.total_pages
+        successful_pages += result.successful_pages
+        if result.stop_exit_code is not None:
+            return result.stop_exit_code
 
-        try:
-            pages = discover_doc_pages(source)
-            validate_discovery(pages, source, previous_count)
-        except CircuitBreaker as exc:
-            print(f"[ERROR] circuit breaker: {exc}")
-            return 1
-        except Exception as exc:  # noqa: BLE001
-            print(f"[ERROR] discovery failed: {exc}")
-            return 1
-
-        print(f"[INFO] source={source.source_id} discovered={len(pages)} (previous={previous_count})")
-        total_pages += len(pages)
-
-        source_root = DOCS_ROOT / source.output_subdir
-        source_root.mkdir(parents=True, exist_ok=True)
-
-        doc_ids = sorted(pages.keys())
-        if args.limit is not None and args.limit < len(doc_ids):
-            step = max(1, len(doc_ids) // args.limit)
-            doc_ids = doc_ids[::step][: args.limit]
-            print(f"[INFO] --limit {args.limit}: sampling {len(doc_ids)} of {len(pages)} discovered docs")
-
-        checkpoint = progress.get(source.source_id) if args.limit is None else None
-        resuming = bool(checkpoint and checkpoint.get("discovered_doc_ids") == doc_ids)
-        # `source_failed_pages` / `source_files` are scoped to this source
-        # (and, unlike `done_doc_ids`, persist across --resume invocations),
-        # unlike the module-wide `failed_pages` / `new_files`, so a
-        # checkpoint save never has to re-filter the whole cumulative
-        # `new_files` dict -- it already has exactly this source's slice.
-        if resuming:
-            done_doc_ids = set(checkpoint.get("done_doc_ids", []))
-            source_files: Dict[str, Dict] = dict(checkpoint.get("files", {}))
-            # The checkpoint claims each of these keys has a written .md file
-            # on disk; don't just trust that -- a hand edit, a partial
-            # checkout, or a manually deleted file would otherwise let a
-            # missing doc silently end up "done" in the final manifest with
-            # no corresponding content. Re-fetch anything that doesn't
-            # actually exist instead.
-            stale_keys = {key for key in source_files if not (DOCS_ROOT / key).exists()}
-            if stale_keys:
-                stale_ids = {key.rsplit("/", 1)[-1].removesuffix(".md") for key in stale_keys}
-                print(
-                    f"[WARN] --resume: {len(stale_keys)} checkpointed doc(s) for "
-                    f"source={source.source_id} are missing their .md file on disk "
-                    f"(deleted or never written out-of-band?) -- re-fetching instead of "
-                    f"trusting the checkpoint: {sorted(stale_ids)}"
-                )
-                for key in stale_keys:
-                    del source_files[key]
-                done_doc_ids -= stale_ids
-            new_files.update(source_files)
-            source_failed_pages: List[Tuple[str, str]] = [
-                tuple(pair) for pair in checkpoint.get("failed", [])
-            ]
-            failed_pages.extend(source_failed_pages)
-            run_started_at = checkpoint.get("run_started_at", now_iso())
-            print(
-                f"[INFO] --resume: continuing checkpoint for source={source.source_id} "
-                f"({len(done_doc_ids)}/{len(doc_ids)} already attempted)"
-            )
-        else:
-            if checkpoint:
-                print(
-                    f"[WARN] --resume: checkpoint for source={source.source_id} doesn't match "
-                    f"current discovery (site changed since the interrupted attempt); "
-                    f"starting this source fresh instead of resuming"
-                )
-            done_doc_ids = set()
-            source_files = {}
-            source_failed_pages = []
-            run_started_at = now_iso()
-
-        def save_checkpoint() -> None:
-            progress[source.source_id] = {
-                "run_started_at": run_started_at,
-                "discovered_doc_ids": doc_ids,
-                "done_doc_ids": sorted(done_doc_ids),
-                "files": source_files,
-                "failed": [list(pair) for pair in source_failed_pages],
-            }
-            write_json_atomic(PROGRESS_PATH, progress)
-
-        # Scoped to *this process's own attempts*, unlike `source_failed_pages`
-        # above which accumulates across every --resume invocation for this
-        # source's lifetime. The circuit breaker below must judge only this
-        # session's recent failure rate: if it judged the cumulative rate
-        # instead, one CAPTCHA cascade months ago would keep re-tripping the
-        # breaker after just a single new attempt on every future --resume,
-        # since attempted-so-far would already be well past the minimum
-        # sample size. A real sliding window (not a whole-session average)
-        # so one early transient failure can't trip the breaker on its own,
-        # while a genuine cascade later in a long run is still caught within
-        # a couple of failures instead of needing to outweigh a large
-        # cumulative denominator. `min_sample` also shrinks to the number of
-        # docs left for a small source, so a source with fewer total docs
-        # than the window still gets checked once fully attempted instead of
-        # never at all.
-        recent_outcomes: "deque[bool]" = deque(maxlen=FAILURE_WINDOW_SIZE)  # True = failed
-        min_sample = min(FAILURE_WINDOW_SIZE, len(doc_ids) - len(done_doc_ids))
-
-        for doc_id in doc_ids:
-            if doc_id in done_doc_ids:
-                continue
-
-            page = pages[doc_id]
-            manifest_key = f"{source.output_subdir}/{page.rel_path}"
-            existing_entry = existing_files.get(manifest_key, {})
-
-            time.sleep(random.uniform(REQUEST_DELAY_MIN_SECONDS, REQUEST_DELAY_MAX_SECONDS))
-            outcome = fetch_one_doc(source, page, existing_entry)
-
-            if outcome.failed:
-                print(f"[WARN] failed url={page.url} err={outcome.error}")
-                failed_pages.append((page.url, outcome.error))
-                source_failed_pages.append((page.url, outcome.error))
-                recent_outcomes.append(True)
-                if existing_entry:
-                    # Keep last-known-good content and manifest record; just
-                    # bump the failure counter so persistent failures are
-                    # visible without deleting anything.
-                    carried = dict(existing_entry)
-                    carried["fetch_failures"] = int(existing_entry.get("fetch_failures", 0)) + 1
-                    new_files[manifest_key] = carried
-                    source_files[manifest_key] = carried
-            else:
-                entry = outcome.manifest_entry
-                dest = source_root / page.rel_path
-                dest.parent.mkdir(parents=True, exist_ok=True)
-                if existing_entry.get("sha256") != entry["sha256"] or not dest.exists():
-                    write_text_atomic(dest, outcome.markdown_text)
-                new_files[manifest_key] = entry
-                source_files[manifest_key] = entry
-                successful_pages += 1
-                print(f"[OK] {manifest_key}")
-                recent_outcomes.append(False)
-
-            done_doc_ids.add(doc_id)
-            if args.limit is None:
-                save_checkpoint()
-
-            if min_sample > 0 and len(recent_outcomes) >= min_sample:
-                # Denominator is a sliding window of docs attempted in *this
-                # process*, not the cumulative total across every --resume
-                # invocation -- see the comment on recent_outcomes above.
-                failure_rate = sum(recent_outcomes) / len(recent_outcomes)
-                if failure_rate > FAILURE_RATE_THRESHOLD:
-                    print(
-                        f"[PAUSED] circuit breaker: failure rate {failure_rate:.1%} exceeds "
-                        f"{FAILURE_RATE_THRESHOLD:.0%} over the last {len(recent_outcomes)} attempts "
-                        f"this run (this pattern -- a run of successes followed by a run of failures "
-                        f"-- has empirically matched a CAPTCHA block, not a real breakage). Progress "
-                        f"up to this point is checkpointed to {PROGRESS_PATH}; CI should commit it "
-                        f"as-is and a future `--resume` run (e.g. tomorrow's cron) will continue from "
-                        f"here."
-                    )
-                    # Not a hard failure in tolerant mode: this is the
-                    # expected shape of a multi-day resumable sync against a
-                    # site with a tight anti-bot budget, not a bug to alert
-                    # on. STRICT_FETCH=1 still treats it as a failure, since
-                    # that mode means "tell me about any imperfection".
-                    return 1 if strict_fetch else 0
-
-    # Delayed deletion: only drop files that have been missing for
-    # MISSING_CONFIRM_RUNS consecutive runs, never on a single run.
-    previous_keys = set(existing_files.keys())
-    current_keys = set(new_files.keys())
-    vanished_keys = previous_keys - current_keys
-
-    for key in vanished_keys:
-        old_entry = existing_files[key]
-        missing_since = old_entry.get("missing_since")
-        run_count = int(old_entry.get("missing_run_count", 0)) + 1
-        if missing_since is None:
-            missing_since = now_iso()
-        carried = dict(old_entry)
-        carried["missing_since"] = missing_since
-        carried["missing_run_count"] = run_count
-        if run_count >= MISSING_CONFIRM_RUNS:
-            file_path = DOCS_ROOT / key
-            if file_path.exists():
-                file_path.unlink()
-                remove_empty_dirs(file_path.parent, DOCS_ROOT)
-            print(f"[INFO] removed {key} after {run_count} consecutive runs missing")
-            continue
-        new_files[key] = carried
-        print(f"[INFO] {key} missing this run ({run_count}/{MISSING_CONFIRM_RUNS}); keeping file for now")
-
-    manifest = {
-        "generated_at": now_iso(),
-        "tool": "scripts/fetch_wecom_docs.py",
-        "converter_version": CONVERTER_VERSION,
-        "strict_fetch": strict_fetch,
-        "sources": [
-            {
-                "id": s.source_id,
-                "site_root": s.site_root,
-                "seed_path": s.seed_path,
-                "doc_path_prefix": s.doc_path_prefix,
-                "output_subdir": s.output_subdir,
-            }
-            for s in sources
-        ],
-        "stats": {
-            "total_pages": total_pages,
-            "successful_pages": successful_pages,
-            "failed_pages": len(failed_pages),
-        },
-        "failed": [{"url": url, "error": err} for url, err in failed_pages],
-        "files": {k: new_files[k] for k in sorted(new_files.keys())},
-    }
-
-    write_json_atomic(MANIFEST_PATH, manifest)
-
-    # Every source ran its doc_ids loop to completion (no circuit breaker
-    # returned early above), so this sync is fully done -- the checkpoint's
-    # job is finished and stale progress must not linger for a future
-    # --resume to misread. Never true of a --limit run, which only ever
-    # visits a sampled subset -- it must not clear a real checkpoint just
-    # because *it* happened to reach the end of its own (partial) doc_ids.
-    if args.limit is None and PROGRESS_PATH.exists():
-        PROGRESS_PATH.unlink()
-
-    print("\n[SUMMARY]")
-    print(f"total_pages={total_pages}")
-    print(f"successful_pages={successful_pages}")
-    print(f"failed_pages={len(failed_pages)}")
-
-    if failed_pages and strict_fetch:
-        print("[ERROR] STRICT_FETCH=1 and failures detected")
-        return 1
-
-    if not new_files:
-        # Deliberately not `successful_pages == 0`: a --resume run whose
-        # remaining doc_ids were all already checkpointed as done (or where
-        # every newly-attempted doc happens to fail) can legitimately finish
-        # a fully-populated manifest while fetching zero *new* docs this
-        # process. What actually indicates a broken sync is an empty
-        # manifest, not an empty this-invocation delta.
-        print("[ERROR] No documents in the resulting manifest")
-        return 1
-
-    return 0
+    return finalize_sync(
+        sources, args, existing_files, new_files, total_pages, successful_pages,
+        failed_pages, strict_fetch,
+    )
 
 
 if __name__ == "__main__":
