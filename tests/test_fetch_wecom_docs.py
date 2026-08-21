@@ -35,6 +35,35 @@ def load_fixture(name: str) -> str:
     return (FIXTURES / name).read_text(encoding="utf-8")
 
 
+def fake_success_outcome(source, page, markdown: str, html: str = "<div>x</div>") -> "fw.FetchOutcome":
+    """Builds the FetchOutcome a real fetch_one_doc() would return on
+    success, for tests that monkeypatch fetch_one_doc directly instead of
+    exercising the real HTTP/conversion path (those live in the conversion
+    tests above, against real fixture HTML)."""
+    return fw.FetchOutcome(
+        manifest_entry={
+            "source": source.source_id,
+            "doc_id": page.doc_id,
+            "slug": page.doc_id,
+            "label": page.label,
+            "section": "s",
+            "url": page.url,
+            "sha256": fw.sha256_text(markdown),
+            "bytes": len(markdown.encode("utf-8")),
+            "html_sha256": fw.sha256_text(html),
+            "html_bytes": len(html.encode("utf-8")),
+            "converter_version": fw.CONVERTER_VERSION,
+            "first_seen_at": fw.now_iso(),
+            "last_verified_at": fw.now_iso(),
+            "fetched_at": fw.now_iso(),
+            "missing_since": None,
+            "fetch_failures": 0,
+        },
+        markdown_text=markdown,
+        raw_html_text=html,
+    )
+
+
 # --------------------------------------------------------------------------
 # Nav-tree discovery
 # --------------------------------------------------------------------------
@@ -305,6 +334,106 @@ def test_load_existing_manifest_rejects_mismatched_schema_version(tmp_path):
     assert fw.load_existing_manifest(target) == {"files": {}}
 
 
+def test_successful_fetch_writes_both_markdown_and_raw_article_html(tmp_path, monkeypatch):
+    """The article body's raw HTML (not the full page -- see fetch_one_doc's
+    module docstring on why) is persisted alongside the converted Markdown,
+    co-located under the same id, so it can be diffed against the .md by
+    hand later without needing a live re-fetch."""
+    docs_root = tmp_path / "docs"
+    docs_root.mkdir(parents=True)
+    monkeypatch.setattr(fw, "DOCS_ROOT", docs_root)
+    monkeypatch.setattr(fw, "MANIFEST_PATH", docs_root / "docs_manifest.json")
+    monkeypatch.setattr(fw, "PROGRESS_PATH", docs_root / "sync_progress.json")
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MIN_SECONDS", 0.0)
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MAX_SECONDS", 0.0)
+
+    source = fw.Source(
+        source_id="wecom", site_root="https://example.invalid",
+        seed_path="/document/path/1", sentinel_ids=(),
+        doc_path_prefix="/document/path/", output_subdir="wecom",
+    )
+    monkeypatch.setattr(fw, "load_sources", lambda path: [source])
+    monkeypatch.setattr(fw, "check_robots_allowed", lambda *a, **k: True)
+
+    pages = {
+        "1": fw.DocPage(
+            doc_id="1", label="doc1", sections=("s",),
+            url="https://example.invalid/document/path/1", rel_path="1.md",
+        ),
+    }
+    monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
+
+    raw_html = '<div class="ep-doc-area-cherry"><p>real article content</p></div>'
+
+    def fake_fetch_one_doc(source, page, existing):
+        return fake_success_outcome(source, page, "# doc 1\n", html=raw_html)
+
+    monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
+    monkeypatch.setattr(sys, "argv", ["fetch_wecom_docs.py"])
+    rc = fw.main()
+
+    assert rc == 0
+    assert (docs_root / "wecom" / "1.md").read_text(encoding="utf-8") == "# doc 1\n"
+    assert (docs_root / "wecom" / "1.html").read_text(encoding="utf-8") == raw_html
+
+    manifest = json.loads(fw.MANIFEST_PATH.read_text(encoding="utf-8"))
+    entry = manifest["files"]["wecom/1.md"]
+    assert entry["html_sha256"] == fw.sha256_text(raw_html)
+    assert entry["html_bytes"] == len(raw_html.encode("utf-8"))
+
+
+def test_delayed_deletion_removes_the_html_companion_too(tmp_path, monkeypatch):
+    """When a doc is finally deleted after MISSING_CONFIRM_RUNS consecutive
+    runs of not being discovered, its .html companion must go with it --
+    not linger as an orphaned file with no corresponding .md/manifest
+    entry."""
+    docs_root = tmp_path / "docs"
+    (docs_root / "wecom").mkdir(parents=True)
+    monkeypatch.setattr(fw, "DOCS_ROOT", docs_root)
+    monkeypatch.setattr(fw, "MANIFEST_PATH", docs_root / "docs_manifest.json")
+    monkeypatch.setattr(fw, "PROGRESS_PATH", docs_root / "sync_progress.json")
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MIN_SECONDS", 0.0)
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MAX_SECONDS", 0.0)
+
+    source = fw.Source(
+        source_id="wecom", site_root="https://example.invalid",
+        seed_path="/document/path/1", sentinel_ids=(),
+        doc_path_prefix="/document/path/", output_subdir="wecom",
+    )
+    monkeypatch.setattr(fw, "load_sources", lambda path: [source])
+    monkeypatch.setattr(fw, "check_robots_allowed", lambda *a, **k: True)
+    monkeypatch.setattr(fw, "discover_doc_pages", lambda src: {})  # doc 1 has vanished
+    monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
+    monkeypatch.setattr(fw, "fetch_one_doc", lambda *a, **k: (_ for _ in ()).throw(
+        AssertionError("nothing to fetch -- discovery is empty")
+    ))
+
+    (docs_root / "wecom" / "1.md").write_text("# doc 1\n", encoding="utf-8")
+    (docs_root / "wecom" / "1.html").write_text("<div>x</div>", encoding="utf-8")
+    fw.write_json_atomic(
+        fw.MANIFEST_PATH,
+        {
+            "files": {
+                "wecom/1.md": {
+                    "doc_id": "1", "source": "wecom", "sha256": "abc",
+                    # Already missing MISSING_CONFIRM_RUNS - 1 times; this
+                    # run's absence should push it over the edge.
+                    "missing_since": fw.now_iso(),
+                    "missing_run_count": fw.MISSING_CONFIRM_RUNS - 1,
+                }
+            }
+        },
+    )
+
+    monkeypatch.setattr(sys, "argv", ["fetch_wecom_docs.py"])
+    rc = fw.main()
+
+    assert rc == 1  # "No documents in the resulting manifest" -- the only doc was deleted
+    assert not (docs_root / "wecom" / "1.md").exists()
+    assert not (docs_root / "wecom" / "1.html").exists()
+
+
 def test_resume_skips_already_done_docs_and_completes(tmp_path, monkeypatch):
     """End-to-end main() run simulating a checkpoint left by an earlier,
     interrupted attempt: docs 1 and 2 are already marked done, so a
@@ -351,26 +480,7 @@ def test_resume_skips_already_done_docs_and_completes(tmp_path, monkeypatch):
 
     def fake_fetch_one_doc(source, page, existing):
         fetched_ids.append(page.doc_id)
-        markdown = f"# doc {page.doc_id}\n"
-        return fw.FetchOutcome(
-            manifest_entry={
-                "source": source.source_id,
-                "doc_id": page.doc_id,
-                "slug": page.doc_id,
-                "label": page.label,
-                "section": "s",
-                "url": page.url,
-                "sha256": fw.sha256_text(markdown),
-                "bytes": len(markdown.encode("utf-8")),
-                "converter_version": fw.CONVERTER_VERSION,
-                "first_seen_at": fw.now_iso(),
-                "last_verified_at": fw.now_iso(),
-                "fetched_at": fw.now_iso(),
-                "missing_since": None,
-                "fetch_failures": 0,
-            },
-            markdown_text=markdown,
-        )
+        return fake_success_outcome(source, page, f"# doc {page.doc_id}\n")
 
     monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
 
@@ -450,18 +560,7 @@ def test_resume_refetches_checkpointed_doc_whose_file_is_missing_on_disk(tmp_pat
 
     def fake_fetch_one_doc(source, page, existing):
         fetched_ids.append(page.doc_id)
-        markdown = "# doc 1\n"
-        return fw.FetchOutcome(
-            manifest_entry={
-                "source": source.source_id, "doc_id": page.doc_id, "slug": page.doc_id,
-                "label": page.label, "section": "s", "url": page.url,
-                "sha256": fw.sha256_text(markdown), "bytes": len(markdown.encode("utf-8")),
-                "converter_version": fw.CONVERTER_VERSION, "first_seen_at": fw.now_iso(),
-                "last_verified_at": fw.now_iso(), "fetched_at": fw.now_iso(),
-                "missing_since": None, "fetch_failures": 0,
-            },
-            markdown_text=markdown,
-        )
+        return fake_success_outcome(source, page, "# doc 1\n")
 
     monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
 
@@ -525,18 +624,7 @@ def _run_main_with_one_failure_in_ten(tmp_path, monkeypatch, strict_fetch):
     def fake_fetch_one_doc(source, page, existing):
         if page.doc_id == "5":
             return fw.FetchOutcome(failed=True, error="simulated CAPTCHA-shaped failure")
-        markdown = f"# doc {page.doc_id}\n"
-        return fw.FetchOutcome(
-            manifest_entry={
-                "source": source.source_id, "doc_id": page.doc_id, "slug": page.doc_id,
-                "label": page.label, "section": "s",
-                "url": page.url, "sha256": fw.sha256_text(markdown),
-                "bytes": len(markdown.encode("utf-8")), "converter_version": fw.CONVERTER_VERSION,
-                "first_seen_at": fw.now_iso(), "last_verified_at": fw.now_iso(),
-                "fetched_at": fw.now_iso(), "missing_since": None, "fetch_failures": 0,
-            },
-            markdown_text=markdown,
-        )
+        return fake_success_outcome(source, page, f"# doc {page.doc_id}\n")
 
     monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
     monkeypatch.setattr(sys, "argv", ["fetch_wecom_docs.py"])
@@ -602,18 +690,7 @@ def test_breaker_forgives_an_early_failure_once_it_ages_out_of_the_window(tmp_pa
     def fake_fetch_one_doc(source, page, existing):
         if page.doc_id == doc_id(1):  # only the very first attempt fails
             return fw.FetchOutcome(failed=True, error="one-off transient error")
-        markdown = f"# doc {page.doc_id}\n"
-        return fw.FetchOutcome(
-            manifest_entry={
-                "source": source.source_id, "doc_id": page.doc_id, "slug": page.doc_id,
-                "label": page.label, "section": "s", "url": page.url,
-                "sha256": fw.sha256_text(markdown), "bytes": len(markdown.encode("utf-8")),
-                "converter_version": fw.CONVERTER_VERSION, "first_seen_at": fw.now_iso(),
-                "last_verified_at": fw.now_iso(), "fetched_at": fw.now_iso(),
-                "missing_since": None, "fetch_failures": 0,
-            },
-            markdown_text=markdown,
-        )
+        return fake_success_outcome(source, page, f"# doc {page.doc_id}\n")
 
     monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
     monkeypatch.setattr(sys, "argv", ["fetch_wecom_docs.py"])
@@ -676,18 +753,7 @@ def test_breaker_reacts_quickly_to_a_cascade_after_a_long_clean_streak(tmp_path,
     def fake_fetch_one_doc(source, page, existing):
         if int(page.doc_id) > n_success:  # everything after the clean streak fails
             return fw.FetchOutcome(failed=True, error="simulated CAPTCHA-shaped failure")
-        markdown = f"# doc {page.doc_id}\n"
-        return fw.FetchOutcome(
-            manifest_entry={
-                "source": source.source_id, "doc_id": page.doc_id, "slug": page.doc_id,
-                "label": page.label, "section": "s", "url": page.url,
-                "sha256": fw.sha256_text(markdown), "bytes": len(markdown.encode("utf-8")),
-                "converter_version": fw.CONVERTER_VERSION, "first_seen_at": fw.now_iso(),
-                "last_verified_at": fw.now_iso(), "fetched_at": fw.now_iso(),
-                "missing_since": None, "fetch_failures": 0,
-            },
-            markdown_text=markdown,
-        )
+        return fake_success_outcome(source, page, f"# doc {page.doc_id}\n")
 
     monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
     monkeypatch.setattr(sys, "argv", ["fetch_wecom_docs.py"])
@@ -809,18 +875,7 @@ def test_limit_run_does_not_touch_an_unrelated_real_checkpoint(tmp_path, monkeyp
     monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
 
     def fake_fetch_one_doc(source, page, existing):
-        markdown = f"# doc {page.doc_id}\n"
-        return fw.FetchOutcome(
-            manifest_entry={
-                "source": source.source_id, "doc_id": page.doc_id, "slug": page.doc_id,
-                "label": page.label, "section": "s",
-                "url": page.url, "sha256": fw.sha256_text(markdown),
-                "bytes": len(markdown.encode("utf-8")), "converter_version": fw.CONVERTER_VERSION,
-                "first_seen_at": fw.now_iso(), "last_verified_at": fw.now_iso(),
-                "fetched_at": fw.now_iso(), "missing_since": None, "fetch_failures": 0,
-            },
-            markdown_text=markdown,
-        )
+        return fake_success_outcome(source, page, f"# doc {page.doc_id}\n")
 
     monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
 

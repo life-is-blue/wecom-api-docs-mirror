@@ -133,6 +133,7 @@ class DocPage:
 class FetchOutcome:
     manifest_entry: Optional[Dict] = None
     markdown_text: str = ""
+    raw_html_text: str = ""
     failed: bool = False
     error: str = ""
 
@@ -572,12 +573,22 @@ def fetch_one_doc(source: Source, page: DocPage, existing: Dict) -> FetchOutcome
     if article is None:
         return FetchOutcome(failed=True, error="content container not found / too short")
 
+    # Snapshot before conversion: convert_article_to_markdown() mutates
+    # `article` in place (strips the TOC, rewrites links, drops admonition
+    # icons, replaces complex tables with placeholders, ...), so this is the
+    # last point at which `article` still reflects what the site actually
+    # sent. Deliberately just the article body, not the full page -- every
+    # page also embeds the entire site nav tree, which bloats a full-page
+    # save to >1.5MB per doc with no per-doc information in the extra bytes.
+    raw_article_html = str(article)
+
     try:
         markdown = convert_article_to_markdown(article, source)
     except Exception as exc:  # noqa: BLE001
         return FetchOutcome(failed=True, error=f"conversion error: {exc}")
 
     digest = sha256_text(markdown)
+    html_digest = sha256_text(raw_article_html)
     entry = {
         "source": source.source_id,
         "doc_id": page.doc_id,
@@ -587,6 +598,8 @@ def fetch_one_doc(source: Source, page: DocPage, existing: Dict) -> FetchOutcome
         "url": page.url,
         "sha256": digest,
         "bytes": len(markdown.encode("utf-8")),
+        "html_sha256": html_digest,
+        "html_bytes": len(raw_article_html.encode("utf-8")),
         "converter_version": CONVERTER_VERSION,
         "first_seen_at": existing.get("first_seen_at") or now_iso(),
         "last_verified_at": now_iso(),
@@ -594,7 +607,7 @@ def fetch_one_doc(source: Source, page: DocPage, existing: Dict) -> FetchOutcome
         "missing_since": None,
         "fetch_failures": 0,
     }
-    return FetchOutcome(manifest_entry=entry, markdown_text=markdown)
+    return FetchOutcome(manifest_entry=entry, markdown_text=markdown, raw_html_text=raw_article_html)
 
 
 def _positive_int(value: str) -> int:
@@ -775,6 +788,9 @@ def sync_source(
             dest.parent.mkdir(parents=True, exist_ok=True)
             if existing_entry.get("sha256") != entry["sha256"] or not dest.exists():
                 write_text_atomic(dest, outcome.markdown_text)
+            html_dest = dest.with_suffix(".html")
+            if existing_entry.get("html_sha256") != entry["html_sha256"] or not html_dest.exists():
+                write_text_atomic(html_dest, outcome.raw_html_text)
             new_files[manifest_key] = entry
             source_files[manifest_key] = entry
             result.successful_pages += 1
@@ -845,6 +861,9 @@ def finalize_sync(
             if file_path.exists():
                 file_path.unlink()
                 remove_empty_dirs(file_path.parent, DOCS_ROOT)
+            html_path = file_path.with_suffix(".html")
+            if html_path.exists():
+                html_path.unlink()
             print(f"[INFO] removed {key} after {run_count} consecutive runs missing")
             continue
         new_files[key] = carried

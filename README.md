@@ -19,9 +19,17 @@ for agent-oriented document ingestion and retrieval.
   HTML produced by Tencent's open-source `cherry-markdown` editor, and this
   mirror converts that rendered HTML back to Markdown. Formatting, complex
   tables, and code blocks may differ slightly from the original page.
+- Each `<id>.md` has a same-named `<id>.html` alongside it: the *raw*
+  article-body HTML (just `div.ep-doc-area-cherry`'s contents, not the full
+  page -- every page also embeds the entire site nav tree, which would
+  otherwise balloon a per-doc save to >1.5MB with no per-doc information in
+  the extra bytes) captured before any conversion, so the Markdown can be
+  diffed against exactly what the site sent without a live re-fetch.
+  Not backfilled for docs mirrored before this existed (2026-08-21) --
+  those simply lack an `.html` file until they're naturally re-fetched.
 - Each mirrored file keeps source metadata (`doc_id`, `section`, `url`,
-  `sha256`, `converter_version`, `first_seen_at`, `last_verified_at`) in
-  `docs/docs_manifest.json`.
+  `sha256`, `html_sha256`, `converter_version`, `first_seen_at`,
+  `last_verified_at`) in `docs/docs_manifest.json`.
 
 ## How discovery works
 
@@ -42,7 +50,8 @@ plays for Markdown-native doc sites.
    `div.ep-doc-area-cherry` article body, and converts it to Markdown
    (code blocks, tables, images, and cross-doc links get specific handling
    — see the module docstring in `scripts/fetch_wecom_docs.py`),
-4. writes `docs/<output_subdir>/<id>.md` and `docs/docs_manifest.json`.
+4. writes `docs/<output_subdir>/<id>.md`, its raw-HTML companion
+   `docs/<output_subdir>/<id>.html`, and `docs/docs_manifest.json`.
 
 A doc id that disappears from discovery is **not** deleted immediately — it
 has to be missing for several consecutive runs first (`missing_since` /
