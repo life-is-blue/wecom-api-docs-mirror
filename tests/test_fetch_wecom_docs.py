@@ -811,6 +811,62 @@ def test_breaker_reacts_quickly_to_a_cascade_after_a_long_clean_streak(tmp_path,
     assert len(checkpoint["wecom"]["done_doc_ids"]) == n_success + fails_needed
 
 
+def test_max_successful_fetches_per_run_stops_before_the_failure_rate_breaker(tmp_path, monkeypatch):
+    """The per-run cap is a proactive stop, unrelated to the failure-rate
+    breaker: with zero failures (a clean run that would otherwise sail
+    through to completion), it must still stop exactly at the cap, leave a
+    resumable checkpoint, and exit 0 even under STRICT_FETCH."""
+    docs_root = tmp_path / "docs"
+    docs_root.mkdir(parents=True)
+    monkeypatch.setattr(fw, "DOCS_ROOT", docs_root)
+    monkeypatch.setattr(fw, "MANIFEST_PATH", docs_root / "docs_manifest.json")
+    monkeypatch.setattr(fw, "PROGRESS_PATH", docs_root / "sync_progress.json")
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MIN_SECONDS", 0.0)
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MAX_SECONDS", 0.0)
+    monkeypatch.setattr(fw, "MAX_SUCCESSFUL_FETCHES_PER_RUN", 3)
+    monkeypatch.setenv("STRICT_FETCH", "1")  # even strict mode must not fail this
+
+    source = fw.Source(
+        source_id="wecom", site_root="https://example.invalid",
+        seed_path="/document/path/1", sentinel_ids=(),
+        doc_path_prefix="/document/path/", output_subdir="wecom",
+    )
+    monkeypatch.setattr(fw, "load_sources", lambda path: [source])
+    monkeypatch.setattr(fw, "check_robots_allowed", lambda *a, **k: True)
+
+    total = 10  # comfortably more than the cap
+    pages = {
+        str(i): fw.DocPage(
+            doc_id=str(i), label=f"doc{i}", sections=("s",),
+            url=f"https://example.invalid/document/path/{i}", rel_path=f"{i}.md",
+        )
+        for i in range(1, total + 1)
+    }
+    monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
+
+    def fake_fetch_one_doc(source, page, existing):
+        return fake_success_outcome(source, page, f"# doc {page.doc_id}\n")
+
+    monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
+    monkeypatch.setattr(sys, "argv", ["fetch_wecom_docs.py"])
+    rc = fw.main()
+
+    assert rc == 0  # proactive pacing stop, not a failure -- STRICT_FETCH doesn't apply
+    assert not fw.MANIFEST_PATH.exists()  # never reached finalize, same as a breaker pause
+    checkpoint = json.loads(fw.PROGRESS_PATH.read_text(encoding="utf-8"))
+    assert len(checkpoint["wecom"]["done_doc_ids"]) == 3  # stopped exactly at the cap
+
+    # A --resume picks up its own fresh budget rather than being capped forever.
+    monkeypatch.setattr(fw, "MAX_SUCCESSFUL_FETCHES_PER_RUN", 100)
+    monkeypatch.setattr(sys, "argv", ["fetch_wecom_docs.py", "--resume"])
+    rc = fw.main()
+    assert rc == 0
+    assert fw.MANIFEST_PATH.exists()
+    manifest = json.loads(fw.MANIFEST_PATH.read_text(encoding="utf-8"))
+    assert len(manifest["files"]) == total
+
+
 def test_limit_rejects_non_positive_values(monkeypatch):
     for bad_value in ("0", "-1"):
         monkeypatch.setattr(sys, "argv", ["fetch_wecom_docs.py", "--limit", bad_value])

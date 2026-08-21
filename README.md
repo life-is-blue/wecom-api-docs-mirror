@@ -85,6 +85,20 @@ reality rather than assuming a sync completes in one shot:
   in place for the next `--resume` run to pick up. `STRICT_FETCH=1` still
   treats this as a failure, since that mode means "tell me about any
   imperfection."
+- **A per-run cap on successful fetches, independent of the breaker above**:
+  the failure-rate breaker is reactive — it only stops a run after enough
+  recent attempts have already failed. A real run (2026-08-21, GitHub
+  Actions IP) got to 199 successful fetches / 201 total attempts before it
+  tripped, uncomfortably close to WeCom's reported harder-block threshold
+  around 210 requests; a run getting slightly luckier on when failures
+  start could blow past that before the breaker has enough failed attempts
+  in its window to react. `MAX_SUCCESSFUL_FETCHES_PER_RUN` (150) is a
+  proactive, unconditional stop on top of it — once *this process* has
+  fetched that many docs successfully, it checkpoints and exits 0
+  regardless of failure rate, even under `STRICT_FETCH=1` (this is
+  deliberate pacing, not a signal of a site-side problem). Resets every
+  `--resume` invocation, so it paces progress across runs rather than
+  capping the backlog itself.
 - **`docs/sync_progress.json` is committed, not gitignored**: CI runners are
   ephemeral, so a checkpoint that only lives on local disk wouldn't survive
   between one day's cron run and the next. Its presence in the repo means a

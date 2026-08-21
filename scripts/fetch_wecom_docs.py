@@ -103,6 +103,20 @@ DISCOVERY_DROP_THRESHOLD = 0.10
 # to a real CAPTCHA cascade within a couple of failures either way).
 FAILURE_RATE_THRESHOLD = 0.05
 FAILURE_WINDOW_SIZE = 30
+# The failure-rate breaker above is reactive: it only stops a run *after*
+# enough recent attempts have already failed. A real run at the current
+# delay (2026-08-21, GitHub Actions IP) got to 199 successful fetches / 201
+# total attempts before the breaker tripped -- close enough to WeCom's
+# reported harder-block threshold (~210 requests) that a run getting
+# slightly luckier on when failures start could blow past it before the
+# reactive breaker has enough failed attempts in its window to react. This
+# is a proactive, unconditional cap on top of it: stop after this many
+# *successful* fetches in this process's own run, regardless of failure
+# rate, leaving real margin under both the observed natural stopping point
+# and the reported harder threshold. Resets every --resume invocation (see
+# result.successful_pages), so it paces progress across runs rather than
+# capping the backlog itself.
+MAX_SUCCESSFUL_FETCHES_PER_RUN = 150
 # A doc must be missing from discovery this many consecutive runs before
 # its file is actually deleted.
 MISSING_CONFIRM_RUNS = 3
@@ -840,6 +854,21 @@ def sync_source(
                 # that mode means "tell me about any imperfection".
                 result.stop_exit_code = 1 if strict_fetch else 0
                 return result
+
+        if result.successful_pages >= MAX_SUCCESSFUL_FETCHES_PER_RUN:
+            print(
+                f"[PAUSED] hit the per-run cap of {MAX_SUCCESSFUL_FETCHES_PER_RUN} successful "
+                f"fetches (failure rate is still fine -- this is a proactive stop, not a reaction "
+                f"to a block). Progress is checkpointed to {PROGRESS_PATH}; a future `--resume` "
+                f"run gets its own fresh {MAX_SUCCESSFUL_FETCHES_PER_RUN}-fetch budget."
+            )
+            # Always exit 0, unlike the failure-rate breaker above: this is
+            # expected, deliberate pacing that fires on every run with more
+            # than MAX_SUCCESSFUL_FETCHES_PER_RUN left in the backlog, not
+            # a signal of a site-side problem -- STRICT_FETCH's "tell me
+            # about any imperfection" contract doesn't apply to it.
+            result.stop_exit_code = 0
+            return result
 
     return result
 
