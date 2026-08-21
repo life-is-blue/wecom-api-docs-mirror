@@ -76,8 +76,9 @@ reality rather than assuming a sync completes in one shot:
 - **`--resume` continues instead of restarting**: skips doc ids already
   checkpointed, so a second attempt doesn't re-spend request budget on docs
   it already has. It's a no-op (identical to a fresh run) when there's no
-  matching checkpoint, so it's safe to pass unconditionally — both CI
-  workflows always pass it.
+  checkpoint, so it's safe to pass unconditionally — both CI workflows always
+  pass it. Discovery changes preserve prior progress: new doc ids are fetched
+  naturally, while ids no longer discovered are not visited in that run.
 - **A failure-rate spike mid-sync pauses, it doesn't fail the job**: if the
   recent per-doc failure rate crosses the threshold (the empirical shape of
   a CAPTCHA cascade — a run of successes followed by a run of failures), the

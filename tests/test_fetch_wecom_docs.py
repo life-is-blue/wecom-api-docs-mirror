@@ -527,7 +527,6 @@ def test_resume_skips_already_done_docs_and_completes(tmp_path, monkeypatch):
 
     monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
 
-    doc_ids = sorted(pages.keys())
     # Checkpointed as done must also actually exist on disk -- main() now
     # verifies that on resume rather than trusting the checkpoint blindly
     # (see the stale_keys handling there), so a realistic fixture needs the
@@ -540,7 +539,6 @@ def test_resume_skips_already_done_docs_and_completes(tmp_path, monkeypatch):
         {
             "wecom": {
                 "run_started_at": fw.now_iso(),
-                "discovered_doc_ids": doc_ids,
                 "done_doc_ids": ["1", "2"],
                 "files": {
                     "wecom/1.md": {"doc_id": "1", "sha256": "seed1", "section": "s"},
@@ -567,6 +565,70 @@ def test_resume_skips_already_done_docs_and_completes(tmp_path, monkeypatch):
     # must be cleared rather than left around for a future --resume to
     # misread as still in progress.
     assert not fw.PROGRESS_PATH.exists()
+
+
+def test_resume_preserves_progress_when_discovery_changes(tmp_path, monkeypatch):
+    """A changed nav tree must retain completed work and fetch new docs."""
+    docs_root = tmp_path / "docs"
+    docs_root.mkdir(parents=True)
+    monkeypatch.setattr(fw, "DOCS_ROOT", docs_root)
+    monkeypatch.setattr(fw, "MANIFEST_PATH", docs_root / "docs_manifest.json")
+    monkeypatch.setattr(fw, "PROGRESS_PATH", docs_root / "sync_progress.json")
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MIN_SECONDS", 0.0)
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MAX_SECONDS", 0.0)
+
+    source = fw.Source(
+        source_id="wecom", site_root="https://example.invalid",
+        seed_path="/document/path/1", sentinel_ids=(),
+        doc_path_prefix="/document/path/", output_subdir="wecom",
+    )
+    monkeypatch.setattr(fw, "load_sources", lambda path: [source])
+    monkeypatch.setattr(fw, "check_robots_allowed", lambda *a, **k: True)
+
+    pages = {
+        doc_id: fw.DocPage(
+            doc_id=doc_id, label=f"doc{doc_id}", sections=("s",),
+            url=f"https://example.invalid/document/path/{doc_id}", rel_path=f"{doc_id}.md",
+        )
+        for doc_id in ("1", "3")
+    }
+    monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
+
+    fetched_ids = []
+
+    def fake_fetch_one_doc(source, page, existing):
+        fetched_ids.append(page.doc_id)
+        return fake_success_outcome(source, page, f"# doc {page.doc_id}\n")
+
+    monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
+
+    (docs_root / "wecom").mkdir(parents=True)
+    (docs_root / "wecom" / "1.md").write_text("# doc 1\n", encoding="utf-8")
+    (docs_root / "wecom" / "2.md").write_text("# doc 2\n", encoding="utf-8")
+    fw.write_json_atomic(
+        fw.PROGRESS_PATH,
+        {
+            "wecom": {
+                "run_started_at": fw.now_iso(),
+                "done_doc_ids": ["1", "2"],
+                "files": {
+                    "wecom/1.md": {"doc_id": "1", "sha256": "seed1", "section": "s"},
+                    "wecom/2.md": {"doc_id": "2", "sha256": "seed2", "section": "s"},
+                },
+                "failed": [],
+            }
+        },
+    )
+
+    monkeypatch.setattr(sys, "argv", ["fetch_wecom_docs.py", "--resume"])
+    rc = fw.main()
+
+    assert rc == 0
+    assert fetched_ids == ["3"]
+    manifest = json.loads(fw.MANIFEST_PATH.read_text(encoding="utf-8"))
+    assert manifest["files"]["wecom/1.md"]["sha256"] == "seed1"
+    assert "wecom/3.md" in manifest["files"]
 
 
 def test_resume_refetches_checkpointed_doc_whose_file_is_missing_on_disk(tmp_path, monkeypatch):
@@ -614,7 +676,6 @@ def test_resume_refetches_checkpointed_doc_whose_file_is_missing_on_disk(tmp_pat
         {
             "wecom": {
                 "run_started_at": fw.now_iso(),
-                "discovered_doc_ids": ["1"],
                 "done_doc_ids": ["1"],
                 "files": {"wecom/1.md": {"doc_id": "1", "sha256": "seed1", "section": "s"}},
                 "failed": [],
@@ -922,7 +983,6 @@ def test_resume_where_every_doc_was_already_done_still_succeeds(tmp_path, monkey
         {
             "wecom": {
                 "run_started_at": fw.now_iso(),
-                "discovered_doc_ids": doc_ids,
                 "done_doc_ids": doc_ids,
                 "files": {
                     f"wecom/{i}.md": {"doc_id": str(i), "sha256": f"seed{i}", "section": "s"}
@@ -981,7 +1041,6 @@ def test_limit_run_does_not_touch_an_unrelated_real_checkpoint(tmp_path, monkeyp
     real_checkpoint = {
         "wecom": {
             "run_started_at": fw.now_iso(),
-            "discovered_doc_ids": ["1", "2", "3", "4", "5", "6", "7"],  # an unrelated, larger sync
             "done_doc_ids": ["1"],
             "files": {"wecom/1.md": {"doc_id": "1", "sha256": "real-progress", "section": "s"}},
             "failed": [],

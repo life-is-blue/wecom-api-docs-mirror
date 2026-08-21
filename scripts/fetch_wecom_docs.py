@@ -712,59 +712,43 @@ def sync_source(
         print(f"[INFO] --limit {args.limit}: sampling {len(doc_ids)} of {len(pages)} discovered docs")
 
     checkpoint = progress.get(source.source_id) if args.limit is None else None
-    resuming = bool(checkpoint and checkpoint.get("discovered_doc_ids") == doc_ids)
+    checkpoint = checkpoint or {}
     # `source_failed_pages` / `source_files` are scoped to this source
     # (and, unlike `done_doc_ids`, persist across --resume invocations),
     # unlike the run-wide `failed_pages` / `new_files`, so a checkpoint
     # save never has to re-filter the whole cumulative `new_files` dict --
     # it already has exactly this source's slice.
-    if resuming:
-        done_doc_ids = set(checkpoint.get("done_doc_ids", []))
-        source_files: Dict[str, Dict] = dict(checkpoint.get("files", {}))
-        # The checkpoint claims each of these keys has a written .md file
-        # on disk; don't just trust that -- a hand edit, a partial
-        # checkout, or a manually deleted file would otherwise let a
-        # missing doc silently end up "done" in the final manifest with
-        # no corresponding content. Re-fetch anything that doesn't
-        # actually exist instead.
-        stale_keys = {key for key in source_files if not (DOCS_ROOT / key).exists()}
-        if stale_keys:
-            stale_ids = {key.rsplit("/", 1)[-1].removesuffix(".md") for key in stale_keys}
-            print(
-                f"[WARN] --resume: {len(stale_keys)} checkpointed doc(s) for "
-                f"source={source.source_id} are missing their .md file on disk "
-                f"(deleted or never written out-of-band?) -- re-fetching instead of "
-                f"trusting the checkpoint: {sorted(stale_ids)}"
-            )
-            for key in stale_keys:
-                del source_files[key]
-            done_doc_ids -= stale_ids
-        new_files.update(source_files)
-        source_failed_pages: List[Tuple[str, str]] = [
-            tuple(pair) for pair in checkpoint.get("failed", [])
-        ]
-        failed_pages.extend(source_failed_pages)
-        run_started_at = checkpoint.get("run_started_at", now_iso())
+    done_doc_ids = set(checkpoint.get("done_doc_ids", []))
+    source_files: Dict[str, Dict] = dict(checkpoint.get("files", {}))
+    # The checkpoint claims each of these keys has a written .md file
+    # on disk; don't just trust that -- a hand edit, a partial
+    # checkout, or a manually deleted file would otherwise let a
+    # missing doc silently end up "done" in the final manifest with
+    # no corresponding content. Re-fetch anything that doesn't
+    # actually exist instead.
+    stale_keys = {key for key in source_files if not (DOCS_ROOT / key).exists()}
+    if stale_keys:
+        stale_ids = {key.rsplit("/", 1)[-1].removesuffix(".md") for key in stale_keys}
         print(
-            f"[INFO] --resume: continuing checkpoint for source={source.source_id} "
-            f"({len(done_doc_ids)}/{len(doc_ids)} already attempted)"
+            f"[WARN] --resume: {len(stale_keys)} checkpointed doc(s) for "
+            f"source={source.source_id} are missing their .md file on disk "
+            f"(deleted or never written out-of-band?) -- re-fetching instead of "
+            f"trusting the checkpoint: {sorted(stale_ids)}"
         )
-    else:
-        if checkpoint:
-            print(
-                f"[WARN] --resume: checkpoint for source={source.source_id} doesn't match "
-                f"current discovery (site changed since the interrupted attempt); "
-                f"starting this source fresh instead of resuming"
-            )
-        done_doc_ids = set()
-        source_files = {}
-        source_failed_pages = []
-        run_started_at = now_iso()
+        for key in stale_keys:
+            del source_files[key]
+        done_doc_ids -= stale_ids
+    new_files.update(source_files)
+    source_failed_pages: List[Tuple[str, str]] = [
+        tuple(pair) for pair in checkpoint.get("failed", [])
+    ]
+    failed_pages.extend(source_failed_pages)
+    run_started_at = checkpoint.get("run_started_at", now_iso())
+    print(f"[INFO] source={source.source_id}: {len(done_doc_ids)}/{len(doc_ids)} already attempted")
 
     def save_checkpoint() -> None:
         progress[source.source_id] = {
             "run_started_at": run_started_at,
-            "discovered_doc_ids": doc_ids,
             "done_doc_ids": sorted(done_doc_ids),
             "files": source_files,
             "failed": [list(pair) for pair in source_failed_pages],
@@ -997,12 +981,11 @@ def main() -> int:
             "Continue an interrupted sync (e.g. one killed mid-run by a "
             "CAPTCHA block or a CI timeout) using docs/sync_progress.json "
             "instead of starting over. Safe to pass unconditionally in "
-            "automation: if there's no matching checkpoint, this is a no-op "
-            "and behaves like a normal fresh run. If the checkpoint's "
-            "discovered doc-id set doesn't match a fresh discovery (site "
-            "changed since the interrupted attempt), the stale checkpoint "
-            "is discarded and the source starts fresh rather than resuming "
-            "against a mismatched id set."
+            "automation: if there's no checkpoint, this is a no-op and "
+            "behaves like a normal fresh run. Discovery changes preserve "
+            "checkpointed progress: newly discovered doc ids are fetched "
+            "normally, while ids no longer discovered are not visited in "
+            "the current run."
         ),
     )
     args = parser.parse_args()
