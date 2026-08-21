@@ -13,8 +13,15 @@ on:
       - "config/**"
       - "tests/**"
       - ".github/workflows/update-docs.yml"
-  schedule:
-    - cron: "0 0 * * *"
+  # Paused 2026-08-21 while running the initial full backfill locally, so
+  # the daily cron doesn't race the local run for request budget against
+  # the same site or fight over pushing to main -- see docs/sync_progress.json
+  # for backfill status. Re-enable (uncomment) once the local backfill
+  # finishes a full pass, and switch this to weekly at the same time (docs
+  # change rarely; daily was only ever needed to grind through the initial
+  # 700+-doc backlog).
+  # schedule:
+  #   - cron: "0 0 * * *"
   workflow_dispatch:
     inputs:
       strict_fetch:
