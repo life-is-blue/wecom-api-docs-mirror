@@ -79,7 +79,7 @@ USER_AGENT = (
     "(+https://github.com/search?q=wecom-api-docs-mirror; doc-mirror bot)"
 )
 
-CONVERTER_VERSION = "2"
+CONVERTER_VERSION = "3"
 
 REQUEST_TIMEOUT_SECONDS = 30
 MAX_RETRIES = 4
@@ -586,6 +586,16 @@ def fetch_one_doc(source: Source, page: DocPage, existing: Dict) -> FetchOutcome
         markdown = convert_article_to_markdown(article, source)
     except Exception as exc:  # noqa: BLE001
         return FetchOutcome(failed=True, error=f"conversion error: {exc}")
+
+    # The nav-tree label, not anything from the article body: opening a
+    # mirrored file with no other context (e.g. just its numeric doc id)
+    # otherwise gives no clue what it's about. Prepended unconditionally,
+    # even on the rare page whose body also opens with a matching heading --
+    # per the project's existing "don't guess, don't delete" stance on
+    # conversion (see the module docstring), a possible duplicate heading is
+    # preferable to speculatively stripping content.
+    if page.label.strip():
+        markdown = f"# {page.label}\n\n{markdown}"
 
     digest = sha256_text(markdown)
     html_digest = sha256_text(raw_article_html)

@@ -273,6 +273,23 @@ def test_conversion_preserves_json_code_block_language():
     assert '"touser" : "UserID1|UserID2|UserID3"' in markdown
 
 
+def test_fetch_one_doc_prepends_the_nav_label_as_a_title_heading(monkeypatch):
+    # Opening a mirrored file with nothing but its numeric doc id gives no
+    # clue what it's about -- fetch_one_doc() must prepend the nav-tree
+    # label as a real "# title" heading, not just leave it in the manifest.
+    monkeypatch.setattr(fw, "fetch_text", lambda url: load_fixture("article_plain.html"))
+    page = fw.DocPage(
+        doc_id="10649", label="开发文档阅读说明", sections=("s",),
+        url="https://developer.work.weixin.qq.com/document/path/10649",
+        rel_path="10649.md",
+    )
+    outcome = fw.fetch_one_doc(SOURCE, page, existing={})
+
+    assert not outcome.failed
+    assert outcome.markdown_text.startswith("# 开发文档阅读说明\n\n")
+    assert outcome.manifest_entry["sha256"] == fw.sha256_text(outcome.markdown_text)
+
+
 # --------------------------------------------------------------------------
 # Atomic writes + checkpoint/resume
 # --------------------------------------------------------------------------
