@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import html as html_escaping
 import json
 import os
 import random
@@ -79,7 +80,7 @@ USER_AGENT = (
     "(+https://github.com/search?q=wecom-api-docs-mirror; doc-mirror bot)"
 )
 
-CONVERTER_VERSION = "3"
+CONVERTER_VERSION = "4"
 
 REQUEST_TIMEOUT_SECONDS = 30
 MAX_RETRIES = 4
@@ -478,6 +479,32 @@ def _fix_images(article: Tag, site_root: str) -> None:
             del img["data-src"]
 
 
+def _convert_admonitions(article: Tag) -> None:
+    # cherry-markdown renders a `::: warning ... :::`-style container (also
+    # seen as colorful_tips_danger/_details, presumably matching source
+    # container types like tip/danger/details) as a
+    # <div class="colorful_tips ..."><div class="colorful_tips_title">
+    # <img ...>注意</div><div class="colorful_tips_cnt">...</div></div>
+    # structure -- real, structured markup, not flattened away. Rendered as
+    # a blockquote with the title bolded on its own line, so the semantic
+    # "this is a callout" distinction survives instead of reading as an
+    # ordinary paragraph. Must run after _fix_images() (title's icon needs
+    # to already be gone) and after _rewrite_internal_links() (any links in
+    # the body need to already point at their rewritten targets before
+    # their HTML gets re-serialized below).
+    for tip in article.select("div.colorful_tips"):
+        title_el = tip.select_one(".colorful_tips_title")
+        cnt_el = tip.select_one(".colorful_tips_cnt")
+        title_text = title_el.get_text(strip=True) if title_el else ""
+        inner_html = "".join(str(child) for child in cnt_el.contents) if cnt_el else ""
+        replacement_html = (
+            f"<blockquote><p><strong>{html_escaping.escape(title_text)}</strong></p>"
+            f"{inner_html}</blockquote>"
+        )
+        replacement = BeautifulSoup(replacement_html, "html.parser").blockquote
+        tip.replace_with(replacement)
+
+
 def _is_complex_table(table: Tag) -> bool:
     for cell in table.find_all(["td", "th"]):
         for attr in ("rowspan", "colspan"):
@@ -511,6 +538,7 @@ def convert_article_to_markdown(article: Tag, source: Source) -> str:
     _clean_code_blocks(article)
     _rewrite_internal_links(article, source)
     _fix_images(article, source.site_root)
+    _convert_admonitions(article)
 
     raw_blocks: List[str] = []
     for table in article.find_all("table"):

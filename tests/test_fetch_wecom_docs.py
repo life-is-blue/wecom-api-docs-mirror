@@ -269,6 +269,44 @@ def test_conversion_drops_admonition_icon_inside_complex_table_without_losing_ce
     assert "after" in markdown
 
 
+def test_conversion_renders_admonition_blocks_as_blockquotes():
+    # cherry-markdown's ::: warning/danger/tip ::: containers render as
+    # div.colorful_tips (title + cnt sub-divs), real structured markup, not
+    # flattened plain text -- confirmed against a live page 2026-08-22.
+    # Must become a real blockquote, not read as an ordinary paragraph.
+    html = (
+        '<div class="ep-doc-area-cherry">'
+        '<div class="colorful_tips colorful_tips_warning">'
+        '<div class="colorful_tips_title">'
+        '<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0i" />注意</div>'
+        '<div class="colorful_tips_cnt">字段属性与字段类型是匹配的，一种字段类型对应一种字段属性<br></div>'
+        '</div>'
+        '</div>'
+    )
+    article = fw.extract_article_soup(html)
+    markdown = fw.convert_article_to_markdown(article, SOURCE)
+
+    assert "> **注意**" in markdown
+    assert "> 字段属性与字段类型是匹配的" in markdown
+    assert "data:image" not in markdown  # the title's icon is still stripped
+
+
+def test_conversion_preserves_links_inside_admonition_blocks():
+    html = (
+        '<div class="ep-doc-area-cherry">'
+        '<div class="colorful_tips colorful_tips_warning">'
+        '<div class="colorful_tips_title">提示</div>'
+        '<div class="colorful_tips_cnt">加密方式参考<a href="#62162">加解密方案</a>，请妥善保管。</div>'
+        '</div>'
+        '</div>'
+    )
+    article = fw.extract_article_soup(html)
+    markdown = fw.convert_article_to_markdown(article, SOURCE)
+
+    assert "> **提示**" in markdown
+    assert "(./62162.md)" in markdown  # rewritten by _rewrite_internal_links, not left as #62162
+
+
 def test_conversion_keeps_simple_table_as_markdown_table():
     html = load_fixture("article_code_table.html")
     article = fw.extract_article_soup(html)
