@@ -1,0 +1,21 @@
+<div class="ep-doc-area-cherry cherry-markdown cherry-wecom" id="js-ep-doc-cnt-md"><div data-code-block-theme="coy" data-inline-code-theme="red"><p data-lines="3" data-sign="c96f1c9385d93d46839d164362a3aedf" data-type="p"><strong>请求方式：</strong>POST（<strong>HTTPS</strong>）<br/><strong>请求地址：</strong>https://qyapi.weixin.qq.com/cgi-bin/auth/get_tfa_info?access_token=ACCESS_TOKEN<br/><strong>参数说明：</strong></p><div data-lines="5" data-sign="ec98887e03f61e3fb110f1372b94c1f5" data-type="codeBlock">
+<pre class="language-javascript"><code class="language-javascript wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">	<span class="token string">"code"</span><span class="token operator">:</span> <span class="token string">"CODE"</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><div class="cherry-table-container" data-lines="4" data-sign="f58e73c6eafb867648237b9737326c3f">
+<table class="cherry-table"><thead><tr><th>参数</th><th>必须</th><th>说明</th></tr></thead><tbody><tr><td>access_token</td><td>是</td><td><a href="#15074" rel="nofollow">调用接口凭证</a></td></tr><tr><td>code</td><td>是</td><td>用户进入二次验证页面时，企业微信颁发的code<br/><code>每次成员授权带上的code将不一样，code只能使用一次，5分钟未被使用自动过期</code></td></tr></tbody></table></div><p data-lines="1" data-sign="be69a8d80807fc12104a6f71258f88a9" data-type="p"><strong>权限说明：</strong></p><ul class="cherry-list__default" data-lines="2" data-sign="3d572513a079268c9fb212f423b1c54clist2"><li>仅『通讯录同步』或者自建应用可调用。</li><li>如用自建应用调用，用户需要在二次验证范围和应用可见范围内，并且验证页面的链接必须填该自建应用的oauth2链接（参考<a href="#15048" rel="nofollow">构造网页授权链接</a>）。</li></ul><p data-lines="3" data-sign="d5144e0333d28ed1c9e3164215301ba7" data-type="p"><strong>并发限制：</strong><br/>20<br/><strong>返回结果：</strong></p><div data-lines="10" data-sign="a4a87ed745a0d0caec34e4e624f85991" data-type="codeBlock">
+<pre class="language-javascript"><code class="language-javascript wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">   <span class="token string">"errcode"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span></span>
+<span class="code-line">   <span class="token string">"errmsg"</span><span class="token operator">:</span> <span class="token string">"ok"</span><span class="token punctuation">,</span></span>
+<span class="code-line">   <span class="token string">"userid"</span><span class="token operator">:</span><span class="token string">"USERID"</span><span class="token punctuation">,</span></span>
+<span class="code-line">   <span class="token string">"tfa_code"</span><span class="token operator">:</span> <span class="token string">"TFA_CODE"</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span>
+<span class="code-line"></span></code></pre>
+</div><div class="cherry-table-container" data-lines="6" data-sign="d400901387bb5ef3444da8fb30d7d2fc">
+<table class="cherry-table"><thead><tr><th>参数</th><th>说明</th></tr></thead><tbody><tr><td>errcode</td><td>返回码</td></tr><tr><td>errmsg</td><td>对返回码的文本描述内容</td></tr><tr><td>userid</td><td>成员UserID。若需要获得用户详情信息，可调用通讯录接口：<a href="#10019" rel="nofollow">读取成员</a>。</td></tr><tr><td>tfa_code</td><td>二次验证授权码，开发者可以调用<a href="#50695" rel="nofollow">通过二次验证</a>接口，解锁企业微信终端<br/><code>tfa_code有效期五分钟，且只能使用一次。</code></td></tr></tbody></table></div><p data-lines="2" data-sign="8b50e9961d524706fefc024f034c742f" data-type="p"><strong>出错返回示例：</strong></p><div data-lines="8" data-sign="8754e64cac6db39aa43e460198debbed" data-type="codeBlock">
+<pre class="language-javascript"><code class="language-javascript wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">   <span class="token string">"errcode"</span><span class="token operator">:</span> <span class="token number">40029</span><span class="token punctuation">,</span></span>
+<span class="code-line">   <span class="token string">"errmsg"</span><span class="token operator">:</span> <span class="token string">"invalid code"</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span>
+<span class="code-line"></span></code></pre>
+</div></div></div>
