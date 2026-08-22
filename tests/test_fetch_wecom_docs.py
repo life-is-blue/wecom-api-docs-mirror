@@ -313,7 +313,12 @@ def test_conversion_keeps_simple_table_as_markdown_table():
     markdown = fw.convert_article_to_markdown(article, SOURCE)
 
     assert "| 参数 | 是否必须 | 说明 |" in markdown
-    assert "access_token" in markdown or "access\\_token" in markdown
+    # Not escaped: CommonMark's intraword-emphasis rule already exempts
+    # word-flanked underscores like this from being misread as emphasis,
+    # and the site's true Markdown source (confirmed via
+    # debug_compare_via_api.py) never escapes these either.
+    assert "access_token" in markdown
+    assert "access\\_token" not in markdown
 
 
 def test_conversion_preserves_complex_table_as_raw_html():

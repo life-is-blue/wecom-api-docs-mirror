@@ -80,7 +80,7 @@ USER_AGENT = (
     "(+https://github.com/search?q=wecom-api-docs-mirror; doc-mirror bot)"
 )
 
-CONVERTER_VERSION = "4"
+CONVERTER_VERSION = "5"
 
 REQUEST_TIMEOUT_SECONDS = 30
 MAX_RETRIES = 4
@@ -551,6 +551,15 @@ def convert_article_to_markdown(article: Tag, source: Source) -> str:
         str(article),
         heading_style="ATX",
         code_language_callback=_code_language,
+        # markdownify's default escapes every underscore, but CommonMark's
+        # own intraword-emphasis rule already treats `_` (unlike `*`) as
+        # not starting emphasis when it's flanked by word characters on
+        # both sides -- exactly the shape of every identifier in this
+        # corpus (out_trade_no, access_token, ...). The true source
+        # (confirmed via debug_compare_via_api.py) never escapes these
+        # either, so this default was only ever adding noise here, not
+        # preventing a real rendering problem.
+        escape_underscores=False,
     )
     for idx, block in enumerate(raw_blocks):
         markdown = markdown.replace(f"@@RAWHTML{idx}@@", f"\n\n{block}\n\n")
