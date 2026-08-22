@@ -181,6 +181,35 @@ ids per run and kept well under the site's empirical anti-bot request
 budget; output is gitignored (`/raw_html/`), it's a local/CI scratch aid,
 not part of the public mirror.
 
+### Comparing against the site's true Markdown source
+
+The site has an internal AJAX endpoint (`/docFetch/fetchCnt`, found via
+browser devtools, not documented anywhere) that returns a document's actual
+Markdown source (`content_md`) directly -- no HTML scraping or lossy
+conversion needed. `scripts/debug_compare_via_api.py` uses it to diff a
+small, explicit list of doc ids against this repo's converted
+`docs/wecom/<id>.md`, and to recover content for docs whose body doesn't
+server-render at all under a plain fetch (a real gap found 2026-08-22: a
+batch of newly-added docs load their body via client-side JS calling this
+same endpoint, so `/document/path/<id>` alone returns no content for them).
+
+**This endpoint is not in `robots.txt`'s `Allow` list** (only `/document`,
+`/tutorial`, `/community/...`, and `/resource/devtool` are). It's used here
+deliberately outside that allowance, at the repo owner's explicit
+instruction, on the condition that it stays low-frequency and
+comparison-only:
+- hand-run only -- unlike the raw-HTML tool above, this is **not** wired
+  into any GitHub Actions workflow, so it can't be triggered casually or
+  end up in a schedule,
+- hard-capped at 10 ids per invocation,
+- never a replacement content source for `fetch_wecom_docs.py`'s daily
+  sync, which continues to only ever touch `/document`.
+
+Resolving the id -> internal doc_id mapping this needs does *not* touch
+`/docFetch/`: every ordinary `/document/path/<id>` page embeds the whole
+site's id index as raw JSON for its own client-side JS to use, so one
+normal (robots.txt-allowed) page fetch resolves every id a run needs.
+
 ## Notes
 
 - Source content remains property of Tencent / WeCom.
@@ -200,3 +229,9 @@ not part of the public mirror.
    real pages surface cases the current converter doesn't handle well.
 4. Keep CNB and GitHub Actions workflows aligned with the same daily sync
    policy.
+5. Known gap, not currently planned: a batch of docs added 2026-08-12+
+   renders its body via client-side JS instead of server-rendering it (see
+   "Comparing against the site's true Markdown source" above) -- the daily
+   sync can't see their content and, by design, doesn't route around it via
+   the endpoint that recovers it, since that endpoint sits outside
+   robots.txt's `Allow` list.
