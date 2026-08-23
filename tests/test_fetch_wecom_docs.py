@@ -8,6 +8,7 @@ cron / manual sync, not in verify-fetcher CI).
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -46,7 +47,8 @@ def fake_success_outcome(source, page, markdown: str, html: str = "<div>x</div>"
             "doc_id": page.doc_id,
             "slug": page.doc_id,
             "label": page.label,
-            "section": "s",
+            "section": "/".join(page.sections) if page.sections else "s",
+            "category_path": list(page.sections) if page.sections else ["s"],
             "url": page.url,
             "sha256": fw.sha256_text(markdown),
             "bytes": len(markdown.encode("utf-8")),
@@ -1331,3 +1333,851 @@ def test_cleanup_stale_temp_files_removes_orphans_but_not_real_files(tmp_path):
     assert real_md.exists()
     assert not orphan_top.exists()
     assert not orphan_nested.exists()
+
+
+# --------------------------------------------------------------------------
+# Multi-level navigation tree, category migration, and Starlight structure
+# --------------------------------------------------------------------------
+
+def test_navigation_tree_multi_level_nesting_and_summary_generation():
+    files = {
+        "wecom/1.md": {
+            "label": "开发前必读",
+            "category_path": ["开发指南"],
+            "section": "开发指南",
+        },
+        "wecom/2.md": {
+            "label": "成员管理概述",
+            "category_path": ["通讯录管理", "成员管理"],
+            "section": "通讯录管理/成员管理",
+        },
+        "wecom/3.md": {
+            "label": "成员批量导入",
+            "category_path": ["通讯录管理", "成员管理", "批量操作"],
+            "section": "通讯录管理/成员管理/批量操作",
+        },
+        "wecom/0.md": {
+            "label": "根级说明",
+            "category_path": [],
+            "section": "",
+        },
+    }
+
+    summary = fw.generate_summary_markdown(files)
+    assert "* [根级说明](wecom/0.md)" in summary
+    assert "* 开发指南" in summary
+    assert "  * [开发前必读](wecom/1.md)" in summary
+    assert "* 通讯录管理" in summary
+    assert "  * 成员管理" in summary
+    assert "    * [成员管理概述](wecom/2.md)" in summary
+    assert "    * 批量操作" in summary
+    assert "      * [成员批量导入](wecom/3.md)" in summary
+
+    links = fw.extract_summary_links(summary)
+    assert links == {"wecom/0.md", "wecom/1.md", "wecom/2.md", "wecom/3.md"}
+
+
+def test_manifest_category_migration_and_compatibility():
+    # Legacy entry with string section only
+    entry1 = {"section": "通讯录管理/标签管理", "label": "标签列表"}
+    assert fw.normalize_category_path(entry1) == ["通讯录管理", "标签管理"]
+
+    # Legacy entry with all_sections
+    entry2 = {"all_sections": ["安全管理/操作日志"], "section": "安全管理/操作日志"}
+    assert fw.normalize_category_path(entry2) == ["安全管理", "操作日志"]
+
+    # Modern entry with category_path
+    entry3 = {"category_path": ["数据与智能专区", "调试模式"], "section": "数据与智能专区/调试模式"}
+    assert fw.normalize_category_path(entry3) == ["数据与智能专区", "调试模式"]
+
+    # Empty section
+    entry4 = {"section": ""}
+    assert fw.normalize_category_path(entry4) == []
+
+
+def test_starlight_sidebar_conforms_to_official_specification():
+    # Ref: https://starlight.astro.build/guides/sidebar/ (Accessed: 2026-08-24)
+    files = {
+        "wecom/10.md": {
+            "label": "根接口",
+            "category_path": [],
+        },
+        "wecom/20.md": {
+            "label": "获取部门列表",
+            "category_path": ["通讯录管理", "部门管理"],
+        },
+    }
+    sidebar = fw.generate_starlight_sidebar(files)
+
+    # Must be list of top-level link or group dicts
+    assert isinstance(sidebar, list)
+    assert sidebar[0] == {"label": "根接口", "link": "wecom/10.md"}
+    assert sidebar[1]["label"] == "通讯录管理"
+    assert "items" in sidebar[1]
+    group_items = sidebar[1]["items"]
+    assert group_items[0]["label"] == "部门管理"
+    assert group_items[0]["items"] == [{"label": "获取部门列表", "link": "wecom/20.md"}]
+
+    leaves = fw.extract_sidebar_leaf_paths(sidebar)
+    assert leaves == {"wecom/10.md", "wecom/20.md"}
+
+
+# --------------------------------------------------------------------------
+# Publication invariants, failure handling, and rollback
+# --------------------------------------------------------------------------
+
+def test_new_failed_page_excluded_from_formal_sets(tmp_path, monkeypatch):
+    """When a new page not in existing manifest fails, it must NOT enter
+    Manifest keys, SUMMARY links, or Sidebar leaves."""
+    docs_root = tmp_path / "docs"
+    docs_root.mkdir(parents=True)
+    monkeypatch.setattr(fw, "DOCS_ROOT", docs_root)
+    monkeypatch.setattr(fw, "MANIFEST_PATH", docs_root / "docs_manifest.json")
+    monkeypatch.setattr(fw, "SUMMARY_PATH", docs_root / "SUMMARY.md")
+    monkeypatch.setattr(fw, "STARLIGHT_SIDEBAR_PATH", docs_root / "starlight_sidebar.json")
+    monkeypatch.setattr(fw, "PROGRESS_PATH", docs_root / "sync_progress.json")
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MIN_SECONDS", 0.0)
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MAX_SECONDS", 0.0)
+
+    source = fw.Source(
+        source_id="wecom", site_root="https://example.invalid",
+        seed_path="/document/path/1", sentinel_ids=(),
+        doc_path_prefix="/document/path/", output_subdir="wecom",
+    )
+    monkeypatch.setattr(fw, "load_sources", lambda path: [source])
+    monkeypatch.setattr(fw, "check_robots_allowed", lambda *a, **k: True)
+
+    pages = {
+        "1": fw.DocPage(doc_id="1", label="doc1", sections=("s",), url="https://example.invalid/1", rel_path="1.md"),
+        "2": fw.DocPage(doc_id="2", label="doc2", sections=("s",), url="https://example.invalid/2", rel_path="2.md"),
+    }
+    monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "build_site_index", lambda src: None)
+    monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
+
+    def fake_fetch_one_doc(source, page, existing, site_index=None):
+        if page.doc_id == "2":
+            return fw.FetchOutcome(failed=True, error="page not found")
+        return fake_success_outcome(source, page, "# doc 1\n")
+
+    monkeypatch.setattr(fw, "FAILURE_RATE_THRESHOLD", 0.9)
+    monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
+    monkeypatch.setattr(sys, "argv", ["fetch_wecom_docs.py"])
+    rc = fw.main()
+
+    assert rc == 0
+    manifest = json.loads(fw.MANIFEST_PATH.read_text(encoding="utf-8"))
+    summary = fw.SUMMARY_PATH.read_text(encoding="utf-8")
+    sidebar = json.loads(fw.STARLIGHT_SIDEBAR_PATH.read_text(encoding="utf-8"))
+
+    manifest_keys = set(manifest["files"].keys())
+    summary_links = fw.extract_summary_links(summary)
+    sidebar_leaves = fw.extract_sidebar_leaf_paths(sidebar)
+
+    assert manifest_keys == {"wecom/1.md"}
+    assert summary_links == {"wecom/1.md"}
+    assert sidebar_leaves == {"wecom/1.md"}
+    assert "wecom/2.md" not in manifest_keys
+    assert "wecom/2.md" not in summary_links
+    assert "wecom/2.md" not in sidebar_leaves
+
+
+def test_existing_failed_page_inherited_in_formal_sets(tmp_path, monkeypatch):
+    """When an existing page in manifest fails during fetch, its last-known-good
+    file and entry are preserved, fetch_failures is bumped, and it stays in all 3 sets."""
+    docs_root = tmp_path / "docs"
+    (docs_root / "wecom").mkdir(parents=True)
+    monkeypatch.setattr(fw, "DOCS_ROOT", docs_root)
+    monkeypatch.setattr(fw, "MANIFEST_PATH", docs_root / "docs_manifest.json")
+    monkeypatch.setattr(fw, "SUMMARY_PATH", docs_root / "SUMMARY.md")
+    monkeypatch.setattr(fw, "STARLIGHT_SIDEBAR_PATH", docs_root / "starlight_sidebar.json")
+    monkeypatch.setattr(fw, "PROGRESS_PATH", docs_root / "sync_progress.json")
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MIN_SECONDS", 0.0)
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MAX_SECONDS", 0.0)
+
+    (docs_root / "wecom" / "1.md").write_text("# doc 1\n", encoding="utf-8")
+    (docs_root / "wecom" / "2.md").write_text("# doc 2 existing\n", encoding="utf-8")
+    fw.write_json_atomic(
+        fw.MANIFEST_PATH,
+        {
+            "files": {
+                "wecom/1.md": {"doc_id": "1", "source": "wecom", "label": "doc1", "category_path": ["s"], "section": "s", "sha256": "sha1"},
+                "wecom/2.md": {"doc_id": "2", "source": "wecom", "label": "doc2", "category_path": ["s"], "section": "s", "sha256": "sha2", "fetch_failures": 0},
+            }
+        }
+    )
+
+    source = fw.Source(
+        source_id="wecom", site_root="https://example.invalid",
+        seed_path="/document/path/1", sentinel_ids=(),
+        doc_path_prefix="/document/path/", output_subdir="wecom",
+    )
+    monkeypatch.setattr(fw, "load_sources", lambda path: [source])
+    monkeypatch.setattr(fw, "check_robots_allowed", lambda *a, **k: True)
+
+    pages = {
+        "1": fw.DocPage(doc_id="1", label="doc1", sections=("s",), url="https://example.invalid/1", rel_path="1.md"),
+        "2": fw.DocPage(doc_id="2", label="doc2", sections=("s",), url="https://example.invalid/2", rel_path="2.md"),
+    }
+    monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "build_site_index", lambda src: None)
+    monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
+
+    def fake_fetch_one_doc(source, page, existing, site_index=None):
+        if page.doc_id == "2":
+            return fw.FetchOutcome(failed=True, error="transient network drop")
+        return fake_success_outcome(source, page, "# doc 1\n")
+
+    monkeypatch.setattr(fw, "FAILURE_RATE_THRESHOLD", 0.9)
+    monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
+    monkeypatch.setattr(sys, "argv", ["fetch_wecom_docs.py"])
+    rc = fw.main()
+
+    assert rc == 0
+    manifest = json.loads(fw.MANIFEST_PATH.read_text(encoding="utf-8"))
+    assert set(manifest["files"].keys()) == {"wecom/1.md", "wecom/2.md"}
+    assert manifest["files"]["wecom/2.md"]["fetch_failures"] == 1
+    assert (docs_root / "wecom" / "2.md").read_text(encoding="utf-8") == "# doc 2 existing\n"
+
+    summary = fw.SUMMARY_PATH.read_text(encoding="utf-8")
+    sidebar = json.loads(fw.STARLIGHT_SIDEBAR_PATH.read_text(encoding="utf-8"))
+    assert fw.extract_summary_links(summary) == {"wecom/1.md", "wecom/2.md"}
+    assert fw.extract_sidebar_leaf_paths(sidebar) == {"wecom/1.md", "wecom/2.md"}
+
+
+def test_set_mismatch_blocks_publish_and_preserves_deletion_candidates(tmp_path, monkeypatch):
+    """If an invariant fails (e.g. deliberate set mismatch), finalize_sync
+    fails non-zero, zero indices are published, and candidate deleted files remain on disk."""
+    docs_root = tmp_path / "docs"
+    (docs_root / "wecom").mkdir(parents=True)
+    manifest_path = docs_root / "docs_manifest.json"
+    summary_path = docs_root / "SUMMARY.md"
+    sidebar_path = docs_root / "starlight_sidebar.json"
+    progress_path = docs_root / "sync_progress.json"
+
+    initial_manifest = {"schema_version": 1, "generated_at": "2026-08-20T00:00:00Z", "files": {"wecom/1.md": {"doc_id": "1", "label": "d1", "section": "s"}}}
+    manifest_path.write_text(json.dumps(initial_manifest), encoding="utf-8")
+    summary_path.write_text("# Initial Summary\n", encoding="utf-8")
+    sidebar_path.write_text("[]\n", encoding="utf-8")
+
+    (docs_root / "wecom" / "1.md").write_text("# doc 1\n", encoding="utf-8")
+    (docs_root / "wecom" / "stale.md").write_text("# stale to delete\n", encoding="utf-8")
+
+    # Monkeypatch generate_summary_markdown to deliberately create a mismatch
+    monkeypatch.setattr(fw, "generate_summary_markdown", lambda files: "# Corrupted Summary\n* [missing](wecom/missing.md)\n")
+
+    args = argparse.Namespace(limit=None, resume=False)
+    existing_files = {
+        "wecom/1.md": {"doc_id": "1", "label": "d1", "section": "s"},
+        "wecom/stale.md": {"doc_id": "stale", "label": "stale", "section": "s", "missing_run_count": fw.MISSING_CONFIRM_RUNS - 1},
+    }
+    new_files = {
+        "wecom/1.md": {"doc_id": "1", "label": "d1", "section": "s"},
+    }
+
+    rc = fw.finalize_sync(
+        sources=[SOURCE],
+        args=args,
+        existing_files=existing_files,
+        new_files=new_files,
+        total_pages=1,
+        successful_pages=1,
+        failed_pages=[],
+        strict_fetch=False,
+        docs_root=docs_root,
+        manifest_path=manifest_path,
+        summary_path=summary_path,
+        starlight_path=sidebar_path,
+        progress_path=progress_path,
+    )
+
+    # Must exit non-zero on invariant failure
+    assert rc != 0
+    # Pending deletion file must NOT be deleted
+    assert (docs_root / "wecom" / "stale.md").exists()
+    # Three formal index files must remain untouched
+    assert json.loads(manifest_path.read_text(encoding="utf-8")) == initial_manifest
+    assert summary_path.read_text(encoding="utf-8") == "# Initial Summary\n"
+    assert sidebar_path.read_text(encoding="utf-8") == "[]\n"
+
+
+def test_missing_file_on_disk_blocks_publication(tmp_path):
+    docs_root = tmp_path / "docs"
+    (docs_root / "wecom").mkdir(parents=True)
+    manifest_path = docs_root / "docs_manifest.json"
+    summary_path = docs_root / "SUMMARY.md"
+    sidebar_path = docs_root / "starlight_sidebar.json"
+    progress_path = docs_root / "sync_progress.json"
+
+    # Manifest contains wecom/1.md, but file does not exist on disk
+    args = argparse.Namespace(limit=None, resume=False)
+    existing_files = {}
+    new_files = {"wecom/1.md": {"doc_id": "1", "label": "d1", "section": "s"}}
+
+    rc = fw.finalize_sync(
+        sources=[SOURCE],
+        args=args,
+        existing_files=existing_files,
+        new_files=new_files,
+        total_pages=1,
+        successful_pages=1,
+        failed_pages=[],
+        strict_fetch=False,
+        docs_root=docs_root,
+        manifest_path=manifest_path,
+        summary_path=summary_path,
+        starlight_path=sidebar_path,
+        progress_path=progress_path,
+    )
+
+    assert rc != 0
+    assert not manifest_path.exists()
+    assert not summary_path.exists()
+    assert not sidebar_path.exists()
+
+
+# --------------------------------------------------------------------------
+# Timestamp and mtime debounce & Idempotency
+# --------------------------------------------------------------------------
+
+def test_no_change_preserves_generated_at_and_mtime(tmp_path):
+    docs_root = tmp_path / "docs"
+    (docs_root / "wecom").mkdir(parents=True)
+    (docs_root / "wecom" / "1.md").write_text("# doc 1\n", encoding="utf-8")
+
+    manifest_path = docs_root / "docs_manifest.json"
+    summary_path = docs_root / "SUMMARY.md"
+    sidebar_path = docs_root / "starlight_sidebar.json"
+    progress_path = docs_root / "sync_progress.json"
+
+    args = argparse.Namespace(limit=None, resume=False)
+    fixed_first_seen = "2026-08-20T00:00:00Z"
+    fixed_fetched_at = "2026-08-20T00:00:00Z"
+
+    files_round1 = {
+        "wecom/1.md": {
+            "source": "wecom",
+            "doc_id": "1",
+            "slug": "1",
+            "label": "doc 1",
+            "section": "s",
+            "category_path": ["s"],
+            "url": "https://example.invalid/1",
+            "sha256": fw.sha256_text("# doc 1\n"),
+            "bytes": len("# doc 1\n".encode("utf-8")),
+            "converter_version": fw.CONVERTER_VERSION,
+            "first_seen_at": fixed_first_seen,
+            "fetched_at": fixed_fetched_at,
+            "missing_since": None,
+            "missing_run_count": 0,
+            "fetch_failures": 0,
+        }
+    }
+
+    # First finalize
+    rc1 = fw.finalize_sync(
+        sources=[SOURCE],
+        args=args,
+        existing_files={},
+        new_files=dict(files_round1),
+        total_pages=1,
+        successful_pages=1,
+        failed_pages=[],
+        strict_fetch=False,
+        docs_root=docs_root,
+        manifest_path=manifest_path,
+        summary_path=summary_path,
+        starlight_path=sidebar_path,
+        progress_path=progress_path,
+    )
+    assert rc1 == 0
+
+    m1_content = manifest_path.read_text(encoding="utf-8")
+    s1_content = summary_path.read_text(encoding="utf-8")
+    star1_content = sidebar_path.read_text(encoding="utf-8")
+
+    m1_mtime = manifest_path.stat().st_mtime_ns
+    s1_mtime = summary_path.stat().st_mtime_ns
+    star1_mtime = sidebar_path.stat().st_mtime_ns
+
+    # Small delay to ensure any touch would modify mtime
+    import time
+    time.sleep(0.05)
+
+    # Second finalize with identical inputs
+    existing_manifest = json.loads(m1_content)
+    rc2 = fw.finalize_sync(
+        sources=[SOURCE],
+        args=args,
+        existing_files=dict(files_round1),
+        new_files=dict(files_round1),
+        total_pages=1,
+        successful_pages=0,
+        failed_pages=[],
+        strict_fetch=False,
+        existing_manifest=existing_manifest,
+        docs_root=docs_root,
+        manifest_path=manifest_path,
+        summary_path=summary_path,
+        starlight_path=sidebar_path,
+        progress_path=progress_path,
+    )
+    assert rc2 == 0
+
+    m2_content = manifest_path.read_text(encoding="utf-8")
+    s2_content = summary_path.read_text(encoding="utf-8")
+    star2_content = sidebar_path.read_text(encoding="utf-8")
+
+    m2_mtime = manifest_path.stat().st_mtime_ns
+    s2_mtime = summary_path.stat().st_mtime_ns
+    star2_mtime = sidebar_path.stat().st_mtime_ns
+
+    # Byte contents and sha256 must be identical
+    assert m1_content == m2_content
+    assert s1_content == s2_content
+    assert star1_content == star2_content
+
+    # File modification times must be completely untouched
+    assert m1_mtime == m2_mtime
+    assert s1_mtime == s2_mtime
+    assert star1_mtime == star2_mtime
+
+
+def test_real_change_updates_generated_at_and_publishes(tmp_path):
+    docs_root = tmp_path / "docs"
+    (docs_root / "wecom").mkdir(parents=True)
+    (docs_root / "wecom" / "1.md").write_text("# doc 1 updated\n", encoding="utf-8")
+
+    manifest_path = docs_root / "docs_manifest.json"
+    summary_path = docs_root / "SUMMARY.md"
+    sidebar_path = docs_root / "starlight_sidebar.json"
+    progress_path = docs_root / "sync_progress.json"
+
+    args = argparse.Namespace(limit=None, resume=False)
+    old_manifest = {
+        "schema_version": 1,
+        "generated_at": "2026-08-20T00:00:00Z",
+        "converter_version": fw.CONVERTER_VERSION,
+        "strict_fetch": False,
+        "sources": [{"id": "wecom"}],
+        "stats": {"total_pages": 1, "successful_pages": 1, "failed_pages": 0},
+        "failed": [],
+        "files": {
+            "wecom/1.md": {
+                "source": "wecom",
+                "doc_id": "1",
+                "slug": "1",
+                "label": "Old Title",
+                "section": "s",
+                "category_path": ["s"],
+                "url": "https://example.invalid/1",
+                "sha256": "old_sha",
+                "bytes": 10,
+                "converter_version": fw.CONVERTER_VERSION,
+                "first_seen_at": "2026-08-20T00:00:00Z",
+                "fetched_at": "2026-08-20T00:00:00Z",
+                "missing_since": None,
+                "missing_run_count": 0,
+                "fetch_failures": 0,
+            }
+        },
+    }
+    manifest_path.write_text(json.dumps(old_manifest), encoding="utf-8")
+
+    new_files = {
+        "wecom/1.md": {
+            "source": "wecom",
+            "doc_id": "1",
+            "slug": "1",
+            "label": "New Title",  # Changed!
+            "section": "s",
+            "category_path": ["s"],
+            "url": "https://example.invalid/1",
+            "sha256": fw.sha256_text("# doc 1 updated\n"),
+            "bytes": len("# doc 1 updated\n".encode("utf-8")),
+            "converter_version": fw.CONVERTER_VERSION,
+            "first_seen_at": "2026-08-20T00:00:00Z",
+            "fetched_at": fw.now_iso(),
+            "missing_since": None,
+            "missing_run_count": 0,
+            "fetch_failures": 0,
+        }
+    }
+
+    rc = fw.finalize_sync(
+        sources=[SOURCE],
+        args=args,
+        existing_files=old_manifest["files"],
+        new_files=new_files,
+        total_pages=1,
+        successful_pages=1,
+        failed_pages=[],
+        strict_fetch=False,
+        existing_manifest=old_manifest,
+        docs_root=docs_root,
+        manifest_path=manifest_path,
+        summary_path=summary_path,
+        starlight_path=sidebar_path,
+        progress_path=progress_path,
+    )
+    assert rc == 0
+
+    new_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert new_manifest["generated_at"] != "2026-08-20T00:00:00Z"
+    assert new_manifest["files"]["wecom/1.md"]["label"] == "New Title"
+
+    summary = summary_path.read_text(encoding="utf-8")
+    assert "[New Title](wecom/1.md)" in summary
+
+
+def test_fetched_at_preserved_when_content_hash_unchanged(tmp_path, monkeypatch):
+    """When a doc is re-fetched and its content/business fields are unchanged,
+    fetched_at must be inherited from existing_entry, not overwritten with now_iso()."""
+    docs_root = tmp_path / "docs"
+    (docs_root / "wecom").mkdir(parents=True)
+    monkeypatch.setattr(fw, "DOCS_ROOT", docs_root)
+    monkeypatch.setattr(fw, "MANIFEST_PATH", docs_root / "docs_manifest.json")
+    monkeypatch.setattr(fw, "PROGRESS_PATH", docs_root / "sync_progress.json")
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MIN_SECONDS", 0.0)
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MAX_SECONDS", 0.0)
+
+    old_fetched_at = "2026-08-20T10:00:00Z"
+    (docs_root / "wecom" / "1.md").write_text("# doc 1 unchanged\n", encoding="utf-8")
+    existing_files = {
+        "wecom/1.md": {
+            "source": "wecom",
+            "doc_id": "1",
+            "slug": "1",
+            "label": "doc 1 unchanged",
+            "section": "s",
+            "category_path": ["s"],
+            "url": "https://example.invalid/1",
+            "sha256": fw.sha256_text("# doc 1 unchanged\n"),
+            "bytes": len("# doc 1 unchanged\n".encode("utf-8")),
+            "converter_version": fw.CONVERTER_VERSION,
+            "first_seen_at": "2026-08-20T00:00:00Z",
+            "last_verified_at": "2026-08-20T00:00:00Z",
+            "fetched_at": old_fetched_at,
+            "missing_since": None,
+            "missing_run_count": 0,
+            "fetch_failures": 0,
+        }
+    }
+    fw.write_json_atomic(fw.MANIFEST_PATH, {"schema_version": 1, "generated_at": "2026-08-20T00:00:00Z", "files": existing_files})
+
+    source = fw.Source(
+        source_id="wecom", site_root="https://example.invalid",
+        seed_path="/document/path/1", sentinel_ids=(),
+        doc_path_prefix="/document/path/", output_subdir="wecom",
+    )
+    monkeypatch.setattr(fw, "load_sources", lambda path: [source])
+    monkeypatch.setattr(fw, "check_robots_allowed", lambda *a, **k: True)
+
+    pages = {
+        "1": fw.DocPage(doc_id="1", label="doc 1 unchanged", sections=("s",), url="https://example.invalid/1", rel_path="1.md"),
+    }
+    monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "build_site_index", lambda src: None)
+    monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
+
+    def fake_fetch_one_doc(source, page, existing, site_index=None):
+        return fake_success_outcome(source, page, "# doc 1 unchanged\n")
+
+    monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
+    monkeypatch.setattr(sys, "argv", ["fetch_wecom_docs.py"])
+    rc = fw.main()
+
+    assert rc == 0
+    manifest = json.loads(fw.MANIFEST_PATH.read_text(encoding="utf-8"))
+    assert manifest["files"]["wecom/1.md"]["fetched_at"] == old_fetched_at
+
+
+def test_active_checkpoint_untouched_and_persisted_on_interrupted_run(tmp_path, monkeypatch):
+    """An active checkpoint must not be cleared or corrupted when a run pauses or stops early."""
+    docs_root = tmp_path / "docs"
+    (docs_root / "wecom").mkdir(parents=True)
+    monkeypatch.setattr(fw, "DOCS_ROOT", docs_root)
+    monkeypatch.setattr(fw, "MANIFEST_PATH", docs_root / "docs_manifest.json")
+    monkeypatch.setattr(fw, "PROGRESS_PATH", docs_root / "sync_progress.json")
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MIN_SECONDS", 0.0)
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MAX_SECONDS", 0.0)
+    monkeypatch.setattr(fw, "MAX_SUCCESSFUL_FETCHES_PER_RUN", 1)
+
+    initial_checkpoint = {
+        "wecom": {
+            "run_started_at": "2026-08-20T00:00:00Z",
+            "done_doc_ids": ["1"],
+            "files": {"wecom/1.md": {"doc_id": "1", "sha256": "sha1", "section": "s"}},
+            "failed": [],
+        }
+    }
+    fw.write_json_atomic(fw.PROGRESS_PATH, initial_checkpoint)
+    (docs_root / "wecom" / "1.md").write_text("# doc 1\n", encoding="utf-8")
+
+    source = fw.Source(
+        source_id="wecom", site_root="https://example.invalid",
+        seed_path="/document/path/1", sentinel_ids=(),
+        doc_path_prefix="/document/path/", output_subdir="wecom",
+    )
+    monkeypatch.setattr(fw, "load_sources", lambda path: [source])
+    monkeypatch.setattr(fw, "check_robots_allowed", lambda *a, **k: True)
+
+    pages = {
+        "1": fw.DocPage(doc_id="1", label="doc1", sections=("s",), url="https://example.invalid/1", rel_path="1.md"),
+        "2": fw.DocPage(doc_id="2", label="doc2", sections=("s",), url="https://example.invalid/2", rel_path="2.md"),
+        "3": fw.DocPage(doc_id="3", label="doc3", sections=("s",), url="https://example.invalid/3", rel_path="3.md"),
+    }
+    monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "build_site_index", lambda src: None)
+    monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
+
+    def fake_fetch_one_doc(source, page, existing, site_index=None):
+        return fake_success_outcome(source, page, f"# doc {page.doc_id}\n")
+
+    monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
+    monkeypatch.setattr(sys, "argv", ["fetch_wecom_docs.py", "--resume"])
+    rc = fw.main()
+
+    assert rc == 0
+    # Must pause at MAX_SUCCESSFUL_FETCHES_PER_RUN=1 without deleting checkpoint
+    assert fw.PROGRESS_PATH.exists()
+    checkpoint = json.loads(fw.PROGRESS_PATH.read_text(encoding="utf-8"))
+    assert set(checkpoint["wecom"]["done_doc_ids"]) == {"1", "2"}
+    assert "wecom/2.md" in checkpoint["wecom"]["files"]
+    assert "wecom/1.md" in checkpoint["wecom"]["files"]
+    # Formal manifest must not exist yet because sync paused mid-flight
+    assert not fw.MANIFEST_PATH.exists()
+
+
+# --------------------------------------------------------------------------
+# Offline navigation migration & metadata preservation regression tests
+# --------------------------------------------------------------------------
+
+def test_offline_navigation_migration_preserves_arbitrary_metadata_and_unknown_fields(tmp_path):
+    """Offline migration must preserve all top-level sync metadata (stats, failed,
+    converter_version, strict_fetch, sources, tool, and arbitrary extension fields)
+    without faking stats or clearing failed entries."""
+    docs_root = tmp_path / "docs"
+    (docs_root / "custom").mkdir(parents=True)
+    (docs_root / "custom" / "1.md").write_text("# doc 1\n", encoding="utf-8")
+    (docs_root / "custom" / "2.md").write_text("# doc 2\n", encoding="utf-8")
+
+    manifest_path = docs_root / "docs_manifest.json"
+    summary_path = docs_root / "SUMMARY.md"
+    sidebar_path = docs_root / "starlight_sidebar.json"
+
+    original_manifest = {
+        "schema_version": 1,
+        "generated_at": "2026-08-20T00:00:00Z",
+        "tool": "scripts/fetch_wecom_docs.py",
+        "converter_version": "custom_v2",
+        "strict_fetch": True,
+        "sources": [{"id": "custom", "site_root": "https://custom.example.invalid"}],
+        "stats": {"total_pages": 999, "successful_pages": 456, "failed_pages": 12},
+        "failed": [
+            {"url": "https://custom.example.invalid/err1", "error": "timeout"},
+            {"url": "https://custom.example.invalid/err2", "error": "404 not found"},
+        ],
+        "custom_unknown_field_dict": {"foo": "bar", "count": 123},
+        "custom_unknown_field_list": ["alpha", "beta"],
+        "files": {
+            "custom/1.md": {
+                "source": "custom",
+                "doc_id": "1",
+                "label": "Doc One",
+                "section": "指南/基础入门",
+                "url": "https://custom.example.invalid/1",
+                "sha256": fw.sha256_text("# doc 1\n"),
+            },
+            "custom/2.md": {
+                "source": "custom",
+                "doc_id": "2",
+                "label": "Doc Two",
+                "section": "指南/进阶操作",
+                "url": "https://custom.example.invalid/2",
+                "sha256": fw.sha256_text("# doc 2\n"),
+            },
+        },
+    }
+
+    rc = fw.offline_sync_navigation(
+        existing_manifest=original_manifest,
+        docs_root=docs_root,
+        manifest_path=manifest_path,
+        summary_path=summary_path,
+        starlight_path=sidebar_path,
+    )
+    assert rc == 0
+
+    migrated = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+    # Top-level sync metadata must be preserved untouched
+    assert migrated["stats"] == {"total_pages": 999, "successful_pages": 456, "failed_pages": 12}
+    assert migrated["failed"] == [
+        {"url": "https://custom.example.invalid/err1", "error": "timeout"},
+        {"url": "https://custom.example.invalid/err2", "error": "404 not found"},
+    ]
+    assert migrated["converter_version"] == "custom_v2"
+    assert migrated["strict_fetch"] is True
+    assert migrated["sources"] == [{"id": "custom", "site_root": "https://custom.example.invalid"}]
+    assert migrated["tool"] == "scripts/fetch_wecom_docs.py"
+    assert migrated["custom_unknown_field_dict"] == {"foo": "bar", "count": 123}
+    assert migrated["custom_unknown_field_list"] == ["alpha", "beta"]
+
+    # Files must have normalized category_path
+    assert migrated["files"]["custom/1.md"]["category_path"] == ["指南", "基础入门"]
+    assert migrated["files"]["custom/2.md"]["category_path"] == ["指南", "进阶操作"]
+
+    # Navigation artifacts must be generated and invariants verified
+    summary_text = summary_path.read_text(encoding="utf-8")
+    sidebar_data = json.loads(sidebar_path.read_text(encoding="utf-8"))
+    assert fw.extract_summary_links(summary_text) == {"custom/1.md", "custom/2.md"}
+    assert fw.extract_sidebar_leaf_paths(sidebar_data) == {"custom/1.md", "custom/2.md"}
+
+
+def test_offline_migration_debounce_and_mtime_preservation(tmp_path):
+    """Repeated offline migration runs on unchanged input must leave sha256 and mtime unchanged."""
+    docs_root = tmp_path / "docs"
+    (docs_root / "wecom").mkdir(parents=True)
+    (docs_root / "wecom" / "1.md").write_text("# doc 1\n", encoding="utf-8")
+
+    manifest_path = docs_root / "docs_manifest.json"
+    summary_path = docs_root / "SUMMARY.md"
+    sidebar_path = docs_root / "starlight_sidebar.json"
+
+    initial_manifest = {
+        "schema_version": 1,
+        "generated_at": "2026-08-20T00:00:00Z",
+        "tool": "scripts/fetch_wecom_docs.py",
+        "converter_version": 3,
+        "strict_fetch": False,
+        "sources": [{"id": "wecom"}],
+        "stats": {"total_pages": 735, "successful_pages": 114, "failed_pages": 24},
+        "failed": [{"url": "https://example.invalid/err", "error": "timeout"}],
+        "files": {
+            "wecom/1.md": {
+                "source": "wecom",
+                "doc_id": "1",
+                "label": "Doc 1",
+                "section": "开发指南",
+                "category_path": ["开发指南"],
+                "url": "https://example.invalid/1",
+                "sha256": fw.sha256_text("# doc 1\n"),
+            }
+        },
+    }
+
+    # First migration
+    rc1 = fw.offline_sync_navigation(
+        existing_manifest=initial_manifest,
+        docs_root=docs_root,
+        manifest_path=manifest_path,
+        summary_path=summary_path,
+        starlight_path=sidebar_path,
+    )
+    assert rc1 == 0
+
+    m1_content = manifest_path.read_text(encoding="utf-8")
+    s1_content = summary_path.read_text(encoding="utf-8")
+    star1_content = sidebar_path.read_text(encoding="utf-8")
+
+    m1_mtime = manifest_path.stat().st_mtime_ns
+    s1_mtime = summary_path.stat().st_mtime_ns
+    star1_mtime = sidebar_path.stat().st_mtime_ns
+
+    import time
+    time.sleep(0.05)
+
+    # Second migration from on-disk manifest
+    rc2 = fw.offline_sync_navigation(
+        docs_root=docs_root,
+        manifest_path=manifest_path,
+        summary_path=summary_path,
+        starlight_path=sidebar_path,
+    )
+    assert rc2 == 0
+
+    m2_content = manifest_path.read_text(encoding="utf-8")
+    s2_content = summary_path.read_text(encoding="utf-8")
+    star2_content = sidebar_path.read_text(encoding="utf-8")
+
+    m2_mtime = manifest_path.stat().st_mtime_ns
+    s2_mtime = summary_path.stat().st_mtime_ns
+    star2_mtime = sidebar_path.stat().st_mtime_ns
+
+    # Contents and mtimes must be strictly identical
+    assert m1_content == m2_content
+    assert s1_content == s2_content
+    assert star1_content == star2_content
+    assert m1_mtime == m2_mtime
+    assert s1_mtime == s2_mtime
+    assert star1_mtime == star2_mtime
+
+
+def test_real_sync_still_updates_stats_and_failures_normally(tmp_path, monkeypatch):
+    """A real live sync must use actual crawl statistics and errors, not frozen legacy stats."""
+    docs_root = tmp_path / "docs"
+    docs_root.mkdir(parents=True)
+    monkeypatch.setattr(fw, "DOCS_ROOT", docs_root)
+    monkeypatch.setattr(fw, "MANIFEST_PATH", docs_root / "docs_manifest.json")
+    monkeypatch.setattr(fw, "PROGRESS_PATH", docs_root / "sync_progress.json")
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MIN_SECONDS", 0.0)
+    monkeypatch.setattr(fw, "REQUEST_DELAY_MAX_SECONDS", 0.0)
+    monkeypatch.setattr(fw, "FAILURE_RATE_THRESHOLD", 0.9)
+
+    source = fw.Source(
+        source_id="wecom", site_root="https://example.invalid",
+        seed_path="/document/path/1", sentinel_ids=(),
+        doc_path_prefix="/document/path/", output_subdir="wecom",
+    )
+    monkeypatch.setattr(fw, "load_sources", lambda path: [source])
+    monkeypatch.setattr(fw, "check_robots_allowed", lambda *a, **k: True)
+
+    pages = {
+        "1": fw.DocPage(doc_id="1", label="doc1", sections=("s",), url="https://example.invalid/1", rel_path="1.md"),
+        "2": fw.DocPage(doc_id="2", label="doc2", sections=("s",), url="https://example.invalid/2", rel_path="2.md"),
+        "3": fw.DocPage(doc_id="3", label="doc3", sections=("s",), url="https://example.invalid/3", rel_path="3.md"),
+    }
+    monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "build_site_index", lambda src: None)
+    monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
+
+    def fake_fetch_one_doc(source, page, existing, site_index=None):
+        if page.doc_id == "3":
+            return fw.FetchOutcome(failed=True, error="network timeout")
+        return fake_success_outcome(source, page, f"# doc {page.doc_id}\n")
+
+    monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
+    monkeypatch.setattr(sys, "argv", ["fetch_wecom_docs.py"])
+    rc = fw.main()
+
+    assert rc == 0
+    manifest = json.loads(fw.MANIFEST_PATH.read_text(encoding="utf-8"))
+    assert manifest["stats"] == {"total_pages": 3, "successful_pages": 2, "failed_pages": 1}
+    assert len(manifest["failed"]) == 1
+    assert manifest["failed"][0]["url"] == "https://example.invalid/3"
+    assert manifest["converter_version"] == fw.CONVERTER_VERSION
+
+
+def test_formal_711_manifest_and_zero_missing_files_invariants():
+    """Validates that repository's formal docs/docs_manifest.json, SUMMARY.md,
+    and starlight_sidebar.json have 711 synchronized items, matching HEAD stats."""
+    docs_root = Path(__file__).resolve().parents[1] / "docs"
+    manifest = json.loads((docs_root / "docs_manifest.json").read_text(encoding="utf-8"))
+    summary_text = (docs_root / "SUMMARY.md").read_text(encoding="utf-8")
+    sidebar_data = json.loads((docs_root / "starlight_sidebar.json").read_text(encoding="utf-8"))
+
+    manifest_keys = set(manifest["files"].keys())
+    summary_links = fw.extract_summary_links(summary_text)
+    sidebar_leaves = fw.extract_sidebar_leaf_paths(sidebar_data)
+
+    assert len(manifest_keys) == 711
+    assert manifest_keys == summary_links == sidebar_leaves
+
+    missing_files = [k for k in sorted(manifest_keys) if not (docs_root / k).is_file()]
+    assert missing_files == []
+
+    assert manifest["stats"] == {"total_pages": 735, "successful_pages": 114, "failed_pages": 24}
+    assert len(manifest["failed"]) == 24
+    assert manifest["converter_version"] in (3, "3")
+    assert manifest["strict_fetch"] is False

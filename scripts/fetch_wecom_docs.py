@@ -57,6 +57,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = REPO_ROOT / "config" / "sources.json"
 DOCS_ROOT = REPO_ROOT / "docs"
 MANIFEST_PATH = DOCS_ROOT / "docs_manifest.json"
+SUMMARY_PATH = DOCS_ROOT / "SUMMARY.md"
+STARLIGHT_SIDEBAR_PATH = DOCS_ROOT / "starlight_sidebar.json"
 # Tracks per-source progress of an in-flight sync so `--resume` can continue
 # after a CAPTCHA block / CI timeout / kill without re-fetching docs we
 # already have. Deliberately committed to git (not gitignored): CI runners
@@ -733,8 +735,284 @@ def convert_article_to_markdown(article: Tag, source: Source, site_index: Option
 # Manifest helpers
 # --------------------------------------------------------------------------
 
+def normalize_category_path(entry: Any) -> List[str]:
+    if entry is None:
+        return []
+    if isinstance(entry, (tuple, list)):
+        return [str(x).strip() for x in entry if str(x).strip()]
+    if isinstance(entry, str):
+        return [str(x).strip() for x in entry.split("/") if str(x).strip()]
+    if isinstance(entry, dict):
+        if "category_path" in entry and isinstance(entry["category_path"], (list, tuple)):
+            return [str(x).strip() for x in entry["category_path"] if str(x).strip()]
+        if "sections" in entry and isinstance(entry["sections"], (list, tuple)):
+            return [str(x).strip() for x in entry["sections"] if str(x).strip()]
+        if "section" in entry and isinstance(entry["section"], str):
+            return [str(x).strip() for x in entry["section"].split("/") if str(x).strip()]
+        if "all_sections" in entry and isinstance(entry["all_sections"], (list, tuple)) and entry["all_sections"]:
+            first = entry["all_sections"][0]
+            return [str(x).strip() for x in first.split("/") if str(x).strip()]
+    return []
+
+
+def build_nav_tree(files: Dict[str, Dict]) -> Dict[str, Any]:
+    """Builds a canonical nested navigation tree from manifest files.
+
+    Tree node structure:
+    {
+        "categories": { "Category Name": <sub_node>, ... },
+        "docs": [ (key, label), ... ]
+    }
+    """
+    root: Dict[str, Any] = {"categories": {}, "docs": []}
+    for key in sorted(files.keys()):
+        entry = files[key]
+        label = entry.get("label") or key
+        cat_path = normalize_category_path(entry)
+        curr = root
+        for cat in cat_path:
+            if cat not in curr["categories"]:
+                curr["categories"][cat] = {"categories": {}, "docs": []}
+            curr = curr["categories"][cat]
+        curr["docs"].append((key, label))
+    return root
+
+
+def generate_summary_markdown(files: Dict[str, Dict], title: str = "Summary") -> str:
+    """Generates a nested GitBook/mdBook-compatible SUMMARY.md from manifest files."""
+    root = build_nav_tree(files)
+    lines: List[str] = [f"# {title}\n"]
+
+    def walk(node: Dict[str, Any], depth: int) -> None:
+        indent = "  " * depth
+        for doc_key, doc_label in sorted(node["docs"], key=lambda x: x[0]):
+            lines.append(f"{indent}* [{doc_label}]({doc_key})")
+        for cat_name in sorted(node["categories"].keys()):
+            cat_node = node["categories"][cat_name]
+            lines.append(f"{indent}* {cat_name}")
+            walk(cat_node, depth + 1)
+
+    walk(root, 0)
+    return "\n".join(lines).strip() + "\n"
+
+
+def generate_starlight_sidebar(files: Dict[str, Dict]) -> List[Dict[str, Any]]:
+    """Generates an Astro Starlight sidebar configuration array from manifest files.
+
+    Conforms to official Starlight sidebar structure (links and groups).
+    Ref: https://starlight.astro.build/guides/sidebar/ (Accessed: 2026-08-24).
+    """
+    root = build_nav_tree(files)
+
+    def walk(node: Dict[str, Any]) -> List[Dict[str, Any]]:
+        items: List[Dict[str, Any]] = []
+        for doc_key, doc_label in sorted(node["docs"], key=lambda x: x[0]):
+            items.append({
+                "label": doc_label,
+                "link": doc_key,
+            })
+        for cat_name in sorted(node["categories"].keys()):
+            cat_node = node["categories"][cat_name]
+            sub_items = walk(cat_node)
+            items.append({
+                "label": cat_name,
+                "items": sub_items,
+            })
+        return items
+
+    return walk(root)
+
+
+def extract_summary_links(summary_text: str) -> set[str]:
+    return set(re.findall(r'\[(?:[^\]]*)\]\(([^)]+)\)', summary_text))
+
+
+def extract_sidebar_leaf_paths(sidebar_items: List[Dict[str, Any]]) -> set[str]:
+    leaves: set[str] = set()
+
+    def walk(items: List[Dict[str, Any]]) -> None:
+        for item in items:
+            if "items" in item and isinstance(item["items"], list):
+                walk(item["items"])
+            elif "link" in item and isinstance(item["link"], str):
+                leaves.add(item["link"])
+            elif "slug" in item and isinstance(item["slug"], str):
+                leaves.add(item["slug"])
+
+    walk(sidebar_items)
+    return leaves
+
+
+def validate_publication_invariants(
+    manifest_keys: set[str],
+    summary_links: set[str],
+    sidebar_leaves: set[str],
+    docs_root: Optional[Path] = None,
+) -> None:
+    """Validates:
+    1. Sidebar leaves == SUMMARY links == Manifest keys (strict equality)
+    2. Every key in Manifest keys exists on disk as a file at docs_root / key
+    Raises RuntimeError if any invariant is violated.
+    """
+    root = DOCS_ROOT if docs_root is None else docs_root
+    if sidebar_leaves != manifest_keys:
+        extra = sorted(sidebar_leaves - manifest_keys)
+        missing = sorted(manifest_keys - sidebar_leaves)
+        raise RuntimeError(
+            f"Publication invariant failed: Sidebar leaves != Manifest keys "
+            f"(extra: {extra[:5]}, missing: {missing[:5]})"
+        )
+    if summary_links != manifest_keys:
+        extra = sorted(summary_links - manifest_keys)
+        missing = sorted(manifest_keys - summary_links)
+        raise RuntimeError(
+            f"Publication invariant failed: SUMMARY links != Manifest keys "
+            f"(extra: {extra[:5]}, missing: {missing[:5]})"
+        )
+    missing_files = [k for k in sorted(manifest_keys) if not (root / k).is_file()]
+    if missing_files:
+        raise RuntimeError(
+            f"Publication invariant failed: {len(missing_files)} file(s) missing from disk: {missing_files[:5]}"
+        )
+
+
+def write_text_if_changed(path: Path, text: str) -> bool:
+    if path.exists():
+        try:
+            if path.read_text(encoding="utf-8") == text:
+                return False
+        except OSError:
+            pass
+    write_text_atomic(path, text)
+    return True
+
+
+def write_json_if_changed(path: Path, data: Any) -> bool:
+    text = json.dumps(data, indent=2, ensure_ascii=False) + "\n"
+    return write_text_if_changed(path, text)
+
+
+def _is_manifest_entry_business_equal(old_e: Dict, new_e: Dict) -> bool:
+    fields = (
+        "source", "doc_id", "slug", "label", "section", "category_path",
+        "url", "sha256", "bytes", "html_sha256", "html_bytes",
+        "converter_version", "missing_since", "missing_run_count", "fetch_failures"
+    )
+    for f in fields:
+        old_val = old_e.get(f)
+        new_val = new_e.get(f)
+        if isinstance(old_val, tuple):
+            old_val = list(old_val)
+        if isinstance(new_val, tuple):
+            new_val = list(new_val)
+        if old_val != new_val:
+            return False
+    return True
+
+
+def is_manifest_business_equal(
+    old_manifest: Dict,
+    new_files: Dict[str, Dict],
+    failed_pages: List[Tuple[str, str]],
+    strict_fetch: bool,
+) -> bool:
+    if not old_manifest or "files" not in old_manifest:
+        return False
+    old_files = old_manifest["files"]
+    if set(old_files.keys()) != set(new_files.keys()):
+        return False
+    for k, new_entry in new_files.items():
+        if not _is_manifest_entry_business_equal(old_files[k], new_entry):
+            return False
+    old_failed = old_manifest.get("failed", [])
+    new_failed = [{"url": u, "error": e} for u, e in failed_pages]
+    if old_failed != new_failed:
+        return False
+    if old_manifest.get("converter_version") != CONVERTER_VERSION:
+        return False
+    if old_manifest.get("strict_fetch") != strict_fetch:
+        return False
+    return True
+
+
 def sha256_text(content: str) -> str:
     return hashlib.sha256(content.encode("utf-8")).hexdigest()
+
+
+def offline_sync_navigation(
+    existing_manifest: Optional[Dict[str, Any]] = None,
+    docs_root: Optional[Path] = None,
+    manifest_path: Optional[Path] = None,
+    summary_path: Optional[Path] = None,
+    starlight_path: Optional[Path] = None,
+) -> int:
+    """Offline migration and navigation generation:
+    Populates multi-level category_path across files without running a live sync,
+    generates docs/SUMMARY.md and docs/starlight_sidebar.json, checks publication invariants,
+    and updates manifest and navigation artifacts idempotently.
+
+    CRITICAL: This is NOT a sync run. All top-level sync metadata (stats, failed,
+    converter_version, strict_fetch, sources, tool, plus any unknown extension fields)
+    MUST be preserved exactly as-is from existing_manifest.
+    """
+    root = DOCS_ROOT if docs_root is None else docs_root
+    man_path = (root / "docs_manifest.json") if manifest_path is None else manifest_path
+    sum_path = (root / "SUMMARY.md") if summary_path is None else summary_path
+    star_path = (root / "starlight_sidebar.json") if starlight_path is None else starlight_path
+
+    if existing_manifest is None:
+        if not man_path.exists():
+            print(f"[ERROR] Manifest file does not exist: {man_path}")
+            return 1
+        existing_manifest = load_existing_manifest(man_path)
+
+    import copy
+    new_manifest = copy.deepcopy(existing_manifest)
+
+    files = new_manifest.get("files", {})
+    if not isinstance(files, dict) or not files:
+        print(f"[ERROR] No valid files dictionary found in manifest")
+        return 1
+
+    # Normalize category_path and section for each file entry
+    for key, entry in files.items():
+        if isinstance(entry, dict):
+            if "category_path" not in entry:
+                entry["category_path"] = normalize_category_path(entry)
+            if "section" not in entry:
+                entry["section"] = "/".join(entry["category_path"])
+
+    summary_text = generate_summary_markdown(files)
+    starlight_sidebar = generate_starlight_sidebar(files)
+
+    manifest_keys = set(files.keys())
+    summary_links = extract_summary_links(summary_text)
+    sidebar_leaves = extract_sidebar_leaf_paths(starlight_sidebar)
+
+    try:
+        validate_publication_invariants(manifest_keys, summary_links, sidebar_leaves, docs_root=root)
+    except RuntimeError as exc:
+        print(f"[ERROR] Invariant check failed, aborting offline navigation sync without changes: {exc}")
+        return 1
+
+    # Preserve generated_at on identical rerun
+    if man_path.exists():
+        try:
+            on_disk = json.loads(man_path.read_text(encoding="utf-8"))
+            if on_disk.get("files") == files and "generated_at" in on_disk:
+                new_manifest["generated_at"] = on_disk["generated_at"]
+            elif "generated_at" not in new_manifest:
+                new_manifest["generated_at"] = now_iso()
+        except Exception:
+            if "generated_at" not in new_manifest:
+                new_manifest["generated_at"] = now_iso()
+    elif "generated_at" not in new_manifest:
+        new_manifest["generated_at"] = now_iso()
+
+    write_json_if_changed(man_path, new_manifest)
+    write_text_if_changed(sum_path, summary_text)
+    write_json_if_changed(star_path, starlight_sidebar)
+    return 0
 
 
 def load_existing_manifest(path: Path) -> Dict:
@@ -819,12 +1097,14 @@ def fetch_one_doc(source: Source, page: DocPage, existing: Dict, site_index: Opt
 
     digest = sha256_text(markdown)
     html_digest = sha256_text(raw_article_html)
+    category_path = list(page.sections)
     entry = {
         "source": source.source_id,
         "doc_id": page.doc_id,
         "slug": page.doc_id,
         "label": page.label,
         "section": "/".join(page.sections),
+        "category_path": category_path,
         "url": page.url,
         "sha256": digest,
         "bytes": len(markdown.encode("utf-8")),
@@ -832,7 +1112,7 @@ def fetch_one_doc(source: Source, page: DocPage, existing: Dict, site_index: Opt
         "html_bytes": len(raw_article_html.encode("utf-8")),
         "converter_version": CONVERTER_VERSION,
         "first_seen_at": existing.get("first_seen_at") or now_iso(),
-        "last_verified_at": now_iso(),
+        "last_verified_at": existing.get("last_verified_at") or now_iso(),
         "fetched_at": now_iso(),
         "missing_since": None,
         "fetch_failures": 0,
@@ -1005,6 +1285,17 @@ def sync_source(
                 source_files[manifest_key] = carried
         else:
             entry = outcome.manifest_entry
+            if (
+                existing_entry
+                and existing_entry.get("sha256") == entry.get("sha256")
+                and existing_entry.get("label") == entry.get("label")
+                and normalize_category_path(existing_entry) == normalize_category_path(entry)
+                and existing_entry.get("converter_version") == entry.get("converter_version")
+            ):
+                if "fetched_at" in existing_entry:
+                    entry["fetched_at"] = existing_entry["fetched_at"]
+                if "first_seen_at" in existing_entry:
+                    entry["first_seen_at"] = existing_entry["first_seen_at"]
             dest = source_root / page.rel_path
             dest.parent.mkdir(parents=True, exist_ok=True)
             if existing_entry.get("sha256") != entry["sha256"] or not dest.exists():
@@ -1072,17 +1363,30 @@ def finalize_sync(
     successful_pages: int,
     failed_pages: List[Tuple[str, str]],
     strict_fetch: bool,
+    existing_manifest: Optional[Dict] = None,
+    docs_root: Optional[Path] = None,
+    manifest_path: Optional[Path] = None,
+    summary_path: Optional[Path] = None,
+    starlight_path: Optional[Path] = None,
+    progress_path: Optional[Path] = None,
 ) -> int:
     """Runs once every source's sync_source() call has completed normally
     (never on a circuit-breaker pause or hard error, which return early from
-    main() before reaching this): delayed deletion, the final manifest
-    write, checkpoint clearing, and the run's exit code."""
+    main() before reaching this): delayed deletion, invariant checks,
+    the final manifest/SUMMARY/Starlight write, checkpoint clearing, and the
+    run's exit code."""
+    root = DOCS_ROOT if docs_root is None else docs_root
+    man_path = (root / "docs_manifest.json") if manifest_path is None else manifest_path
+    sum_path = (root / "SUMMARY.md") if summary_path is None else summary_path
+    star_path = (root / "starlight_sidebar.json") if starlight_path is None else starlight_path
+    prog_path = (root / "sync_progress.json") if progress_path is None else progress_path
     # Delayed deletion: only drop files that have been missing for
     # MISSING_CONFIRM_RUNS consecutive runs, never on a single run.
     previous_keys = set(existing_files.keys())
     current_keys = set(new_files.keys())
     vanished_keys = previous_keys - current_keys
 
+    deletion_plan: List[str] = []
     for key in vanished_keys:
         old_entry = existing_files[key]
         missing_since = old_entry.get("missing_since")
@@ -1093,21 +1397,55 @@ def finalize_sync(
         carried["missing_since"] = missing_since
         carried["missing_run_count"] = run_count
         if run_count >= MISSING_CONFIRM_RUNS:
-            file_path = DOCS_ROOT / key
-            if file_path.exists():
-                file_path.unlink()
-                remove_empty_dirs(file_path.parent, DOCS_ROOT)
-            html_path = file_path.with_suffix(".html")
-            if html_path.exists():
-                html_path.unlink()
-            print(f"[INFO] removed {key} after {run_count} consecutive runs missing")
-            continue
-        new_files[key] = carried
-        print(f"[INFO] {key} missing this run ({run_count}/{MISSING_CONFIRM_RUNS}); keeping file for now")
+            deletion_plan.append(key)
+        else:
+            new_files[key] = carried
+            print(f"[INFO] {key} missing this run ({run_count}/{MISSING_CONFIRM_RUNS}); keeping file for now")
+
+    # Ensure every entry in new_files has normalized category_path and section
+    for key, entry in new_files.items():
+        if "category_path" not in entry:
+            entry["category_path"] = normalize_category_path(entry)
+        if "section" not in entry:
+            entry["section"] = "/".join(entry["category_path"])
+
+    # Generate navigation outputs
+    summary_text = generate_summary_markdown(new_files)
+    starlight_sidebar = generate_starlight_sidebar(new_files)
+
+    # Validate publication invariants BEFORE publishing and before deleting
+    manifest_keys = set(new_files.keys())
+    summary_links = extract_summary_links(summary_text)
+    sidebar_leaves = extract_sidebar_leaf_paths(starlight_sidebar)
+
+    try:
+        validate_publication_invariants(manifest_keys, summary_links, sidebar_leaves, docs_root=root)
+    except RuntimeError as exc:
+        print(f"[ERROR] Invariant check failed, aborting publication without changes: {exc}")
+        return 1
+
+    if existing_manifest is None:
+        existing_manifest = load_existing_manifest(man_path)
+
+    unchanged = is_manifest_business_equal(existing_manifest, new_files, failed_pages, strict_fetch)
+    if unchanged and "generated_at" in existing_manifest:
+        generated_at = existing_manifest["generated_at"]
+        stats = existing_manifest.get("stats", {
+            "total_pages": total_pages,
+            "successful_pages": successful_pages,
+            "failed_pages": len(failed_pages),
+        })
+    else:
+        generated_at = now_iso()
+        stats = {
+            "total_pages": total_pages,
+            "successful_pages": successful_pages,
+            "failed_pages": len(failed_pages),
+        }
 
     manifest = {
         "schema_version": MANIFEST_SCHEMA_VERSION,
-        "generated_at": now_iso(),
+        "generated_at": generated_at,
         "tool": "scripts/fetch_wecom_docs.py",
         "converter_version": CONVERTER_VERSION,
         "strict_fetch": strict_fetch,
@@ -1121,16 +1459,26 @@ def finalize_sync(
             }
             for s in sources
         ],
-        "stats": {
-            "total_pages": total_pages,
-            "successful_pages": successful_pages,
-            "failed_pages": len(failed_pages),
-        },
+        "stats": stats,
         "failed": [{"url": url, "error": err} for url, err in failed_pages],
         "files": {k: new_files[k] for k in sorted(new_files.keys())},
     }
 
-    write_json_atomic(MANIFEST_PATH, manifest)
+    # Invariants passed: execute deletion plan
+    for key in deletion_plan:
+        file_path = root / key
+        if file_path.exists():
+            file_path.unlink()
+            remove_empty_dirs(file_path.parent, root)
+        html_path = file_path.with_suffix(".html")
+        if html_path.exists():
+            html_path.unlink()
+        print(f"[INFO] removed {key} after {MISSING_CONFIRM_RUNS} consecutive runs missing")
+
+    # Idempotently write the 3 formal index files
+    write_json_if_changed(man_path, manifest)
+    write_text_if_changed(sum_path, summary_text)
+    write_json_if_changed(star_path, starlight_sidebar)
 
     # Every source ran its doc_ids loop to completion (no circuit breaker
     # returned early above), so this sync is fully done -- the checkpoint's
@@ -1138,8 +1486,8 @@ def finalize_sync(
     # --resume to misread. Never true of a --limit run, which only ever
     # visits a sampled subset -- it must not clear a real checkpoint just
     # because *it* happened to reach the end of its own (partial) doc_ids.
-    if args.limit is None and PROGRESS_PATH.exists():
-        PROGRESS_PATH.unlink()
+    if args.limit is None and prog_path.exists():
+        prog_path.unlink()
 
     print("\n[SUMMARY]")
     print(f"total_pages={total_pages}")
@@ -1151,12 +1499,6 @@ def finalize_sync(
         return 1
 
     if not new_files:
-        # Deliberately not `successful_pages == 0`: a --resume run whose
-        # remaining doc_ids were all already checkpointed as done (or where
-        # every newly-attempted doc happens to fail) can legitimately finish
-        # a fully-populated manifest while fetching zero *new* docs this
-        # process. What actually indicates a broken sync is an empty
-        # manifest, not an empty this-invocation delta.
         print("[ERROR] No documents in the resulting manifest")
         return 1
 
@@ -1194,7 +1536,26 @@ def main() -> int:
             "the current run."
         ),
     )
+    parser.add_argument(
+        "--offline-nav",
+        action="store_true",
+        help=(
+            "Generate SUMMARY.md, starlight_sidebar.json and migrate category_path "
+            "offline from existing docs_manifest.json without performing network fetches "
+            "or mutating sync metadata (stats, failed, converter_version)."
+        ),
+    )
     args = parser.parse_args()
+
+    if args.offline_nav:
+        summary_path = DOCS_ROOT / "SUMMARY.md"
+        starlight_path = DOCS_ROOT / "starlight_sidebar.json"
+        return offline_sync_navigation(
+            docs_root=DOCS_ROOT,
+            manifest_path=MANIFEST_PATH,
+            summary_path=summary_path,
+            starlight_path=starlight_path,
+        )
 
     strict_fetch = os.environ.get("STRICT_FETCH", "0") == "1"
 
@@ -1232,9 +1593,14 @@ def main() -> int:
         if result.stop_exit_code is not None:
             return result.stop_exit_code
 
+    summary_path = DOCS_ROOT / "SUMMARY.md"
+    starlight_path = DOCS_ROOT / "starlight_sidebar.json"
+
     return finalize_sync(
         sources, args, existing_files, new_files, total_pages, successful_pages,
-        failed_pages, strict_fetch,
+        failed_pages, strict_fetch, existing_manifest=existing_manifest,
+        docs_root=DOCS_ROOT, manifest_path=MANIFEST_PATH, summary_path=summary_path,
+        starlight_path=starlight_path, progress_path=PROGRESS_PATH,
     )
 
 
