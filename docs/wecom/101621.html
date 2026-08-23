@@ -1,0 +1,51 @@
+<div class="ep-doc-area-cherry cherry-markdown cherry-wecom" id="js-ep-doc-cnt-md"><div data-code-block-theme="coy" data-inline-code-theme="red"><p data-lines="4" data-sign="8962deb60de13de5716f01d25768fa14" data-type="p">用于更新指定智能文档中的页面信息，包括标题、布局模式、排序位置等。<br/> <br/><strong>请求方式</strong>：POST（<strong>HTTPS</strong>） <br/><strong>请求地址</strong>：https://qyapi.weixin.qq.com/cgi-bin/wedoc/smartdoc/update_page?access_token=ACCESS_TOKEN</p><p data-lines="1" data-sign="66d740442fe5a752ce55be4db5d3ece0" data-type="p"><strong>请求包体</strong> </p><div data-lines="12" data-sign="04e8e6abbd8a201d3d14ea23de90f21b" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token property">"docid"</span><span class="token operator">:</span> <span class="token string">"DOC_ID"</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"info"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">        <span class="token property">"page_id"</span><span class="token operator">:</span> <span class="token string">"PAGE_ID"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"title"</span><span class="token operator">:</span> <span class="token string">"新的页面标题"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"layout_mode"</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"after_id"</span><span class="token operator">:</span> <span class="token string">"AFTER_PAGE_ID"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"parent_id"</span><span class="token operator">:</span> <span class="token string">"PARENT_PAGE_ID"</span></span>
+<span class="code-line">    <span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><ul class="cherry-list__default" data-lines="8" data-sign="f4aa8b5679658d728e477056f5654364list8"><li>示例1：修改页面标题<br/><div data-lines="9" data-sign="dbdc364326661b7edd59254dafbdfa37" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token property">"docid"</span><span class="token operator">:</span> <span class="token string">"DOC_ID"</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"info"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">        <span class="token property">"page_id"</span><span class="token operator">:</span> <span class="token string">"PAGE_ID"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"title"</span><span class="token operator">:</span> <span class="token string">"新标题"</span></span>
+<span class="code-line">    <span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><br/></li><li>示例2：修改页面布局为全宽模式<br/><div data-lines="9" data-sign="868505023292ab991d25d238566eb162" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token property">"docid"</span><span class="token operator">:</span> <span class="token string">"DOC_ID"</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"info"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">        <span class="token property">"page_id"</span><span class="token operator">:</span> <span class="token string">"PAGE_ID"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"layout_mode"</span><span class="token operator">:</span> <span class="token number">3</span></span>
+<span class="code-line">    <span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><br/></li><li>示例3：移动页面到另一个父页面下<br/><div data-lines="10" data-sign="2dbcd3ddaa95f147d8ad0e43cfdff891" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token property">"docid"</span><span class="token operator">:</span> <span class="token string">"DOC_ID"</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"info"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">        <span class="token property">"page_id"</span><span class="token operator">:</span> <span class="token string">"PAGE_ID"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"parent_id"</span><span class="token operator">:</span> <span class="token string">"NEW_PARENT_PAGE_ID"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"after_id"</span><span class="token operator">:</span> <span class="token string">"AFTER_PAGE_ID"</span></span>
+<span class="code-line">    <span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div></li></ul><p data-lines="1" data-sign="54d2f7abd4f226094d9bdd35b3129b56" data-type="p"><strong>参数说明</strong></p><div class="cherry-table-container" data-lines="9" data-sign="f4ba09cb82cc25adad34b7e5ddc41cee">
+<table class="cherry-table"><thead><tr><th>参数</th><th>类型</th><th>是否必须</th><th>说明</th></tr></thead><tbody><tr><td>docid</td><td>string</td><td>是</td><td>智能文档的文档 id</td></tr><tr><td>info</td><td>PageInfo</td><td>是</td><td>需要更新的页面信息</td></tr><tr><td>info.page_id</td><td>string</td><td>是</td><td>要更新的页面 ID</td></tr><tr><td>info.title</td><td>string</td><td>否</td><td>新的页面标题</td></tr><tr><td>info.layout_mode</td><td>uint32</td><td>否</td><td>页面布局模式，参见 <a href="#61635/pagelayoutmode" rel="nofollow">PageLayoutMode</a></td></tr><tr><td>info.after_id</td><td>string</td><td>否</td><td>新的排序位置，表示排在哪个页面之后，为空表示移到最后</td></tr><tr><td>info.parent_id</td><td>string</td><td>否</td><td>父页面 ID，用于移动页面到其他父节点下</td></tr></tbody></table></div><p data-lines="2" data-sign="9aa60bee95e8cdc71f9a24e8f544d4d0" data-type="p"> <br/><strong>权限说明</strong></p><ul class="cherry-list__default" data-lines="3" data-sign="e638a8a46e1ac2f3ea6da444a10d9241list3"><li>自建应用需配置到"可调用应用"列表中的应用secret所获取的accesstoken来调用</li><li>第三方应用需具有"文档"权限</li><li>代开发自建应用需具有"文档"权限</li></ul><p data-lines="2" data-sign="b545318d217cc03b71689681f94637c5" data-type="p"><strong>返回示例</strong><br/> </p><div data-lines="13" data-sign="55e283c4c9396feb4bd17a6c45542eae" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token property">"errcode"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"errmsg"</span><span class="token operator">:</span> <span class="token string">"ok"</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"info"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">        <span class="token property">"page_id"</span><span class="token operator">:</span> <span class="token string">"PAGE_ID"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"title"</span><span class="token operator">:</span> <span class="token string">"新的页面标题"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"layout_mode"</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"after_id"</span><span class="token operator">:</span> <span class="token string">"AFTER_PAGE_ID"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"parent_id"</span><span class="token operator">:</span> <span class="token string">"PARENT_PAGE_ID"</span></span>
+<span class="code-line">    <span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><p data-lines="2" data-sign="5316a3650aebb5577f61570597715c2f" data-type="p"><strong>参数说明</strong><br/> </p><div class="cherry-table-container" data-lines="10" data-sign="b2c629e2c3a3cca253fe9dca5e94a60e">
+<table class="cherry-table"><thead><tr><th>参数</th><th>类型</th><th>说明</th></tr></thead><tbody><tr><td>errcode</td><td>int32</td><td>错误码</td></tr><tr><td>errmsg</td><td>string</td><td>错误码说明</td></tr><tr><td>info</td><td>PageInfo</td><td>更新后的页面信息</td></tr><tr><td>info.page_id</td><td>string</td><td>页面 ID</td></tr><tr><td>info.title</td><td>string</td><td>页面标题</td></tr><tr><td>info.layout_mode</td><td>uint32</td><td>页面布局模式</td></tr><tr><td>info.after_id</td><td>string</td><td>排序位置（在哪个页面之后）</td></tr><tr><td>info.parent_id</td><td>string</td><td>父页面 ID</td></tr></tbody></table></div></div></div>

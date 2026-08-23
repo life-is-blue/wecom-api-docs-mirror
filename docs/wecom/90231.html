@@ -1,0 +1,90 @@
+<div class="ep-doc-area-cherry cherry-markdown cherry-wecom" id="js-ep-doc-cnt-md"><div data-code-block-theme="coy" data-inline-code-theme="red"><p data-lines="1" data-sign="c741d61cf3cece779565a36442d95d62" data-type="p">自定义菜单接口可实现多种类型按钮，如下：</p><div class="cherry-table-container" data-lines="11" data-sign="68402b105b110b1b871d961fe468327e">
+<table class="cherry-table"><thead><tr><th>字段值</th><th>功能名称</th><th>说明</th></tr></thead><tbody><tr><td>click</td><td>点击推事件</td><td>成员点击click类型按钮后，企业微信服务器会通过消息接口推送消息类型为event 的结构给开发者（参考消息接口指南），并且带上按钮中开发者填写的key值，开发者可以通过自定义的key值与成员进行交互；</td></tr><tr><td>view</td><td>跳转URL</td><td>成员点击view类型按钮后，企业微信客户端将会打开开发者在按钮中填写的网页URL，可与网页授权<a href="#15574" rel="nofollow">获取成员基本信息接口</a>结合，获得成员基本信息。</td></tr><tr><td>scancode_push</td><td>扫码推事件</td><td>成员点击按钮后，企业微信客户端将调起扫一扫工具，完成扫码操作后显示扫描结果（如果是URL，将进入URL），且会将扫码的结果传给开发者，开发者可用于下发消息。</td></tr><tr><td>scancode_waitmsg</td><td>扫码推事件 且弹出“消息接收中”提示框</td><td>成员点击按钮后，企业微信客户端将调起扫一扫工具，完成扫码操作后，将扫码的结果传给开发者，同时收起扫一扫工具，然后弹出“消息接收中”提示框，随后可能会收到开发者下发的消息。</td></tr><tr><td>pic_sysphoto</td><td>弹出系统拍照发图</td><td>弹出系统拍照发图	成员点击按钮后，企业微信客户端将调起系统相机，完成拍照操作后，会将拍摄的相片发送给开发者，并推送事件给开发者，同时收起系统相机，随后可能会收到开发者下发的消息。</td></tr><tr><td>pic_photo_or_album</td><td>弹出拍照或者相册发图</td><td>成员点击按钮后，企业微信客户端将弹出选择器供成员选择“拍照”或者“从手机相册选择”。成员选择后即走其他两种流程。</td></tr><tr><td>pic_weixin</td><td>弹出企业微信相册发图器</td><td>成员点击按钮后，企业微信客户端将调起企业微信相册，完成选择操作后，将选择的相片发送给开发者的服务器，并推送事件给开发者，同时收起相册，随后可能会收到开发者下发的消息。</td></tr><tr><td>location_select</td><td>弹出地理位置选择器</td><td>成员点击按钮后，企业微信客户端将调起地理位置选择工具，完成选择操作后，将选择的地理位置发送给开发者的服务器，同时收起位置选择工具，随后可能会收到开发者下发的消息。</td></tr><tr><td>view_miniprogram</td><td>跳转到小程序</td><td>成员点击按钮后，企业微信客户端将会打开开发者在按钮中配置的小程序</td></tr></tbody></table></div><p data-lines="3" data-sign="8bdc09bc5de6ab75e255e98e952edebf" data-type="p"><strong>请求方式：</strong>POST（<strong>HTTPS</strong>）<br/><strong>请求地址：</strong>https://qyapi.weixin.qq.com/cgi-bin/menu/create?access_token=ACCESS_TOKEN&amp;agentid=AGENTID</p><p data-lines="2" data-sign="3bb87b25d1fdff6c35dae5dd9b726712" data-type="p"><strong>示例：构造click和view类型的请求包如下</strong></p><div data-lines="27" data-sign="4299a5853021ff4b5b9f885a510e207c" data-type="codeBlock">
+<pre class="language-javascript"><code class="language-javascript wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">   <span class="token string">"button"</span><span class="token operator">:</span><span class="token punctuation">[</span></span>
+<span class="code-line">       <span class="token punctuation">{</span>    </span>
+<span class="code-line">           <span class="token string">"type"</span><span class="token operator">:</span><span class="token string">"click"</span><span class="token punctuation">,</span></span>
+<span class="code-line">           <span class="token string">"name"</span><span class="token operator">:</span><span class="token string">"今日歌曲"</span><span class="token punctuation">,</span></span>
+<span class="code-line">           <span class="token string">"key"</span><span class="token operator">:</span><span class="token string">"V1001_TODAY_MUSIC"</span></span>
+<span class="code-line">       <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">       <span class="token punctuation">{</span></span>
+<span class="code-line">           <span class="token string">"name"</span><span class="token operator">:</span><span class="token string">"菜单"</span><span class="token punctuation">,</span></span>
+<span class="code-line">           <span class="token string">"sub_button"</span><span class="token operator">:</span><span class="token punctuation">[</span></span>
+<span class="code-line">               <span class="token punctuation">{</span></span>
+<span class="code-line">                   <span class="token string">"type"</span><span class="token operator">:</span><span class="token string">"view"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                   <span class="token string">"name"</span><span class="token operator">:</span><span class="token string">"搜索"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                   <span class="token string">"url"</span><span class="token operator">:</span><span class="token string">"http://www.soso.com/"</span></span>
+<span class="code-line">               <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">               <span class="token punctuation">{</span></span>
+<span class="code-line">                   <span class="token string">"type"</span><span class="token operator">:</span><span class="token string">"click"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                   <span class="token string">"name"</span><span class="token operator">:</span><span class="token string">"赞一下我们"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                   <span class="token string">"key"</span><span class="token operator">:</span><span class="token string">"V1001_GOOD"</span></span>
+<span class="code-line">               <span class="token punctuation">}</span></span>
+<span class="code-line">           <span class="token punctuation">]</span></span>
+<span class="code-line">      <span class="token punctuation">}</span></span>
+<span class="code-line">   <span class="token punctuation">]</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><p data-lines="2" data-sign="230842b32ce552d2ee1a86382a25f562" data-type="p"><strong>示例：其他新增按钮类型的请求</strong></p><div data-lines="58" data-sign="3bbec433f4b0649aac417dfd59791e80" data-type="codeBlock">
+<pre class="language-javascript"><code class="language-javascript wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token string">"button"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">        <span class="token punctuation">{</span></span>
+<span class="code-line">            <span class="token string">"name"</span><span class="token operator">:</span> <span class="token string">"扫码"</span><span class="token punctuation">,</span> </span>
+<span class="code-line">            <span class="token string">"sub_button"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"scancode_waitmsg"</span><span class="token punctuation">,</span> </span>
+<span class="code-line">                    <span class="token string">"name"</span><span class="token operator">:</span> <span class="token string">"扫码带提示"</span><span class="token punctuation">,</span> </span>
+<span class="code-line">                    <span class="token string">"key"</span><span class="token operator">:</span> <span class="token string">"rselfmenu_0_0"</span><span class="token punctuation">,</span> </span>
+<span class="code-line">                    <span class="token string">"sub_button"</span><span class="token operator">:</span> <span class="token punctuation">[</span> <span class="token punctuation">]</span></span>
+<span class="code-line">                <span class="token punctuation">}</span><span class="token punctuation">,</span> </span>
+<span class="code-line">                <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"scancode_push"</span><span class="token punctuation">,</span> </span>
+<span class="code-line">                    <span class="token string">"name"</span><span class="token operator">:</span> <span class="token string">"扫码推事件"</span><span class="token punctuation">,</span> </span>
+<span class="code-line">                    <span class="token string">"key"</span><span class="token operator">:</span> <span class="token string">"rselfmenu_0_1"</span><span class="token punctuation">,</span> </span>
+<span class="code-line">                    <span class="token string">"sub_button"</span><span class="token operator">:</span> <span class="token punctuation">[</span> <span class="token punctuation">]</span></span>
+<span class="code-line">                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">				<span class="token punctuation">{</span></span>
+<span class="code-line">					<span class="token string">"type"</span><span class="token operator">:</span><span class="token string">"view_miniprogram"</span><span class="token punctuation">,</span></span>
+<span class="code-line">					<span class="token string">"name"</span><span class="token operator">:</span><span class="token string">"小程序"</span><span class="token punctuation">,</span></span>
+<span class="code-line">					<span class="token string">"pagepath"</span><span class="token operator">:</span><span class="token string">"pages/lunar/index"</span><span class="token punctuation">,</span></span>
+<span class="code-line">					<span class="token string">"appid"</span><span class="token operator">:</span><span class="token string">"wx4389ji4kAAA"</span></span>
+<span class="code-line">				<span class="token punctuation">}</span></span>
+<span class="code-line">            <span class="token punctuation">]</span></span>
+<span class="code-line">        <span class="token punctuation">}</span><span class="token punctuation">,</span> </span>
+<span class="code-line">        <span class="token punctuation">{</span></span>
+<span class="code-line">            <span class="token string">"name"</span><span class="token operator">:</span> <span class="token string">"发图"</span><span class="token punctuation">,</span> </span>
+<span class="code-line">            <span class="token string">"sub_button"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"pic_sysphoto"</span><span class="token punctuation">,</span> </span>
+<span class="code-line">                    <span class="token string">"name"</span><span class="token operator">:</span> <span class="token string">"系统拍照发图"</span><span class="token punctuation">,</span> </span>
+<span class="code-line">                    <span class="token string">"key"</span><span class="token operator">:</span> <span class="token string">"rselfmenu_1_0"</span><span class="token punctuation">,</span> </span>
+<span class="code-line">                   <span class="token string">"sub_button"</span><span class="token operator">:</span> <span class="token punctuation">[</span> <span class="token punctuation">]</span></span>
+<span class="code-line">                 <span class="token punctuation">}</span><span class="token punctuation">,</span> </span>
+<span class="code-line">                <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"pic_photo_or_album"</span><span class="token punctuation">,</span> </span>
+<span class="code-line">                    <span class="token string">"name"</span><span class="token operator">:</span> <span class="token string">"拍照或者相册发图"</span><span class="token punctuation">,</span> </span>
+<span class="code-line">                    <span class="token string">"key"</span><span class="token operator">:</span> <span class="token string">"rselfmenu_1_1"</span><span class="token punctuation">,</span> </span>
+<span class="code-line">                    <span class="token string">"sub_button"</span><span class="token operator">:</span> <span class="token punctuation">[</span> <span class="token punctuation">]</span></span>
+<span class="code-line">                <span class="token punctuation">}</span><span class="token punctuation">,</span> </span>
+<span class="code-line">                <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"pic_weixin"</span><span class="token punctuation">,</span> </span>
+<span class="code-line">                    <span class="token string">"name"</span><span class="token operator">:</span> <span class="token string">"微信相册发图"</span><span class="token punctuation">,</span> </span>
+<span class="code-line">                    <span class="token string">"key"</span><span class="token operator">:</span> <span class="token string">"rselfmenu_1_2"</span><span class="token punctuation">,</span> </span>
+<span class="code-line">                    <span class="token string">"sub_button"</span><span class="token operator">:</span> <span class="token punctuation">[</span> <span class="token punctuation">]</span></span>
+<span class="code-line">                <span class="token punctuation">}</span></span>
+<span class="code-line">            <span class="token punctuation">]</span></span>
+<span class="code-line">        <span class="token punctuation">}</span><span class="token punctuation">,</span> </span>
+<span class="code-line">        <span class="token punctuation">{</span></span>
+<span class="code-line">            <span class="token string">"name"</span><span class="token operator">:</span> <span class="token string">"发送位置"</span><span class="token punctuation">,</span> </span>
+<span class="code-line">            <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"location_select"</span><span class="token punctuation">,</span> </span>
+<span class="code-line">            <span class="token string">"key"</span><span class="token operator">:</span> <span class="token string">"rselfmenu_2_0"</span></span>
+<span class="code-line">        <span class="token punctuation">}</span></span>
+<span class="code-line">    <span class="token punctuation">]</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><p data-lines="1" data-sign="f2e21495051cadd2d5b0f8a3eedbae8d" data-type="p"><strong>参数说明：</strong></p><div class="cherry-table-container" data-lines="12" data-sign="0f9bb92347b5f3bef54977271284c69b">
+<table class="cherry-table"><thead><tr><th>参数</th><th>必须</th><th>说明</th></tr></thead><tbody><tr><td>access_token</td><td>是</td><td>调用接口凭证</td></tr><tr><td>agentid</td><td>是</td><td>企业应用的id，整型。可在应用的设置页面查看</td></tr><tr><td>button</td><td>是</td><td>一级菜单数组，个数应为1~3个</td></tr><tr><td>sub_button</td><td>否</td><td>二级菜单数组，个数应为1~5个</td></tr><tr><td>type</td><td>是</td><td>菜单的响应动作类型</td></tr><tr><td>name</td><td>是</td><td>菜单的名字。不能为空，主菜单不能超过16字节，子菜单不能超过40字节。</td></tr><tr><td>key</td><td>click等点击类型必须</td><td>菜单KEY值，用于消息接口推送，不超过128字节</td></tr><tr><td>url</td><td>view类型必须</td><td>网页链接，成员点击菜单可打开链接，不超过1024字节。为了提高安全性，建议使用https的url</td></tr><tr><td>pagepath</td><td>view_miniprogram类型必须</td><td>小程序的页面路径</td></tr><tr><td>appid</td><td>view_miniprogram类型必须</td><td>小程序的appid（仅与企业绑定的小程序可配置）</td></tr></tbody></table></div><p data-lines="2" data-sign="852a6d26bdd26ec0c49d4afe68d8381e" data-type="p"><strong>权限说明 :</strong></p><p data-lines="2" data-sign="6c70850ccbf050e4fe67e8f52cc00d14" data-type="p">仅企业可调用；第三方不可调用。</p><p data-lines="2" data-sign="0b789d7580f376b3feaff0d57431f7b7" data-type="p"><strong>返回结果 ：</strong></p><div data-lines="8" data-sign="8beb28475c2476d41d2471df0f96fc43" data-type="codeBlock">
+<pre class="language-javascript"><code class="language-javascript wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">   <span class="token string">"errcode"</span><span class="token operator">:</span><span class="token number">0</span><span class="token punctuation">,</span></span>
+<span class="code-line">   <span class="token string">"errmsg"</span><span class="token operator">:</span><span class="token string">"ok"</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span>
+<span class="code-line"></span></code></pre>
+</div></div></div>

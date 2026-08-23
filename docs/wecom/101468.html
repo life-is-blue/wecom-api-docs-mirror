@@ -1,0 +1,622 @@
+<div class="ep-doc-area-cherry cherry-markdown cherry-wecom" id="js-ep-doc-cnt-md"><div data-code-block-theme="coy" data-inline-code-theme="red"><dir class="toc" data-lines="1" data-sign="e0bd9cfdec09ee0021aaccad54dccaf1-1"><p class="toc-title">目录</p><li class="toc-li"><a class="level-3" href="#%E6%A6%82%E8%BF%B0"><strong>概述</strong></a></li><li class="toc-li"><a class="level-3" href="#%E6%8E%88%E6%9D%83%E6%93%8D%E4%BD%9C"><strong>授权操作</strong></a></li><li class="toc-li"><a class="level-3" href="#%E5%B7%A5%E5%85%B7%E4%BB%8B%E7%BB%8D"><strong>工具介绍</strong></a></li><li class="toc-li">      <a class="level-4" href="#create-doc%EF%BC%9A%E6%96%B0%E5%BB%BA%E6%96%87%E6%A1%A3%E6%88%96%E6%99%BA%E8%83%BD%E8%A1%A8%E6%A0%BC"><strong>create_doc：新建文档或智能表格</strong></a></li><li class="toc-li">      <a class="level-4" href="#edit-doc-content%EF%BC%9A%E7%BC%96%E8%BE%91%E6%96%87%E6%A1%A3%E5%86%85%E5%AE%B9"><strong>edit_doc_content：编辑文档内容</strong></a></li><li class="toc-li">      <a class="level-4" href="#smartsheet-add-sheet%EF%BC%9A%E6%B7%BB%E5%8A%A0%E6%99%BA%E8%83%BD%E8%A1%A8%E6%A0%BC%E5%AD%90%E8%A1%A8"><strong>smartsheet_add_sheet：添加智能表格子表</strong></a></li><li class="toc-li">      <a class="level-4" href="#smartsheet-get-sheet%EF%BC%9A%E6%9F%A5%E8%AF%A2%E6%99%BA%E8%83%BD%E8%A1%A8%E6%A0%BC%E5%AD%90%E8%A1%A8"><strong>smartsheet_get_sheet：查询智能表格子表</strong></a></li><li class="toc-li">      <a class="level-4" href="#smartsheet-add-fields%EF%BC%9A%E6%B7%BB%E5%8A%A0%E6%99%BA%E8%83%BD%E8%A1%A8%E6%A0%BC%E5%AD%97%E6%AE%B5"><strong>smartsheet_add_fields：添加智能表格字段</strong></a></li><li class="toc-li">      <a class="level-4" href="#smartsheet-update-fields%EF%BC%9A%E6%9B%B4%E6%96%B0%E6%99%BA%E8%83%BD%E8%A1%A8%E6%A0%BC%E5%AD%97%E6%AE%B5"><strong>smartsheet_update_fields：更新智能表格字段</strong></a></li><li class="toc-li">      <a class="level-4" href="#smartsheet-get-fields%EF%BC%9A%E6%9F%A5%E8%AF%A2%E6%99%BA%E8%83%BD%E8%A1%A8%E6%A0%BC%E5%AD%97%E6%AE%B5%EF%BC%9A"><strong>smartsheet_get_fields：查询智能表格字段：</strong></a></li><li class="toc-li">      <a class="level-4" href="#smartsheet-add-records%EF%BC%9A%E6%B7%BB%E5%8A%A0%E6%99%BA%E8%83%BD%E8%A1%A8%E6%A0%BC%E8%AE%B0%E5%BD%95"><strong>smartsheet_add_records：添加智能表格记录</strong></a></li></dir><h3 data-lines="2" data-sign="c8f250698fc6b8ecc7f3ee841d0a9e5c" id="%E6%A6%82%E8%BF%B0"><a class="anchor" href="#%E6%A6%82%E8%BF%B0"></a><strong>概述</strong></h3><p data-lines="3" data-sign="7ee87ce11a26d621a975c98792736bf7" data-type="p">API模式创建的机器人，已支持由成员授权机器人「文档」使用权限。授权后，机器人可以便捷地新建、写入文档和智能表格，提高办公效率。成员可以让机器人完成报告生成、信息汇集等工作。<br/>文档创建后，机器人将成为文档的创建者；机器人仅可编辑自己创建的文档。<br/>目前该能力支持以MCP方式调用。具体能力如下：</p><ul class="cherry-list__default" data-lines="8" data-sign="d188293fd868e4a7ee07432b7e5326a3list8"><li><strong>新建文档</strong>：用于新建文档、智能表格，创建后可获得文档链接</li><li><strong>编辑文档内容</strong>：支持写入文档内容，支持markdown格式</li><li><strong>添加智能表格子表</strong>：在智能表格内添加工作表</li><li><strong>查询智能表格子表</strong>：查询智能表格工作表基本信息</li><li><strong>添加智能表格字段</strong>：在智能表格的工作表内新增一列或多列字段</li><li><strong>更新智能表格字段</strong>：更新智能表格字段的标题</li><li><strong>查询智能表格字段</strong>：查询智能表格字段的标题和类型</li><li><strong>添加智能表格记录</strong>：在智能表格内新增一行或多行记录</li></ul><h3 data-lines="2" data-sign="caf6715a01f2d7bbf9f261eafb20fe92" id="%E6%8E%88%E6%9D%83%E6%93%8D%E4%BD%9C"><a class="anchor" href="#%E6%8E%88%E6%9D%83%E6%93%8D%E4%BD%9C"></a><strong>授权操作</strong></h3><p data-lines="1" data-sign="e90ef369eb7353f5497cb762e528dd49" data-type="p"><strong>前置要求</strong>：需要创建一个API模式机器人</p><p data-lines="1" data-sign="40e4c8b03cd6bcf7c1e704c43af604dc" data-type="p"><strong>授权流程</strong>：</p><ol class="cherry-list__default" data-lines="9" data-sign="69518fab86ab5e3eb9288062d451f595list9" data-start="1" start="1"><li>入口：工作台-智能机器人-找到对应API模式机器人，点击“编辑”</li><li>在编辑页，点击「可使用权限」<br/><img alt="enter image description here" data-alt="enter image description here" src="https://wework.qpic.cn/wwpic3az/450703_4b8OtpOoR4WE3X2_1773242699/0"/></li><li>点击授权<br/><img alt="enter image description here" data-alt="enter image description here" src="https://wework.qpic.cn/wwpic3az/265030_PAz6aqddSSWts3y_1773242740/0"/></li><li>授权成功，当前授权有效期为7天，点击查看使用方式<br/><img alt="enter image description here" data-alt="enter image description here" src="https://wework.qpic.cn/wwpic3az/86244_mcNk_JzaQX25JT3_1773242810/0"/></li><li>点击复制streamableHTTP URL或者JSON Config，可根据实际使用场景自行选择<br/><img alt="enter image description here" data-alt="enter image description here" src="https://wework.qpic.cn/wwpic3az/697388_rojT7dzJT_CWkhE_1773373766/0"/></li></ol><p data-lines="2" data-sign="035741e0b49f46f1ae989bc50df4832f" data-type="p">若需在openclaw使用，可使用通过企业微信openclaw插件进行使用，具体可见：<br/><a href="https://open.work.weixin.qq.com/help2/pc/cat?doc_id=21658" rel="nofollow">以长连接方式接入OpenClaw</a></p><h3 data-lines="2" data-sign="da8fa57a5818b9504c5f3e18da91dfb5" id="%E5%B7%A5%E5%85%B7%E4%BB%8B%E7%BB%8D"><a class="anchor" href="#%E5%B7%A5%E5%85%B7%E4%BB%8B%E7%BB%8D"></a><strong>工具介绍</strong></h3><h4 data-lines="1" data-sign="092014a770554ec2d95f70a7289c022f" id="create-doc%EF%BC%9A%E6%96%B0%E5%BB%BA%E6%96%87%E6%A1%A3%E6%88%96%E6%99%BA%E8%83%BD%E8%A1%A8%E6%A0%BC"><a class="anchor" href="#create-doc%EF%BC%9A%E6%96%B0%E5%BB%BA%E6%96%87%E6%A1%A3%E6%88%96%E6%99%BA%E8%83%BD%E8%A1%A8%E6%A0%BC"></a><strong>create_doc：新建文档或智能表格</strong></h4><p data-lines="2" data-sign="46e015cf40bcf033b08f60282bfbdf9e" data-type="p">新建成功后返回文档访问链接和 docid（docid 仅在创建时返回，需妥善保存）。注意：创建智能表格（doc_type=10）时，文档会默认包含一个子表，可通过 smartsheet_get_sheet 查询其 sheet_id，无需额外调用 smartsheet_add_sheet。<br/>WARNING: 创建智能表格后，默认子表自带一个默认字段（标题"文本"）。你在添加字段前，必须按以下步骤处理：</p><ol class="cherry-list__default" data-lines="3" data-sign="4676e69e0f9d0efc1c492b2a78d8e0c4list3" start="1"><li>调用 smartsheet_get_fields 获取默认字段的 field_id</li><li>调用 smartsheet_update_fields 将默认字段重命名为你需要的第一个字段</li><li>调用 smartsheet_add_fields 只添加剩余字段，如果跳过步骤1-2直接add_fields，会多出一个无用的默认列 </li></ol><p data-lines="1" data-sign="002849c1b5940dbeddd106f00f69783b" data-type="p"><strong>入参</strong></p><div data-lines="29" data-sign="2012b6e173c50cfa98c72c97ef00fa0f" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token property">"inputSchema"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">        <span class="token property">"properties"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">            <span class="token property">"doc_type"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token property">"description"</span><span class="token operator">:</span> <span class="token string">"文档类型：3-文档，10-智能表格"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token property">"enum"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                    <span class="token number">3</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token number">10</span></span>
+<span class="code-line">                <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token property">"title"</span><span class="token operator">:</span> <span class="token string">"Doc Type"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"integer"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token property">"doc_name"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token property">"description"</span><span class="token operator">:</span> <span class="token string">"文档名字，最多 255 个字符，超过会被截断"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token property">"title"</span><span class="token operator">:</span> <span class="token string">"Doc Name"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span></span>
+<span class="code-line">        <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"required"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">            <span class="token string">"doc_type"</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"doc_name"</span></span>
+<span class="code-line">        <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"title"</span><span class="token operator">:</span> <span class="token string">"create_docArguments"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"object"</span></span>
+<span class="code-line">    <span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><h4 data-lines="2" data-sign="97596d81684a36064457fede174193b3" id="edit-doc-content%EF%BC%9A%E7%BC%96%E8%BE%91%E6%96%87%E6%A1%A3%E5%86%85%E5%AE%B9"><a class="anchor" href="#edit-doc-content%EF%BC%9A%E7%BC%96%E8%BE%91%E6%96%87%E6%A1%A3%E5%86%85%E5%AE%B9"></a><strong>edit_doc_content：编辑文档内容</strong></h4><p data-lines="1" data-sign="ed2c0526bec0c8186f978f2a8289f2ea" data-type="p">编辑文档内容。content 参数直接传入 Markdown 原文，例如 "# 标题\n正文内容"，不要将 Markdown 文本再用引号包成 JSON 字符串。</p><p data-lines="1" data-sign="002849c1b5940dbeddd106f00f69783b" data-type="p"><strong>入参</strong></p><div data-lines="33" data-sign="b1f1e6f28e042aa4e1204d6acf260560" data-type="codeBlock">
+<pre class="language-javascript"><code class="language-javascript wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token string">"inputSchema"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">        <span class="token string">"properties"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">            <span class="token string">"docid"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"文档 id"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Docid"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"content"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"覆写的文档内容，直接传入原始 Markdown 文本，不要对内容做额外的 JSON 转义或用引号包裹"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Content"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"content_type"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"内容类型格式。1:markdown"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"enum"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                    <span class="token number">1</span></span>
+<span class="code-line">                <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Content Type"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"integer"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span></span>
+<span class="code-line">        <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token string">"required"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">            <span class="token string">"docid"</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"content"</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"content_type"</span></span>
+<span class="code-line">        <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"edit_doc_contentArguments"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"object"</span></span>
+<span class="code-line">    <span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><h4 data-lines="2" data-sign="110cef23ba176bccb9456c6102fc1d8a" id="smartsheet-add-sheet%EF%BC%9A%E6%B7%BB%E5%8A%A0%E6%99%BA%E8%83%BD%E8%A1%A8%E6%A0%BC%E5%AD%90%E8%A1%A8"><a class="anchor" href="#smartsheet-add-sheet%EF%BC%9A%E6%B7%BB%E5%8A%A0%E6%99%BA%E8%83%BD%E8%A1%A8%E6%A0%BC%E5%AD%90%E8%A1%A8"></a><strong>smartsheet_add_sheet：添加智能表格子表</strong></h4><p data-lines="2" data-sign="3016e8d3476570a1be6a1e1aaf4e74ed" data-type="p">在指定文档中添加一个空的智能表（子表）。注意：新建的智能表格文档默认已包含一个子表，仅在需要多个子表时才需调用此接口。<br/>WARNING: 新建的子表自带一个默认字段（标题"智能表列"）。你在添加字段前，必须按以下步骤处理：</p><ol class="cherry-list__default" data-lines="3" data-sign="24462f8c31157117a27c5954c029d9a0list3" start="1"><li>调用 smartsheet_get_fields 获取默认字段的 field_id</li><li>调用 smartsheet_update_fields 将默认字段重命名为你需要的第一个字段</li><li>调用 smartsheet_add_fields 只添加剩余字段，如果跳过步骤1-2直接add_fields，表格会多出一个无用的默认列。</li></ol><p data-lines="1" data-sign="002849c1b5940dbeddd106f00f69783b" data-type="p"><strong>入参</strong></p><div data-lines="52" data-sign="344cd644fe5cf4a4158acdaaf9da57ef" data-type="codeBlock">
+<pre class="language-javascript"><code class="language-javascript wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token string">"inputSchema"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">        <span class="token string">"$defs"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">            <span class="token string">"SheetProperties"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"智能表属性"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"properties"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token string">"title"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"anyOf"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"null"</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span></span>
+<span class="code-line">                        <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"default"</span><span class="token operator">:</span> <span class="token keyword">null</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"智能表标题"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Title"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span></span>
+<span class="code-line">                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"SheetProperties"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"object"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span></span>
+<span class="code-line">        <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token string">"properties"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">            <span class="token string">"docid"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"文档的 docid"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Docid"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"properties"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"anyOf"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                    <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"$ref"</span><span class="token operator">:</span> <span class="token string">"#/$defs/SheetProperties"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"null"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span></span>
+<span class="code-line">                <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"default"</span><span class="token operator">:</span> <span class="token keyword">null</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"智能表属性"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span></span>
+<span class="code-line">        <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token string">"required"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">            <span class="token string">"docid"</span></span>
+<span class="code-line">        <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"smartsheet_add_sheetArguments"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"object"</span></span>
+<span class="code-line">    <span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><h4 data-lines="2" data-sign="f4c0665a10a652659dbf954db0725d08" id="smartsheet-get-sheet%EF%BC%9A%E6%9F%A5%E8%AF%A2%E6%99%BA%E8%83%BD%E8%A1%A8%E6%A0%BC%E5%AD%90%E8%A1%A8"><a class="anchor" href="#smartsheet-get-sheet%EF%BC%9A%E6%9F%A5%E8%AF%A2%E6%99%BA%E8%83%BD%E8%A1%A8%E6%A0%BC%E5%AD%90%E8%A1%A8"></a><strong>smartsheet_get_sheet：查询智能表格子表</strong></h4><p data-lines="2" data-sign="237caeb99595de781fe432a656b0edd8" data-type="p">查询指定文档中的智能表（子表）信息，返回 sheet_id 列表。<br/>IMPORTANT: 获取 sheet_id 后，下一步必须调用 smartsheet_get_fields 查看该子表的现有字段。子表默认自带一个文本字段，你需要先用 smartsheet_update_fields 重命名该默认字段，再用 smartsheet_add_fields 添加其余字段。</p><p data-lines="2" data-sign="002849c1b5940dbeddd106f00f69783b" data-type="p"><strong>入参</strong></p><div data-lines="12" data-sign="d99efd56c5ecab69ae3322df457adc20" data-type="codeBlock">
+<pre class="language-javascript"><code class="language-javascript wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token string">"properties"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">        <span class="token string">"docid"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">            <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"文档的 docid"</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Docid"</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">        <span class="token punctuation">}</span></span>
+<span class="code-line">    <span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><h4 data-lines="2" data-sign="f1e5de30aeb4eb3e12a2fa51d54c554b" id="smartsheet-add-fields%EF%BC%9A%E6%B7%BB%E5%8A%A0%E6%99%BA%E8%83%BD%E8%A1%A8%E6%A0%BC%E5%AD%97%E6%AE%B5"><a class="anchor" href="#smartsheet-add-fields%EF%BC%9A%E6%B7%BB%E5%8A%A0%E6%99%BA%E8%83%BD%E8%A1%A8%E6%A0%BC%E5%AD%97%E6%AE%B5"></a><strong>smartsheet_add_fields：添加智能表格字段</strong></h4><p data-lines="1" data-sign="002849c1b5940dbeddd106f00f69783b" data-type="p"><strong>入参</strong></p><div data-lines="65" data-sign="905814cc6db5f22c6eb281bfef720c6c" data-type="codeBlock">
+<pre class="language-javascript"><code class="language-javascript wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token string">"inputSchema"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">        <span class="token string">"properties"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">            <span class="token string">"docid"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"文档的 docid"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Docid"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"sheet_id"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"子表的 sheet ID"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Sheet Id"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"fields"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"要添加的字段列表"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"items"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token string">"properties"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"field_title"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                            <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"字段标题"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">                        <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"field_type"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                            <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"字段类型。FIELD_TYPE_TEXT: 文本（适用于名称、标题、描述、负责人姓名等自由文本）, FIELD_TYPE_NUMBER: 数字（适用于金额、工时、数量等数值）, FIELD_TYPE_CHECKBOX: 复选框, FIELD_TYPE_DATE_TIME: 日期时间, FIELD_TYPE_IMAGE: 图片, FIELD_TYPE_USER: 用户/成员（需要传入 user_id，仅在明确知道成员ID时使用；如果用户只提供了姓名，应使用 TEXT 类型代替）, FIELD_TYPE_URL: 链接, FIELD_TYPE_SELECT: 多选, FIELD_TYPE_PROGRESS: 进度（适用于完成进度、完成百分比，值为 0-100 的整数）, FIELD_TYPE_PHONE_NUMBER: 手机号, FIELD_TYPE_EMAIL: 邮箱, FIELD_TYPE_SINGLE_SELECT: 单选（适用于状态、优先级、严重程度、分类等有固定选项的字段）, FIELD_TYPE_LOCATION: 位置, FIELD_TYPE_CURRENCY: 货币, FIELD_TYPE_PERCENTAGE: 百分比（适用于比率类数值，如完成率、转化率）, FIELD_TYPE_BARCODE: 条码"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token string">"enum"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_TEXT"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_NUMBER"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_CHECKBOX"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_DATE_TIME"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_IMAGE"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_USER"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_URL"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_SELECT"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_PROGRESS"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_PHONE_NUMBER"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_EMAIL"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_SINGLE_SELECT"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_LOCATION"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_CURRENCY"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_PERCENTAGE"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_BARCODE"</span></span>
+<span class="code-line">                            <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">                        <span class="token punctuation">}</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"required"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                        <span class="token string">"field_title"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"field_type"</span></span>
+<span class="code-line">                    <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"object"</span></span>
+<span class="code-line">                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Fields"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"array"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span></span>
+<span class="code-line">        <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token string">"required"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">            <span class="token string">"docid"</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"sheet_id"</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"fields"</span></span>
+<span class="code-line">        <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"smartsheet_add_fieldsArguments"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"object"</span></span>
+<span class="code-line">    <span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><h4 data-lines="2" data-sign="deb9eec6f3129a2d3ce567fd41cd0822" id="smartsheet-update-fields%EF%BC%9A%E6%9B%B4%E6%96%B0%E6%99%BA%E8%83%BD%E8%A1%A8%E6%A0%BC%E5%AD%97%E6%AE%B5"><a class="anchor" href="#smartsheet-update-fields%EF%BC%9A%E6%9B%B4%E6%96%B0%E6%99%BA%E8%83%BD%E8%A1%A8%E6%A0%BC%E5%AD%97%E6%AE%B5"></a><strong>smartsheet_update_fields：更新智能表格字段</strong></h4><p data-lines="2" data-sign="4aa70ae850610f8ab1f23d4cc3c0def7" data-type="p">更新企业微信智能表格子表中一个或多个字段的标题。注意：该接口只能更新字段名，不能更新字段类型（field_type 必须为字段当前的原始类型）。field_title 不能被更新为原值。<br/><strong>入参</strong></p><div data-lines="69" data-sign="5c1e476a1f14d3f8d776036d9a3dd02c" data-type="codeBlock">
+<pre class="language-javascript"><code class="language-javascript wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token string">"inputSchema"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">        <span class="token string">"properties"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">            <span class="token string">"docid"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"文档的 docid"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Docid"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"sheet_id"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"子表的 sheet ID"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Sheet Id"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"fields"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"要更新的字段列表"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"items"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token string">"properties"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"field_id"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                            <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"字段 ID，用于标识要更新的字段，不可更改"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">                        <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"field_title"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                            <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"需要更新为的字段标题，不能更新为原值。"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">                        <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"field_type"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                            <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"字段类型，必须传该字段当前的原始类型，不能更改。FIELD_TYPE_TEXT: 文本, FIELD_TYPE_NUMBER: 数字, FIELD_TYPE_CHECKBOX: 复选框, FIELD_TYPE_DATE_TIME: 日期时间, FIELD_TYPE_IMAGE: 图片, FIELD_TYPE_USER: 用户/成员（需要传入 user_id）, FIELD_TYPE_URL: 链接, FIELD_TYPE_SELECT: 多选, FIELD_TYPE_PROGRESS: 进度, FIELD_TYPE_PHONE_NUMBER: 手机号, FIELD_TYPE_EMAIL: 邮箱, FIELD_TYPE_SINGLE_SELECT: 单选, FIELD_TYPE_LOCATION: 位置, FIELD_TYPE_CURRENCY: 货币, FIELD_TYPE_PERCENTAGE: 百分比, FIELD_TYPE_BARCODE: 条码"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token string">"enum"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_TEXT"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_NUMBER"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_CHECKBOX"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_DATE_TIME"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_IMAGE"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_USER"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_URL"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_SELECT"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_PROGRESS"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_PHONE_NUMBER"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_EMAIL"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_SINGLE_SELECT"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_LOCATION"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_CURRENCY"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_PERCENTAGE"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"FIELD_TYPE_BARCODE"</span></span>
+<span class="code-line">                            <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">                        <span class="token punctuation">}</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"required"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                        <span class="token string">"field_id"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"field_type"</span></span>
+<span class="code-line">                    <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"object"</span></span>
+<span class="code-line">                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Fields"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"array"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span></span>
+<span class="code-line">        <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token string">"required"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">            <span class="token string">"docid"</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"sheet_id"</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"fields"</span></span>
+<span class="code-line">        <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"smartsheet_update_fieldsArguments"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"object"</span></span>
+<span class="code-line">    <span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><h4 data-lines="2" data-sign="f0f0f22b58a85bfb9405549bb0b51288" id="smartsheet-get-fields%EF%BC%9A%E6%9F%A5%E8%AF%A2%E6%99%BA%E8%83%BD%E8%A1%A8%E6%A0%BC%E5%AD%97%E6%AE%B5%EF%BC%9A"><a class="anchor" href="#smartsheet-get-fields%EF%BC%9A%E6%9F%A5%E8%AF%A2%E6%99%BA%E8%83%BD%E8%A1%A8%E6%A0%BC%E5%AD%97%E6%AE%B5%EF%BC%9A"></a><strong>smartsheet_get_fields：查询智能表格字段：</strong></h4><div data-lines="24" data-sign="eb57d341e80f5a997118be25a450d15b" data-type="codeBlock">
+<pre class="language-javascript"><code class="language-javascript wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token string">"inputSchema"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">        <span class="token string">"properties"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">            <span class="token string">"docid"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"文档的 docid"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Docid"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"sheet_id"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"子表的 sheet ID"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Sheet Id"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span></span>
+<span class="code-line">        <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token string">"required"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">            <span class="token string">"docid"</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"sheet_id"</span></span>
+<span class="code-line">        <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"smartsheet_get_fieldsArguments"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"object"</span></span>
+<span class="code-line">    <span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><h4 data-lines="2" data-sign="37a0f778cb489155e09411c6881cc1fb" id="smartsheet-add-records%EF%BC%9A%E6%B7%BB%E5%8A%A0%E6%99%BA%E8%83%BD%E8%A1%A8%E6%A0%BC%E8%AE%B0%E5%BD%95"><a class="anchor" href="#smartsheet-add-records%EF%BC%9A%E6%B7%BB%E5%8A%A0%E6%99%BA%E8%83%BD%E8%A1%A8%E6%A0%BC%E8%AE%B0%E5%BD%95"></a><strong>smartsheet_add_records：添加智能表格记录</strong></h4><p data-lines="1" data-sign="0892a2e7a07941a14ff30af7767317cf" data-type="p">在企业微信智能表格的某个子表里添加一行或多行新记录。在调用该工具前，你要先了解目标表的各列的类型。你可能需要重点关注在查询字段工具返回的<code>field_type</code>，对于添加记录中的一些复杂嵌套字段，比如<code>Option</code>，你需要注意查询中返回的 id 的匹配。单次添加记录建议在 500 行内。</p><p data-lines="2" data-sign="002849c1b5940dbeddd106f00f69783b" data-type="p"><strong>入参</strong></p><div data-lines="348" data-sign="6a8c2a28b66e41b79e4c39a5d52bfbc3" data-type="codeBlock">
+<pre class="language-javascript"><code class="language-javascript wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token string">"inputSchema"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">        <span class="token string">"properties"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">            <span class="token string">"AddRecord"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"单条待添加的记录（AddRecord）"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"properties"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token string">"values"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"additionalProperties"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                            <span class="token string">"anyOf"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                                <span class="token punctuation">{</span></span>
+<span class="code-line">                                    <span class="token string">"items"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                                        <span class="token string">"$ref"</span><span class="token operator">:</span> <span class="token string">"#/$defs/CellTextValue"</span></span>
+<span class="code-line">                                    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                    <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"array"</span></span>
+<span class="code-line">                                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token punctuation">{</span></span>
+<span class="code-line">                                    <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"number"</span></span>
+<span class="code-line">                                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token punctuation">{</span></span>
+<span class="code-line">                                    <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"boolean"</span></span>
+<span class="code-line">                                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token punctuation">{</span></span>
+<span class="code-line">                                    <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">                                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token punctuation">{</span></span>
+<span class="code-line">                                    <span class="token string">"items"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                                        <span class="token string">"$ref"</span><span class="token operator">:</span> <span class="token string">"#/$defs/CellImageValue"</span></span>
+<span class="code-line">                                    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                    <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"array"</span></span>
+<span class="code-line">                                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token punctuation">{</span></span>
+<span class="code-line">                                    <span class="token string">"items"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                                        <span class="token string">"$ref"</span><span class="token operator">:</span> <span class="token string">"#/$defs/CellUserValue"</span></span>
+<span class="code-line">                                    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                    <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"array"</span></span>
+<span class="code-line">                                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token punctuation">{</span></span>
+<span class="code-line">                                    <span class="token string">"items"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                                        <span class="token string">"$ref"</span><span class="token operator">:</span> <span class="token string">"#/$defs/CellUrlValue"</span></span>
+<span class="code-line">                                    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                    <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"array"</span></span>
+<span class="code-line">                                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token punctuation">{</span></span>
+<span class="code-line">                                    <span class="token string">"items"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                                        <span class="token string">"$ref"</span><span class="token operator">:</span> <span class="token string">"#/$defs/Option"</span></span>
+<span class="code-line">                                    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                    <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"array"</span></span>
+<span class="code-line">                                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token punctuation">{</span></span>
+<span class="code-line">                                    <span class="token string">"items"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                                        <span class="token string">"$ref"</span><span class="token operator">:</span> <span class="token string">"#/$defs/CellLocationValue"</span></span>
+<span class="code-line">                                    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                    <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"array"</span></span>
+<span class="code-line">                                <span class="token punctuation">}</span></span>
+<span class="code-line">                            <span class="token punctuation">]</span></span>
+<span class="code-line">                        <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"记录的具体内容。【重要】key 必须是字段标题（field_title），不能使用字段ID（field_id），否则会报错。各字段类型的值格式说明：1. 文本(TEXT)：必须使用数组格式 [{\"</span>type\<span class="token string">":\"</span>text\<span class="token string">", \"</span>text\<span class="token string">":\"</span>内容\<span class="token string">"}]，注意外层方括号不可省略，不能传单个对象 {\"</span>type\<span class="token string">":\"</span>text\<span class="token string">",\"</span>text\<span class="token string">":\"</span>内容\<span class="token string">"}；2. 数字(NUMBER)/货币(CURRENCY)/百分比(PERCENTAGE)/进度(PROGRESS)：直接传数字，例如 100、0.6；3. 复选框(CHECKBOX)：直接传 true/false；4. 单选(SINGLE_SELECT)/多选(SELECT)：必须使用数组格式 [{\"</span>text\<span class="token string">":\"</span>选项内容\<span class="token string">"}]，不能直接传字符串；5. 日期时间(DATE_TIME)：传日期时间字符串，支持格式：\"</span><span class="token constant">YYYY</span><span class="token operator">-</span><span class="token constant">MM</span><span class="token operator">-</span><span class="token constant">DD</span> <span class="token constant">HH</span><span class="token operator">:</span><span class="token constant">MM</span><span class="token operator">:</span><span class="token constant">SS</span>\<span class="token string">"（精确到秒）、\"</span><span class="token constant">YYYY</span><span class="token operator">-</span><span class="token constant">MM</span><span class="token operator">-</span><span class="token constant">DD</span> <span class="token constant">HH</span><span class="token operator">:</span><span class="token constant">MM</span>\<span class="token string">"（精确到分）、\"</span><span class="token constant">YYYY</span><span class="token operator">-</span><span class="token constant">MM</span><span class="token operator">-</span><span class="token constant">DD</span>\<span class="token string">"（精确到天），例如 \"</span><span class="token number">2026</span><span class="token operator">-</span><span class="token number">01</span><span class="token operator">-</span><span class="token number">15</span> <span class="token number">14</span><span class="token operator">:</span><span class="token number">30</span><span class="token operator">:</span><span class="token number">00</span>\<span class="token string">" 或 \"</span><span class="token number">2026</span><span class="token operator">-</span><span class="token number">01</span><span class="token operator">-</span><span class="token number">15</span>\<span class="token string">"。系统会自动按东八区转换为时间戳，无需手动计算；6. 手机号(PHONE_NUMBER)/邮箱(EMAIL)/条码(BARCODE)：直接传字符串，例如 \"</span><span class="token number">13800138000</span>\<span class="token string">"；7. 成员(USER)：数组格式 [{\"</span>user_id\<span class="token string">":\"</span>成员<span class="token constant">ID</span>\<span class="token string">"}]；8. 超链接(URL)：数组格式 [{\"</span>type\<span class="token string">":\"</span>url\<span class="token string">", \"</span>text\<span class="token string">":\"</span>显示文本\<span class="token string">", \"</span>link\<span class="token string">":\"</span>https<span class="token operator">:</span><span class="token operator">/</span><span class="token operator">/</span><span class="token operator">...</span>\<span class="token string">"}]；9. 图片(IMAGE)：数组格式 [{\"</span>image_url\<span class="token string">":\"</span>图片链接\<span class="token string">"}]；10. 地理位置(LOCATION)：数组格式 [{\"</span>source_type\<span class="token string">":1, \"</span>id\<span class="token string">":\"</span>地点<span class="token constant">ID</span>\<span class="token string">", \"</span>latitude\<span class="token string">":\"</span>纬度\<span class="token string">", \"</span>longitude\<span class="token string">":\"</span>经度\<span class="token string">", \"</span>title\<span class="token string">":\"</span>地点名\<span class="token string">"}]"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Values"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"object"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span></span>
+<span class="code-line">                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"required"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                    <span class="token string">"values"</span></span>
+<span class="code-line">                <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"AddRecord"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"object"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"CellImageValue"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"图片类型字段的单元值"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"properties"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token string">"id"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"anyOf"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"null"</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span></span>
+<span class="code-line">                        <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"default"</span><span class="token operator">:</span> <span class="token keyword">null</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"图片 ID，自定义 id"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Id"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"title"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"anyOf"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"null"</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span></span>
+<span class="code-line">                        <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"default"</span><span class="token operator">:</span> <span class="token keyword">null</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"图片标题"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Title"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"image_url"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"anyOf"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"null"</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span></span>
+<span class="code-line">                        <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"default"</span><span class="token operator">:</span> <span class="token keyword">null</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"图片链接，通过上传图片接口获取"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Image Url"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"width"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"anyOf"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"integer"</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"null"</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span></span>
+<span class="code-line">                        <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"default"</span><span class="token operator">:</span> <span class="token keyword">null</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"图片宽度"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Width"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"height"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"anyOf"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"integer"</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"null"</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span></span>
+<span class="code-line">                        <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"default"</span><span class="token operator">:</span> <span class="token keyword">null</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"图片高度"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Height"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span></span>
+<span class="code-line">                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"CellImageValue"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"object"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"CellLocationValue"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"地理位置类型字段的单元值"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"properties"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token string">"source_type"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"const"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"来源类型，填 1 表示来源为腾讯地图，目前只支持腾讯地图来源"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Source Type"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"integer"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"id"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"地点 ID"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Id"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"latitude"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"纬度"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Latitude"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"longitude"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"经度"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Longitude"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"title"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"地点名称"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Title"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span></span>
+<span class="code-line">                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"required"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                    <span class="token string">"source_type"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"id"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"latitude"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"longitude"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"title"</span></span>
+<span class="code-line">                <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"CellLocationValue"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"object"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"CellTextValue"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"文本类型字段的单元值"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"properties"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token string">"type"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"内容类型，text 为文本，url 为链接"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"enum"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                            <span class="token string">"text"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token string">"url"</span></span>
+<span class="code-line">                        <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Type"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"text"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"单元格文本内容"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Text"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"link"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"anyOf"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"null"</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span></span>
+<span class="code-line">                        <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"default"</span><span class="token operator">:</span> <span class="token keyword">null</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"当 type 为 url 时，表示链接跳转 URL"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Link"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span></span>
+<span class="code-line">                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"required"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                    <span class="token string">"type"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"text"</span></span>
+<span class="code-line">                <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"CellTextValue"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"object"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"CellUrlValue"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"超链接类型字段的单元值。数组类型为预留能力，目前只支持展示一个链接，建议只传入一个链接"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"properties"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token string">"type"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"const"</span><span class="token operator">:</span> <span class="token string">"url"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"固定填 url"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Type"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"text"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"anyOf"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"null"</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span></span>
+<span class="code-line">                        <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"default"</span><span class="token operator">:</span> <span class="token keyword">null</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"链接显示文本"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Text"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"link"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"链接跳转 URL"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Link"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span></span>
+<span class="code-line">                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"required"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                    <span class="token string">"type"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"link"</span></span>
+<span class="code-line">                <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"CellUrlValue"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"object"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"CellUserValue"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"成员类型字段的单元值"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"properties"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token string">"user_id"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"成员 ID"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"User Id"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span></span>
+<span class="code-line">                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"required"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                    <span class="token string">"user_id"</span></span>
+<span class="code-line">                <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"CellUserValue"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"object"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"Option"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"选项"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"properties"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token string">"id"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"anyOf"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"null"</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span></span>
+<span class="code-line">                        <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"default"</span><span class="token operator">:</span> <span class="token keyword">null</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"选项 ID，当选项存在时通过 ID 识别选项；需要新增选项时不填写此字段"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Id"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"style"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"anyOf"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token string">"maximum"</span><span class="token operator">:</span> <span class="token number">27</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"minimum"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"integer"</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"null"</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span></span>
+<span class="code-line">                        <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"default"</span><span class="token operator">:</span> <span class="token keyword">null</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"选项颜色，取值 1-27 对应不同颜色，分别为浅红1, 浅橙1, 浅天蓝1, 浅绿1, 浅紫1, 浅粉红1, 浅灰1, 白, 灰, 浅蓝1, 浅蓝2, 蓝, 浅天蓝2, 天蓝, 浅绿2, 绿, 浅红2, 红, 浅橙2, 橙, 浅黄1, 浅黄2, 黄, 浅紫2, 紫, 浅粉红2, 粉红"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Style"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token string">"text"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token string">"anyOf"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"null"</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span></span>
+<span class="code-line">                        <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"default"</span><span class="token operator">:</span> <span class="token keyword">null</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"要填写的选项内容。新增选项时填写，已经存在时优先匹配已存在的选项，否则会新增选项"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Text"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span></span>
+<span class="code-line">                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Option"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"object"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span></span>
+<span class="code-line">        <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token string">"properties"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">            <span class="token string">"docid"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"文档的 docid"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Docid"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"sheet_id"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"Smartsheet 子表 ID"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Sheet Id"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"string"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"records"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token string">"description"</span><span class="token operator">:</span> <span class="token string">"需要添加的记录的具体内容组成的 JSON 数组"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"items"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token string">"$ref"</span><span class="token operator">:</span> <span class="token string">"#/$defs/AddRecord"</span></span>
+<span class="code-line">                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"Records"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"array"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span></span>
+<span class="code-line">        <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token string">"required"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">            <span class="token string">"docid"</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"sheet_id"</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token string">"records"</span></span>
+<span class="code-line">        <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"smartsheet_add_recordsArguments"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token string">"type"</span><span class="token operator">:</span> <span class="token string">"object"</span></span>
+<span class="code-line">    <span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><p data-lines="2" data-sign="br2" data-type="br"> </p></div></div>

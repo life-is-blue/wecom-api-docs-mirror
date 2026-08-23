@@ -1,0 +1,27 @@
+<div class="ep-doc-area-cherry cherry-markdown cherry-wecom" id="js-ep-doc-cnt-md"><div data-code-block-theme="coy" data-inline-code-theme="red"><p data-lines="5" data-sign="09d597744771a98ecf0a37c7e74fc32a" data-type="p"><strong>修改待办</strong><br/>该接口用于修改指定的待办信息，支持修改待办整体状态、待办参与人及其状态。<br/><strong>请求方式：</strong> POST（<strong>HTTPS</strong>）  <br/><strong>请求地址：</strong> https://qyapi.weixin.qq.com/cgi-bin/todo/update?access_token=ACCESS_TOKEN<br/><strong>请求包体：</strong></p><div data-lines="16" data-sign="77ada3f9053c09758c888a2f41681af3" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">  <span class="token property">"todo_id"</span><span class="token operator">:</span> <span class="token string">"17c7d2bd9f20d652840f72f59e796AAA"</span><span class="token punctuation">,</span></span>
+<span class="code-line">  <span class="token property">"status"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">  <span class="token property">"attendees"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">    <span class="token punctuation">{</span></span>
+<span class="code-line">      <span class="token property">"userid"</span><span class="token operator">:</span> <span class="token string">"lisi"</span><span class="token punctuation">,</span></span>
+<span class="code-line">      <span class="token property">"status"</span><span class="token operator">:</span> <span class="token number">2</span></span>
+<span class="code-line">    <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token punctuation">{</span></span>
+<span class="code-line">      <span class="token property">"userid"</span><span class="token operator">:</span> <span class="token string">"zhangsan"</span><span class="token punctuation">,</span></span>
+<span class="code-line">      <span class="token property">"status"</span><span class="token operator">:</span> <span class="token number">1</span></span>
+<span class="code-line">    <span class="token punctuation">}</span></span>
+<span class="code-line">  <span class="token punctuation">]</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><p data-lines="1" data-sign="9d18f64639afa81e674d6ea7a4374c32" data-type="p"><strong>仅修改待办整体状态示例：</strong></p><div data-lines="6" data-sign="89216d868a7e0aef1eb0f782e9e503c7" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">  <span class="token property">"todo_id"</span><span class="token operator">:</span> <span class="token string">"17c7d2bd9f20d652840f72f59e796AAA"</span><span class="token punctuation">,</span></span>
+<span class="code-line">  <span class="token property">"status"</span><span class="token operator">:</span> <span class="token number">0</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><p data-lines="1" data-sign="f2e21495051cadd2d5b0f8a3eedbae8d" data-type="p"><strong>参数说明：</strong></p><div class="cherry-table-container" data-lines="8" data-sign="f80e7d119ce6662161257bfa1bd3b9ee">
+<table class="cherry-table"><thead><tr><th>参数</th><th>是否必须</th><th>说明</th></tr></thead><tbody><tr><td>access_token</td><td>是</td><td>调用接口凭证。获取方法查看“<a href="https://work.weixin.qq.com/api/doc/90001/90143/90605" rel="nofollow">获取access_token</a>”</td></tr><tr><td>todo_id</td><td>是</td><td>待办ID</td></tr><tr><td>status</td><td>否</td><td>待办整体状态。<br/>0 - 完成<br/>1 - 进行中</td></tr><tr><td>attendees</td><td>否</td><td>待办参与人列表，最多支持20个参与人。可不传或传空数组；不传或为空时不修改参与人列表</td></tr><tr><td>attendees.userid</td><td>是</td><td>待办参与人ID。当传入attendees时，该字段必填</td></tr><tr><td>attendees.status</td><td>是</td><td>参与人的待办状态。当传入attendees时，该字段必填。0 - 完成<br/>1 - 进行中</td></tr></tbody></table></div><p data-lines="1" data-sign="be69a8d80807fc12104a6f71258f88a9" data-type="p"><strong>权限说明：</strong></p><ul class="cherry-list__default" data-lines="5" data-sign="524786107b6e2389e8f75ea822970bfflist5"><li>调用应用的可见范围需要包含根部门。</li><li>仅允许修改当前应用创建的待办。</li><li>不允许修改已删除的待办。<br/><strong>返回结果：</strong><br/><div data-lines="6" data-sign="c13de34582f792348a5d37232e7c0253" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">  <span class="token property">"errcode"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span></span>
+<span class="code-line">  <span class="token property">"errmsg"</span><span class="token operator">:</span> <span class="token string">"ok"</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div></li></ul></div></div>
