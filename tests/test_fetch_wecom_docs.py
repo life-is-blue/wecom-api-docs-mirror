@@ -90,6 +90,32 @@ def test_load_sources_rejects_schema_version_as_a_source_id(tmp_path):
         fw.load_sources(config_path)
 
 
+def test_doc_id_index_regex_extracts_id_doc_id_and_title():
+    # A trimmed, realistic snippet of the raw JS data blob every
+    # /document/path/<id> page embeds -- not valid standalone JSON (it's
+    # embedded inside a larger JS expression), hence the regex approach
+    # instead of json.loads. Shared by fetch_wecom_docs_src.py and
+    # debug_compare_via_api.py to resolve a URL-path id to the internal
+    # doc_id docFetch/fetchCnt needs.
+    blob = (
+        '...var docIndex = [{"id":90573,"category_id":91143,"doc_id":10990,'
+        '"parent_id":90592,"time":1540799096,"author":"warrenchen",'
+        '"type":1,"status":2,"title":"通讯录权限体系","order_id":4096,'
+        '"gray_status":0},'
+        '{"id":97322,"category_id":97322,"doc_id":43090,'
+        '"parent_id":97321,"time":1667892111,"author":"chengzuo",'
+        '"type":1,"status":2,"title":"小程序下单","order_id":1024,'
+        '"gray_status":0}];...'
+    )
+    mapping = {
+        m.group("id"): {"doc_id": m.group("doc_id"), "title": m.group("title")}
+        for m in fw.DOC_ID_INDEX_ENTRY_RE.finditer(blob)
+    }
+
+    assert mapping["90573"] == {"doc_id": "10990", "title": "通讯录权限体系"}
+    assert mapping["97322"] == {"doc_id": "43090", "title": "小程序下单"}
+
+
 # --------------------------------------------------------------------------
 # Nav-tree discovery
 # --------------------------------------------------------------------------
@@ -118,6 +144,41 @@ def test_parse_nav_tree_builds_correct_urls():
 
     assert pages["90664"].url == "https://developer.work.weixin.qq.com/document/path/90664"
     assert pages["90664"].rel_path == "90664.md"
+
+
+def test_discover_doc_pages_unions_multiple_nav_containers(monkeypatch):
+    # The real seed page embeds *multiple* separate div.ep-doc-select
+    # containers (7 on the live site: one per top-level tab/scope, some
+    # duplicated) -- found 2026-08-23 after select_one() silently took only
+    # the first one, missing 248 real docs under the others entirely.
+    # Two containers here: the first has doc 1 (twice, to also cover
+    # cross-container dedup) and doc 2; the second repeats doc 1 under a
+    # different section and adds doc 3 -- doc 1 must keep its first-seen
+    # section, and doc 3 must not be dropped just for being in the second
+    # container.
+    html = (
+        '<div class="ep-doc-select">'
+        '<div class="ep-doc-wrap" level="0">'
+        '<div class="ep-doc-item"> 分类A </div>'
+        '<div class="ep-doc-wrap" level="1"><a class="ep-doc-item" href="/document/path/1"> 文档一 </a></div>'
+        '<div class="ep-doc-wrap" level="1"><a class="ep-doc-item" href="/document/path/2"> 文档二 </a></div>'
+        '</div>'
+        '</div>'
+        '<div class="ep-doc-select">'
+        '<div class="ep-doc-wrap" level="0">'
+        '<div class="ep-doc-item"> 分类B </div>'
+        '<div class="ep-doc-wrap" level="1"><a class="ep-doc-item" href="/document/path/1"> 文档一 </a></div>'
+        '<div class="ep-doc-wrap" level="1"><a class="ep-doc-item" href="/document/path/3"> 文档三 </a></div>'
+        '</div>'
+        '</div>'
+    )
+    monkeypatch.setattr(fw, "fetch_text", lambda url: html)
+
+    pages = fw.discover_doc_pages(SOURCE)
+
+    assert set(pages.keys()) == {"1", "2", "3"}
+    assert pages["1"].sections == ("分类A",)  # first-seen container wins, not overwritten by the second
+    assert pages["3"].sections == ("分类B",)  # not dropped just for being only in the second container
 
 
 def test_validate_discovery_passes_when_sentinels_present_and_no_big_drop():

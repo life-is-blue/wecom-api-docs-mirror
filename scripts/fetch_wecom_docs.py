@@ -46,7 +46,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from urllib.error import HTTPError, URLError
-from urllib.parse import urljoin
+from urllib.parse import urlencode, urljoin
 from urllib.request import Request, urlopen
 
 import certifi
@@ -375,10 +375,24 @@ def discover_doc_pages(source: Source) -> Dict[str, DocPage]:
     seed_url = urljoin(source.site_root + "/", source.seed_path.lstrip("/"))
     html = fetch_text(seed_url)
     soup = BeautifulSoup(html, "html.parser")
-    nav_root = soup.select_one("div.ep-doc-select")
-    if nav_root is None:
+    # The seed page embeds *multiple* separate div.ep-doc-select containers
+    # (7 on the current site: one per top-level tab/scope -- e.g. quick
+    # start, server API, client API -- some duplicated), not just one.
+    # Found 2026-08-23 after a doc count mismatch against an independently
+    # scraped sitemap: select_one() here used to silently take only the
+    # first container (always the same 735-doc "server API" one), quietly
+    # missing every doc under the others (248 more, mostly the client-side
+    # JS-SDK reference). Union every container's tree instead; a doc id
+    # that appears in more than one (the duplicated containers genuinely
+    # repeat entries) keeps whichever section path it was first seen under,
+    # same "first occurrence wins" rule already used within a single tree.
+    nav_roots = soup.find_all("div", class_="ep-doc-select")
+    if not nav_roots:
         raise RuntimeError(f"Nav tree (.ep-doc-select) not found on seed page {seed_url}")
-    pages = parse_nav_tree(nav_root, source)
+    pages: Dict[str, DocPage] = {}
+    for nav_root in nav_roots:
+        for doc_id, page in parse_nav_tree(nav_root, source).items():
+            pages.setdefault(doc_id, page)
     if not pages:
         raise RuntimeError(f"No document links discovered from {seed_url}")
     return pages
@@ -399,6 +413,59 @@ def validate_discovery(pages: Dict[str, DocPage], source: Source, previous_count
                 f"discovery count dropped {drop:.0%} ({previous_count} -> {len(pages)}), "
                 f"exceeds {DISCOVERY_DROP_THRESHOLD:.0%} threshold; aborting without touching docs/"
             )
+
+
+# --------------------------------------------------------------------------
+# True-source Markdown via docFetch/fetchCnt -- NOT in robots.txt's Allow
+# list (only /document, /tutorial, /community/..., /resource/devtool are).
+# Shared by scripts/fetch_wecom_docs_src.py (the true-source sync pipeline)
+# and scripts/debug_compare_via_api.py (the hand-run comparison tool); see
+# each caller's own module docstring for the usage constraints it commits
+# to. Resolving the id -> doc_id mapping this endpoint needs does NOT touch
+# /docFetch/ itself: every ordinary /document/path/<id> page embeds the
+# whole site's id index as raw JSON for its own client-side JS to use, so
+# one normal (robots.txt-allowed) page fetch resolves every id a run needs.
+# --------------------------------------------------------------------------
+
+# {"id":<url-path id>, ..., "doc_id":<fetchCnt id>, ..., "title":<label>, ...}
+# -- a loose regex, not a full JSON parse, since this blob sits inside a
+# larger non-JSON JS expression on the page (not a standalone <script>
+# block we could hand to json.loads cleanly).
+DOC_ID_INDEX_ENTRY_RE = re.compile(
+    r'"id":(?P<id>\d+),(?:(?!\{).)*?"doc_id":(?P<doc_id>\d+),(?:(?!\{).)*?"title":"(?P<title>[^"]*)"'
+)
+
+
+def build_id_to_doc_id_map(source: Source) -> Dict[str, Dict[str, str]]:
+    seed_url = urljoin(source.site_root + "/", source.seed_path.lstrip("/"))
+    html = fetch_text(seed_url)
+    mapping: Dict[str, Dict[str, str]] = {}
+    for m in DOC_ID_INDEX_ENTRY_RE.finditer(html):
+        mapping[m.group("id")] = {"doc_id": m.group("doc_id"), "title": m.group("title")}
+    return mapping
+
+
+def fetch_via_doc_api(site_root: str, doc_id: str, referer_url: str) -> Dict:
+    """POSTs to /docFetch/fetchCnt and returns its `data` object (title,
+    content_md, is_deleted, ...). Raises on a non-200 response or malformed
+    JSON -- callers decide what "failed" means for their own purposes
+    (e.g. empty/missing content_md, is_deleted=True)."""
+    url = f"{site_root}/docFetch/fetchCnt?lang=zh_CN&ajax=1&f=json"
+    body = urlencode({"doc_id": doc_id}).encode("utf-8")
+    req = Request(
+        url,
+        data=body,
+        headers={
+            "User-Agent": USER_AGENT,
+            "Content-Type": "application/x-www-form-urlencoded",
+            # Required: a request with no Referer gets 403'd, even with an
+            # otherwise-valid doc_id -- confirmed empirically 2026-08-22.
+            "Referer": referer_url,
+        },
+    )
+    with urlopen(req, timeout=REQUEST_TIMEOUT_SECONDS, context=SSL_CONTEXT) as resp:
+        payload = json.loads(resp.read().decode("utf-8", errors="replace"))
+    return payload.get("data") or {}
 
 
 # --------------------------------------------------------------------------

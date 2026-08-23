@@ -37,7 +37,15 @@ for agent-oriented document ingestion and retrieval.
 every `/document/path/<id>` page embeds the site's full left-nav tree in its
 HTML (`div.ep-doc-select` -> nested `div.ep-doc-wrap[level=N]`). One "seed"
 page therefore doubles as a complete site index — the same role `llms.txt`
-plays for Markdown-native doc sites.
+plays for Markdown-native doc sites. The page actually embeds **multiple**
+`div.ep-doc-select` containers (7 on the live site, one per top-level
+tab/scope such as quick-start / server API / client API, some duplicated) —
+`discover_doc_pages()` unions every one of them (deduplicated, first-seen
+section wins). Until 2026-08-23 it only read the first container, silently
+missing 248 real docs (the client-side JS-SDK reference section) the whole
+time; caught via an independently-scraped sitemap that found more links
+than we did. If the discovered count ever looks suspiciously low again,
+this is the first thing to re-check.
 
 `scripts/fetch_wecom_docs.py`:
 

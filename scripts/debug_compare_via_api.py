@@ -19,18 +19,17 @@ IMPORTANT -- robots.txt does NOT allow /docFetch/. The site's robots.txt is:
     Allow: /resource/devtool$
 
 /docFetch/ is not in that Allow list, so it falls under the leading
-`Disallow: /`. This script is used outside that allowance deliberately, at
-the repo owner's explicit instruction (2026-08-22), on the condition that
-it stays low-frequency and comparison-only:
-  - NEVER wired into the daily/scheduled sync -- hand-run only, and
-    deliberately not even exposed as a GitHub Actions workflow_dispatch job
-    the way debug_capture_raw_html.py is, to keep it clearly separate from
-    anything that could be re-triggered casually or automated later,
+`Disallow: /`. As of 2026-08-23, that endpoint IS used by a real scheduled
+pipeline too -- see scripts/fetch_wecom_docs_src.py and its README section
+("True-source Markdown sync") for that conscious, deliberately conservative
+exception to the robots.txt boundary. THIS script is a separate, narrower
+thing: a hand-run comparison/spot-check tool, kept to its own original,
+tighter constraints regardless of what the scheduled pipeline now does:
+  - NEVER wired into any CI workflow -- hand-run only, so it can't be
+    triggered casually or end up in a schedule of its own,
   - hard-capped at a small number of ids per invocation (MAX_IDS),
-  - not a replacement content source for the main fetch_wecom_docs.py
-    pipeline, which continues to only ever touch /document (the allowed
-    path) -- this script's findings might inform a future *conscious*
-    decision to widen the mirror's data source, but that isn't this.
+  - not itself a sync/recovery mechanism -- that's fetch_wecom_docs_src.py's
+    job now; this one stays a comparison tool.
 
 Resolving the id -> doc_id mapping this endpoint needs does NOT touch
 /docFetch/ at all: every ordinary /document/path/<id> page (robots.txt DOES
@@ -41,56 +40,17 @@ every id this run needs before a single /docFetch/ request is made.
 from __future__ import annotations
 
 import argparse
-import json
-import random
 import re
+import random
 import sys
 import time
-import urllib.parse
 from pathlib import Path
-from urllib.request import Request, urlopen
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import fetch_wecom_docs as fw
 
 MAX_IDS = 10
-
-# {"id":<url-path id>, ..., "doc_id":<fetchCnt id>, ..., "title":<label>, ...}
-# -- a loose regex, not a full JSON parse, since this blob sits inside a
-# larger non-JSON JS expression on the page (not a standalone <script>
-# block we could hand to json.loads cleanly).
-_INDEX_ENTRY_RE = re.compile(
-    r'"id":(?P<id>\d+),(?:(?!\{).)*?"doc_id":(?P<doc_id>\d+),(?:(?!\{).)*?"title":"(?P<title>[^"]*)"'
-)
-
-
-def build_id_to_doc_id_map(source: fw.Source) -> dict:
-    seed_url = fw.urljoin(source.site_root + "/", source.seed_path.lstrip("/"))
-    html = fw.fetch_text(seed_url)
-    mapping = {}
-    for m in _INDEX_ENTRY_RE.finditer(html):
-        mapping[m.group("id")] = {"doc_id": m.group("doc_id"), "title": m.group("title")}
-    return mapping
-
-
-def fetch_via_api(site_root: str, doc_id: str, referer_url: str) -> dict:
-    url = f"{site_root}/docFetch/fetchCnt?lang=zh_CN&ajax=1&f=json"
-    body = urllib.parse.urlencode({"doc_id": doc_id}).encode("utf-8")
-    req = Request(
-        url,
-        data=body,
-        headers={
-            "User-Agent": fw.USER_AGENT,
-            "Content-Type": "application/x-www-form-urlencoded",
-            # Required: a request with no Referer gets 403'd, even with a
-            # doc_id that's otherwise valid -- confirmed empirically.
-            "Referer": referer_url,
-        },
-    )
-    with urlopen(req, timeout=fw.REQUEST_TIMEOUT_SECONDS, context=fw.SSL_CONTEXT) as resp:
-        payload = json.loads(resp.read().decode("utf-8", errors="replace"))
-    return payload.get("data", {})
 
 
 def main() -> int:
@@ -114,7 +74,7 @@ def main() -> int:
     source = sources[0]
 
     print(f"[INFO] resolving id -> doc_id mapping from a single /document page fetch...")
-    id_map = build_id_to_doc_id_map(source)
+    id_map = fw.build_id_to_doc_id_map(source)
     print(f"[INFO] resolved {len(id_map)} ids site-wide")
 
     for url_id in doc_ids:
@@ -126,7 +86,7 @@ def main() -> int:
         time.sleep(random.uniform(fw.REQUEST_DELAY_MIN_SECONDS, fw.REQUEST_DELAY_MAX_SECONDS))
         try:
             referer_url = fw.urljoin(source.site_root + "/", f"{source.doc_path_prefix.lstrip('/')}{url_id}")
-            data = fetch_via_api(source.site_root, entry["doc_id"], referer_url)
+            data = fw.fetch_via_doc_api(source.site_root, entry["doc_id"], referer_url)
         except Exception as exc:  # noqa: BLE001 -- best-effort comparison tool
             print(f"[WARN] {url_id} (doc_id={entry['doc_id']}): fetch failed: {exc}")
             continue
