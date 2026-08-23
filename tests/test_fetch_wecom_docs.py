@@ -94,9 +94,9 @@ def test_doc_id_index_regex_extracts_id_doc_id_and_title():
     # A trimmed, realistic snippet of the raw JS data blob every
     # /document/path/<id> page embeds -- not valid standalone JSON (it's
     # embedded inside a larger JS expression), hence the regex approach
-    # instead of json.loads. Shared by fetch_wecom_docs_src.py and
-    # debug_compare_via_api.py to resolve a URL-path id to the internal
-    # doc_id docFetch/fetchCnt needs.
+    # instead of json.loads. Used by build_site_index() (the main sync's
+    # link-resolution support) and by the hand-run
+    # debug_compare_via_api.py tool.
     blob = (
         '...var docIndex = [{"id":90573,"category_id":91143,"doc_id":10990,'
         '"parent_id":90592,"time":1540799096,"author":"warrenchen",'
@@ -114,6 +114,57 @@ def test_doc_id_index_regex_extracts_id_doc_id_and_title():
 
     assert mapping["90573"] == {"doc_id": "10990", "title": "通讯录权限体系"}
     assert mapping["97322"] == {"doc_id": "43090", "title": "小程序下单"}
+
+
+def test_build_site_index_builds_the_reverse_doc_id_map(monkeypatch, tmp_path):
+    blob = '{"id":97322,"category_id":97322,"doc_id":43090,"title":"小程序下单"}'
+    monkeypatch.setattr(fw, "fetch_text", lambda url: blob)
+    monkeypatch.setattr(fw, "DOCS_ROOT", tmp_path)
+    (tmp_path / SOURCE.output_subdir).mkdir()
+    (tmp_path / SOURCE.output_subdir / "97322.md").write_text("x", encoding="utf-8")
+
+    site_index = fw.build_site_index(SOURCE)
+
+    assert site_index.valid_url_ids == frozenset({"97322"})
+    assert site_index.doc_id_to_url_id == {"43090": "97322"}
+
+
+def test_build_site_index_drops_doc_ids_that_resolve_outside_the_mirror(monkeypatch, tmp_path):
+    # The site's id index (build_id_to_doc_id_map) covers every doc WeCom
+    # knows about -- far more than this mirror actually carries a file
+    # for. A doc_id whose url_id ("99999", here) has no local file must
+    # not end up in doc_id_to_url_id at all: reverse-resolving a link to
+    # it would produce a *new* broken link (./99999.md) instead of fixing
+    # one. Found via codex review 2026-08-23 after the first version of
+    # this fix shipped without this check and silently introduced exactly
+    # that failure mode into the corpus backfill.
+    blob = (
+        '{"id":97322,"category_id":97322,"doc_id":43090,"title":"已发现的文档"},'
+        '{"id":99999,"category_id":99999,"doc_id":10990,"title":"未收录的文档"}'
+    )
+    monkeypatch.setattr(fw, "fetch_text", lambda url: blob)
+    monkeypatch.setattr(fw, "DOCS_ROOT", tmp_path)
+    (tmp_path / SOURCE.output_subdir).mkdir()
+    (tmp_path / SOURCE.output_subdir / "97322.md").write_text("x", encoding="utf-8")
+    # 99999.md deliberately not created: discovered by the site's index,
+    # but this mirror has never fetched it (still queued, or a past
+    # failure) -- not the same thing as "doesn't exist on the real site".
+
+    site_index = fw.build_site_index(SOURCE)
+
+    assert site_index.doc_id_to_url_id == {"43090": "97322"}
+    assert "10990" not in site_index.doc_id_to_url_id
+
+
+def test_build_site_index_is_best_effort_on_fetch_failure(monkeypatch, tmp_path):
+    def boom(url):
+        raise RuntimeError("network is down")
+
+    monkeypatch.setattr(fw, "fetch_text", boom)
+    monkeypatch.setattr(fw, "DOCS_ROOT", tmp_path)
+
+    # Must not raise -- the normal HTML sync doesn't depend on this at all.
+    assert fw.build_site_index(SOURCE) is None
 
 
 # --------------------------------------------------------------------------
@@ -257,6 +308,100 @@ def test_conversion_rewrites_fragment_id_links_to_local_mirror_paths():
     assert "(./10649.md)" in markdown
     assert "(./15074.md)" in markdown
     assert "#10649" not in markdown
+
+
+def test_conversion_with_site_index_resolves_internal_doc_id_fragments():
+    # A corpus scan (2026-08-23) found 988 broken ./<id>.md links across
+    # 373 of 711 already-published files: a bare #<N> fragment in the
+    # site's HTML sometimes holds the *internal* doc_id, not the URL-path
+    # id, and the old unconditional "#<N> -> ./<N>.md" rewrite produced a
+    # link to a file that would never exist. With a SiteIndex available,
+    # #62131 must reverse-resolve to whichever URL-path id actually has
+    # that internal doc_id -- not be written out as ./62131.md.
+    html = (
+        '<div class="ep-doc-area-cherry">'
+        '<p>参考<a href="#62131">开发前必读</a>与<a href="#62131/连接方式对比">对比</a>。</p>'
+        '</div>'
+    )
+    article = fw.extract_article_soup(html)
+    site_index = fw.SiteIndex(
+        valid_url_ids=frozenset({"90664", "101805"}),
+        doc_id_to_url_id={"62131": "101805"},
+    )
+    markdown = fw.convert_article_to_markdown(article, SOURCE, site_index)
+
+    assert "(./101805.md)" in markdown
+    assert "./62131.md" not in markdown
+    assert "#62131" not in markdown
+
+
+def test_conversion_with_site_index_preserves_the_sub_anchor_on_rewrite():
+    # "#<id>/<sub-anchor>" addresses a specific heading inside the target
+    # page. The sub-anchor must survive the rewrite as a "#<anchor>"
+    # suffix on the resolved .md path: dropping it (as an earlier draft of
+    # the doc_id fix did, caught in codex review 2026-08-23) flattened
+    # ~442 corpus links -- e.g. a table's per-property links like
+    # #53117/decimalplaces all collapsing to the same bare ./101157.md --
+    # losing the "which heading was this pointing at" information. The
+    # site's anchors are already URL-encoded the way GitHub slugs these
+    # headings, so they pass through verbatim.
+    html = (
+        '<div class="ep-doc-area-cherry">'
+        '<p><a href="#53117/decimalplaces">精度</a>'
+        '与<a href="#62131/%E8%BF%9E%E6%8E%A5%E6%96%B9%E5%BC%8F%E5%AF%B9%E6%AF%94">对比</a>。</p>'
+        '</div>'
+    )
+    article = fw.extract_article_soup(html)
+    site_index = fw.SiteIndex(
+        valid_url_ids=frozenset({"101157", "101805"}),
+        doc_id_to_url_id={"53117": "101157", "62131": "101805"},
+    )
+    markdown = fw.convert_article_to_markdown(article, SOURCE, site_index)
+
+    # URL-path-id branch (53117 is not a real URL id here... it resolves
+    # via doc_id_to_url_id) -- both branches must keep their anchor.
+    assert "(./101157.md#decimalplaces)" in markdown
+    assert "(./101805.md#%E8%BF%9E%E6%8E%A5%E6%96%B9%E5%BC%8F%E5%AF%B9%E6%AF%94)" in markdown
+    # Bare-file forms of these links (anchor dropped) must not appear.
+    assert "(./101157.md)" not in markdown
+    assert "(./101805.md)" not in markdown
+
+
+def test_conversion_preserves_sub_anchor_on_url_id_passthrough():
+    # The direct URL-path-id branch (and the site_index=None fallback)
+    # must keep the sub-anchor too, not just the reverse-resolved branch.
+    html = '<div class="ep-doc-area-cherry"><p>选项颜色说明<a href="#90664/style">样式</a></p></div>'
+    article = fw.extract_article_soup(html)
+    site_index = fw.SiteIndex(valid_url_ids=frozenset({"90664"}), doc_id_to_url_id={})
+    markdown = fw.convert_article_to_markdown(article, SOURCE, site_index)
+
+    assert "(./90664.md#style)" in markdown
+
+    # Degraded mode (no site index) behaves the same for anchors.
+    article2 = fw.extract_article_soup(html)
+    markdown2 = fw.convert_article_to_markdown(article2, SOURCE)
+    assert "(./90664.md#style)" in markdown2
+
+
+def test_conversion_with_site_index_leaves_unresolvable_fragment_untouched():
+    html = '<div class="ep-doc-area-cherry"><p>见<a href="#99999999">未知</a>说明。</p></div>'
+    article = fw.extract_article_soup(html)
+    site_index = fw.SiteIndex(valid_url_ids=frozenset(), doc_id_to_url_id={})
+    markdown = fw.convert_article_to_markdown(article, SOURCE, site_index)
+
+    # Can't resolve it against anything we know this run -- must not guess
+    # a ./99999999.md link to a file that will never exist.
+    assert "./99999999.md" not in markdown
+    assert "#99999999" in markdown
+
+
+def test_conversion_with_site_index_still_resolves_a_real_url_id():
+    html = '<div class="ep-doc-area-cherry"><p>详情参见<a href="#90664">这篇说明文档</a>。</p></div>'
+    article = fw.extract_article_soup(html)
+    site_index = fw.SiteIndex(valid_url_ids=frozenset({"90664"}), doc_id_to_url_id={})
+    markdown = fw.convert_article_to_markdown(article, SOURCE, site_index)
+
+    assert "(./90664.md)" in markdown
 
 
 def test_conversion_normalizes_relative_image_src():
@@ -509,11 +654,12 @@ def test_successful_fetch_writes_both_markdown_and_raw_article_html(tmp_path, mo
         ),
     }
     monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "build_site_index", lambda src: None)
     monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
 
     raw_html = '<div class="ep-doc-area-cherry"><p>real article content</p></div>'
 
-    def fake_fetch_one_doc(source, page, existing):
+    def fake_fetch_one_doc(source, page, existing, site_index=None):
         return fake_success_outcome(source, page, "# doc 1\n", html=raw_html)
 
     monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
@@ -551,6 +697,7 @@ def test_delayed_deletion_removes_the_html_companion_too(tmp_path, monkeypatch):
     monkeypatch.setattr(fw, "load_sources", lambda path: [source])
     monkeypatch.setattr(fw, "check_robots_allowed", lambda *a, **k: True)
     monkeypatch.setattr(fw, "discover_doc_pages", lambda src: {})  # doc 1 has vanished
+    monkeypatch.setattr(fw, "build_site_index", lambda src: None)
     monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
     monkeypatch.setattr(fw, "fetch_one_doc", lambda *a, **k: (_ for _ in ()).throw(
         AssertionError("nothing to fetch -- discovery is empty")
@@ -621,11 +768,12 @@ def test_resume_skips_already_done_docs_and_completes(tmp_path, monkeypatch):
         for i in range(1, 6)
     }
     monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "build_site_index", lambda src: None)
     monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
 
     fetched_ids = []
 
-    def fake_fetch_one_doc(source, page, existing):
+    def fake_fetch_one_doc(source, page, existing, site_index=None):
         fetched_ids.append(page.doc_id)
         return fake_success_outcome(source, page, f"# doc {page.doc_id}\n")
 
@@ -697,11 +845,12 @@ def test_resume_preserves_progress_when_discovery_changes(tmp_path, monkeypatch)
         for doc_id in ("1", "3")
     }
     monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "build_site_index", lambda src: None)
     monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
 
     fetched_ids = []
 
-    def fake_fetch_one_doc(source, page, existing):
+    def fake_fetch_one_doc(source, page, existing, site_index=None):
         fetched_ids.append(page.doc_id)
         return fake_success_outcome(source, page, f"# doc {page.doc_id}\n")
 
@@ -763,11 +912,12 @@ def test_resume_refetches_checkpointed_doc_whose_file_is_missing_on_disk(tmp_pat
         ),
     }
     monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "build_site_index", lambda src: None)
     monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
 
     fetched_ids = []
 
-    def fake_fetch_one_doc(source, page, existing):
+    def fake_fetch_one_doc(source, page, existing, site_index=None):
         fetched_ids.append(page.doc_id)
         return fake_success_outcome(source, page, "# doc 1\n")
 
@@ -827,9 +977,10 @@ def _run_main_with_one_failure_in_ten(tmp_path, monkeypatch, strict_fetch):
         for i in range(1, 11)
     }
     monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "build_site_index", lambda src: None)
     monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
 
-    def fake_fetch_one_doc(source, page, existing):
+    def fake_fetch_one_doc(source, page, existing, site_index=None):
         if page.doc_id == "5":
             return fw.FetchOutcome(failed=True, error="simulated CAPTCHA-shaped failure")
         return fake_success_outcome(source, page, f"# doc {page.doc_id}\n")
@@ -893,9 +1044,10 @@ def test_breaker_forgives_an_early_failure_once_it_ages_out_of_the_window(tmp_pa
         for i in range(1, total + 1)
     }
     monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "build_site_index", lambda src: None)
     monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
 
-    def fake_fetch_one_doc(source, page, existing):
+    def fake_fetch_one_doc(source, page, existing, site_index=None):
         if page.doc_id == doc_id(1):  # only the very first attempt fails
             return fw.FetchOutcome(failed=True, error="one-off transient error")
         return fake_success_outcome(source, page, f"# doc {page.doc_id}\n")
@@ -956,9 +1108,10 @@ def test_breaker_reacts_quickly_to_a_cascade_after_a_long_clean_streak(tmp_path,
         for i in range(1, total + 1)
     }
     monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "build_site_index", lambda src: None)
     monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
 
-    def fake_fetch_one_doc(source, page, existing):
+    def fake_fetch_one_doc(source, page, existing, site_index=None):
         if int(page.doc_id) > n_success:  # everything after the clean streak fails
             return fw.FetchOutcome(failed=True, error="simulated CAPTCHA-shaped failure")
         return fake_success_outcome(source, page, f"# doc {page.doc_id}\n")
@@ -1008,9 +1161,10 @@ def test_max_successful_fetches_per_run_stops_before_the_failure_rate_breaker(tm
         for i in range(1, total + 1)
     }
     monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "build_site_index", lambda src: None)
     monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
 
-    def fake_fetch_one_doc(source, page, existing):
+    def fake_fetch_one_doc(source, page, existing, site_index=None):
         return fake_success_outcome(source, page, f"# doc {page.doc_id}\n")
 
     monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)
@@ -1068,6 +1222,7 @@ def test_resume_where_every_doc_was_already_done_still_succeeds(tmp_path, monkey
         for i in range(1, 4)
     }
     monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "build_site_index", lambda src: None)
     monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
 
     def fail_if_called(*a, **k):
@@ -1135,9 +1290,10 @@ def test_limit_run_does_not_touch_an_unrelated_real_checkpoint(tmp_path, monkeyp
         for i in range(1, 6)
     }
     monkeypatch.setattr(fw, "discover_doc_pages", lambda src: pages)
+    monkeypatch.setattr(fw, "build_site_index", lambda src: None)
     monkeypatch.setattr(fw, "validate_discovery", lambda *a, **k: None)
 
-    def fake_fetch_one_doc(source, page, existing):
+    def fake_fetch_one_doc(source, page, existing, site_index=None):
         return fake_success_outcome(source, page, f"# doc {page.doc_id}\n")
 
     monkeypatch.setattr(fw, "fetch_one_doc", fake_fetch_one_doc)

@@ -19,17 +19,17 @@ IMPORTANT -- robots.txt does NOT allow /docFetch/. The site's robots.txt is:
     Allow: /resource/devtool$
 
 /docFetch/ is not in that Allow list, so it falls under the leading
-`Disallow: /`. As of 2026-08-23, that endpoint IS used by a real scheduled
-pipeline too -- see scripts/fetch_wecom_docs_src.py and its README section
-("True-source Markdown sync") for that conscious, deliberately conservative
-exception to the robots.txt boundary. THIS script is a separate, narrower
-thing: a hand-run comparison/spot-check tool, kept to its own original,
-tighter constraints regardless of what the scheduled pipeline now does:
+`Disallow: /`. There is no scheduled pipeline built on this endpoint (a
+parallel "true-source" sync was prototyped 2026-08-23 and deliberately cut
+before shipping -- its only real target docs are never discovered by
+nav-tree walking in the first place, so it had no actual content to
+recover). THIS script is the only thing in this repo that touches
+/docFetch/, and it stays a narrow, hand-run comparison/spot-check tool:
   - NEVER wired into any CI workflow -- hand-run only, so it can't be
     triggered casually or end up in a schedule of its own,
   - hard-capped at a small number of ids per invocation (MAX_IDS),
-  - not itself a sync/recovery mechanism -- that's fetch_wecom_docs_src.py's
-    job now; this one stays a comparison tool.
+  - not a sync/recovery mechanism -- just a fidelity spot-check against
+    docs/wecom/<id>.md.
 
 Resolving the id -> doc_id mapping this endpoint needs does NOT touch
 /docFetch/ at all: every ordinary /document/path/<id> page (robots.txt DOES

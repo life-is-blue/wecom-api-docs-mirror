@@ -80,7 +80,7 @@ USER_AGENT = (
     "(+https://github.com/search?q=wecom-api-docs-mirror; doc-mirror bot)"
 )
 
-CONVERTER_VERSION = "5"
+CONVERTER_VERSION = "6"
 
 REQUEST_TIMEOUT_SECONDS = 30
 MAX_RETRIES = 4
@@ -418,10 +418,9 @@ def validate_discovery(pages: Dict[str, DocPage], source: Source, previous_count
 # --------------------------------------------------------------------------
 # True-source Markdown via docFetch/fetchCnt -- NOT in robots.txt's Allow
 # list (only /document, /tutorial, /community/..., /resource/devtool are).
-# Shared by scripts/fetch_wecom_docs_src.py (the true-source sync pipeline)
-# and scripts/debug_compare_via_api.py (the hand-run comparison tool); see
-# each caller's own module docstring for the usage constraints it commits
-# to. Resolving the id -> doc_id mapping this endpoint needs does NOT touch
+# Used only by scripts/debug_compare_via_api.py, the hand-run comparison
+# tool; see its module docstring for the usage constraints it commits to.
+# Resolving the id -> doc_id mapping this endpoint needs does NOT touch
 # /docFetch/ itself: every ordinary /document/path/<id> page embeds the
 # whole site's id index as raw JSON for its own client-side JS to use, so
 # one normal (robots.txt-allowed) page fetch resolves every id a run needs.
@@ -443,6 +442,63 @@ def build_id_to_doc_id_map(source: Source) -> Dict[str, Dict[str, str]]:
     for m in DOC_ID_INDEX_ENTRY_RE.finditer(html):
         mapping[m.group("id")] = {"doc_id": m.group("doc_id"), "title": m.group("title")}
     return mapping
+
+
+@dataclass
+class SiteIndex:
+    """Corpus-wide context threaded through fetch_one_doc() ->
+    convert_article_to_markdown() -> _rewrite_internal_links(), built once
+    per sync_source() call. Its job:
+
+    1. Correct in-article cross-doc link rewriting. A bare `#<N>` fragment
+       in the site's rendered HTML is ambiguous on its own: sometimes N is
+       a real URL-path id, but sometimes it's the site's *internal* doc_id
+       (a different numbering namespace) -- treating every `#<N>` as a
+       URL-path id (the pre-2026-08-23 behavior) silently produced a
+       ./<N>.md link to a file that would never exist. Found via a corpus
+       scan: 988 broken links across 373 of 711 already-published files.
+
+    `valid_url_ids` means exactly one thing: this mirror already has a
+    `./<id>.md` file for it on disk, as of the start of this run. Not
+    "discovered by today's nav-tree walk" -- discovery can (and, right
+    after a discovery-logic change, does) run ahead of what's actually
+    been fetched, so a freshly-discovered id can still have no file for
+    several runs (per-run fetch cap, circuit breaker, or a transient
+    failure). Reverse-resolving into one of those would trade one broken
+    link for another, so both resolution branches in
+    `_rewrite_internal_links()` key off this same "has a file" set.
+    """
+    valid_url_ids: frozenset
+    doc_id_to_url_id: Dict[str, str]
+
+
+def build_site_index(source: Source) -> Optional[SiteIndex]:
+    """Best-effort: a failure here must not abort the sync (link rewriting
+    degrades gracefully to its pre-index behavior when this is None),
+    since the normal HTML fetch path for every doc doesn't depend on it."""
+    try:
+        id_map = build_id_to_doc_id_map(source)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[WARN] failed to resolve id -> doc_id index this run "
+              f"(link resolution is degraded, not disabled): {exc}")
+        return None
+    source_root = DOCS_ROOT / source.output_subdir
+    valid_url_ids = frozenset(p.stem for p in source_root.glob("*.md"))
+    return SiteIndex(
+        valid_url_ids=valid_url_ids,
+        # build_id_to_doc_id_map() reflects the *site's* full id index
+        # (every doc WeCom knows about), not just what this mirror
+        # carries -- a doc_id can legitimately reverse-resolve to a real
+        # url_id this mirror has never fetched. Drop those here rather
+        # than at the call site, so nothing downstream needs to re-derive
+        # this filter: only keep a mapping if its target already has a
+        # file on disk.
+        doc_id_to_url_id={
+            v["doc_id"]: k
+            for k, v in id_map.items()
+            if k in valid_url_ids
+        },
+    )
 
 
 def fetch_via_doc_api(site_root: str, doc_id: str, referer_url: str) -> Dict:
@@ -505,14 +561,53 @@ def _clean_code_blocks(article: Tag) -> None:
         code.append(text)
 
 
-def _rewrite_internal_links(article: Tag, source: Source) -> None:
+def _rewrite_internal_links(article: Tag, source: Source, site_index: Optional[SiteIndex] = None) -> None:
     doc_path_re = re.compile(re.escape(source.doc_path_prefix) + r"(\d+)$")
-    fragment_id_re = re.compile(r"^#(\d+)$")
+    # Also matches the previously-unhandled "#<id>/<url-encoded sub-anchor>"
+    # shape (e.g. #62131/连接方式对比) -- left completely untouched before,
+    # now resolved the same way a bare #<id> is. The sub-anchor addresses a
+    # heading inside the *target* page, so it survives the rewrite as a
+    # GitHub-style "#anchor" suffix on the mirrored .md path -- dropping it
+    # (as an earlier draft of this fix did) flattens dozens of table links
+    # that each point at a distinct heading into all pointing at the same
+    # bare file. The anchor is already URL-encoded on the site
+    # (%E6%95%B0... for Chinese, lowercase-digits for ascii slugs), which
+    # matches what GitHub generates for these headings, so it's passed
+    # through verbatim rather than re-derived.
+    fragment_id_re = re.compile(r"^#(\d+)(?:/(.*))?$")
     for a in article.find_all("a", href=True):
         href = a["href"].strip()
-        match = doc_path_re.match(href) or fragment_id_re.match(href)
-        if match:
-            a["href"] = f"./{match.group(1)}.md"
+        doc_path_match = doc_path_re.match(href)
+        if doc_path_match:
+            a["href"] = f"./{doc_path_match.group(1)}.md"
+            continue
+
+        frag_match = fragment_id_re.match(href)
+        if not frag_match:
+            continue
+        candidate = frag_match.group(1)
+        sub_anchor = frag_match.group(2)
+        anchor_suffix = f"#{sub_anchor}" if sub_anchor else ""
+
+        if site_index is None:
+            # No corpus context this run (offline unit tests, or the
+            # id-index fetch failed) -- fall back to the original
+            # assume-it's-a-URL-id behavior rather than leaving every
+            # fragment link unrewritten.
+            a["href"] = f"./{candidate}.md{anchor_suffix}"
+        elif candidate in site_index.valid_url_ids:
+            a["href"] = f"./{candidate}.md{anchor_suffix}"
+        elif candidate in site_index.doc_id_to_url_id:
+            # `candidate` isn't a real URL-path id -- it's the site's
+            # *internal* doc_id for some other doc, embedded directly in
+            # this href. Reverse-resolve it instead of guessing wrong.
+            # (doc_id_to_url_id is already filtered to only ever point at
+            # ids this mirror actually has a file for -- see
+            # build_site_index -- so no further check is needed here.)
+            a["href"] = f"./{site_index.doc_id_to_url_id[candidate]}.md{anchor_suffix}"
+        # else: unresolvable against what we know this run -- leave the
+        # original href untouched rather than writing a confidently wrong
+        # link to a file that will never exist.
 
 
 _ADMONITION_ICON_SRC_PREFIX = "data:image/svg+xml;base64,"
@@ -596,14 +691,14 @@ def _normalize_markdown(text: str) -> str:
     return "\n".join(normalized).strip() + "\n"
 
 
-def convert_article_to_markdown(article: Tag, source: Source) -> str:
+def convert_article_to_markdown(article: Tag, source: Source, site_index: Optional[SiteIndex] = None) -> str:
     for toc in article.select("dir.toc"):
         toc.decompose()
     for anchor in article.select("a.anchor"):
         anchor.decompose()
 
     _clean_code_blocks(article)
-    _rewrite_internal_links(article, source)
+    _rewrite_internal_links(article, source, site_index)
     _fix_images(article, source.site_root)
     _convert_admonitions(article)
 
@@ -688,7 +783,7 @@ def remove_empty_dirs(start: Path, stop: Path) -> None:
 # Main
 # --------------------------------------------------------------------------
 
-def fetch_one_doc(source: Source, page: DocPage, existing: Dict) -> FetchOutcome:
+def fetch_one_doc(source: Source, page: DocPage, existing: Dict, site_index: Optional[SiteIndex] = None) -> FetchOutcome:
     try:
         html = fetch_text(page.url)
     except Exception as exc:  # noqa: BLE001
@@ -708,7 +803,7 @@ def fetch_one_doc(source: Source, page: DocPage, existing: Dict) -> FetchOutcome
     raw_article_html = str(article)
 
     try:
-        markdown = convert_article_to_markdown(article, source)
+        markdown = convert_article_to_markdown(article, source, site_index)
     except Exception as exc:  # noqa: BLE001
         return FetchOutcome(failed=True, error=f"conversion error: {exc}")
 
@@ -809,6 +904,13 @@ def sync_source(
     source_root = DOCS_ROOT / source.output_subdir
     source_root.mkdir(parents=True, exist_ok=True)
 
+    # Best-effort; None just means link rewriting degrades to its
+    # no-context behavior this run (see SiteIndex / build_site_index
+    # docstrings) -- never fatal to the normal HTML sync. Built from
+    # source_root's current *files*, so it must run after the mkdir
+    # above and before any of this run's own fetches land there.
+    site_index = build_site_index(source)
+
     doc_ids = sorted(pages.keys())
     if args.limit is not None and args.limit < len(doc_ids):
         step = max(1, len(doc_ids) // args.limit)
@@ -886,7 +988,7 @@ def sync_source(
         existing_entry = existing_files.get(manifest_key, {})
 
         time.sleep(random.uniform(REQUEST_DELAY_MIN_SECONDS, REQUEST_DELAY_MAX_SECONDS))
-        outcome = fetch_one_doc(source, page, existing_entry)
+        outcome = fetch_one_doc(source, page, existing_entry, site_index)
 
         if outcome.failed:
             print(f"[WARN] failed url={page.url} err={outcome.error}")
