@@ -13,3 +13,7 @@ docs/**/.*.tmp*
 # scripts/debug_capture_raw_html.py output -- ad hoc audit copies, not part
 # of the public mirror (that's the converted docs/wecom/*.md).
 /raw_html/
+
+# Internal working notes for picking up in-progress work across sessions --
+# not part of the public mirror.
+/HANDOFF.md
