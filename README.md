@@ -27,9 +27,72 @@ for agent-oriented document ingestion and retrieval.
   diffed against exactly what the site sent without a live re-fetch.
   Not backfilled for docs mirrored before this existed (2026-08-21) --
   those simply lack an `.html` file until they're naturally re-fetched.
-- Each mirrored file keeps source metadata (`doc_id`, `section`, `url`,
-  `sha256`, `html_sha256`, `converter_version`, `first_seen_at`,
-  `last_verified_at`) in `docs/docs_manifest.json`.
+- Each mirrored file keeps source metadata (`doc_id`, `category_path`, `section`,
+  `url`, `sha256`, `html_sha256`, `converter_version`, `first_seen_at`,
+  `last_verified_at`, `fetched_at`) in `docs/docs_manifest.json`.
+- The repository maintains **three strictly aligned formal indexes**:
+  1. `docs/docs_manifest.json`: Complete machine-readable metadata manifest with category paths and hashes.
+  2. `docs/SUMMARY.md`: Nested GitBook/mdBook-compatible table of contents.
+  3. `docs/starlight_sidebar.json`: Astro Starlight sidebar navigation configuration.
+
+## Formal Indices & Navigation Model
+
+The mirror generates three synchronized formal index artifacts from the canonical navigation model:
+
+| Artifact | Format | Purpose |
+|---|---|---|
+| `docs/docs_manifest.json` | JSON | Machine-readable manifest of all mirrored files, metadata, hashes, and categories |
+| `docs/SUMMARY.md` | Markdown | GitBook / mdBook nested navigation list with verified markdown links |
+| `docs/starlight_sidebar.json` | JSON | Astro Starlight sidebar configuration array (links & groups) |
+
+### Astro Starlight Integration
+
+The generated `docs/starlight_sidebar.json` directly conforms to Astro Starlight's official sidebar specification ([Starlight Sidebar Navigation](https://starlight.astro.build/guides/sidebar/), accessed 2026-08-24). You can directly import and supply it to the Starlight integration:
+
+```javascript
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import starlight from '@astrojs/starlight';
+import sidebar from './docs/starlight_sidebar.json';
+
+// Ref: https://starlight.astro.build/guides/sidebar/ (Accessed: 2026-08-24)
+export default defineConfig({
+  integrations: [
+    starlight({
+      title: '企业微信 API 文档镜像',
+      sidebar: sidebar,
+    }),
+  ],
+});
+```
+
+### Field Semantics in `docs_manifest.json`
+
+- `schema_version`: Manifest schema format version (currently `1`).
+- `generated_at`: ISO 8601 UTC timestamp of the last time formal published content actually changed. Unchanged runs inherit this timestamp to prevent Git noise.
+- `category_path`: Array of category titles representing the multi-level hierarchy (e.g. `["通讯录管理", "成员管理"]`).
+- `section`: Backward-compatible slash-separated string (e.g. `"通讯录管理/成员管理"`).
+- `sha256` / `bytes`: SHA-256 hash and byte length of the converted `.md` file.
+- `html_sha256` / `html_bytes`: SHA-256 hash and byte length of the raw article-body `.html` file.
+- `converter_version`: Version string of the HTML-to-Markdown converter.
+- `first_seen_at`: Timestamp when the document was first observed in discovery.
+- `last_verified_at`: Timestamp when the document was last crawled/verified.
+- `fetched_at`: Timestamp when the document content was last fetched and modified. If content hash is unchanged, `fetched_at` is preserved.
+- `missing_since` / `missing_run_count`: Delayed deletion tracking fields.
+- `fetch_failures`: Consecutive failure counter for this document.
+
+### Publication Invariants & Checkpoint Boundary
+
+1. **Strict Set Equality Invariant**:
+   Before writing any formal index, the fetcher verifies:
+   $$\text{Sidebar Leaves} == \text{SUMMARY Links} == \text{Manifest Keys}$$
+   and verifies that every key corresponds to an existing `.md` file on disk.
+2. **Atomic Publication & Delayed Deletion Safety**:
+   Candidate deletions are queued in a deletion plan. If invariant validation fails, the process exits non-zero immediately with **zero writes** and **zero deletions**, keeping all formal files and disk files untouched.
+3. **Checkpoint vs Formal Index Separation**:
+   `docs/sync_progress.json` tracks in-flight progress across rate-limited cron runs (8–15s delay, 150 docs/run). In-flight checkpoint state is never mixed into formal indices until an entire discovery pass completes and passes all invariant checks.
+4. **Idempotency & Zero-Noise Debounce**:
+   If a sync pass results in no business content changes, `generated_at` and file contents are preserved byte-for-byte, ensuring identical sha256 and untouched file `mtime`.
 
 ## How discovery works
 
@@ -153,6 +216,8 @@ Other useful flags:
 STRICT_FETCH=1 python3 scripts/fetch_wecom_docs.py         # fail on any per-page fetch error
 python3 scripts/fetch_wecom_docs.py --limit 20              # quick low-traffic smoke test;
                                                               # see --help, not meant for a real sync
+python3 scripts/fetch_wecom_docs.py --offline-nav           # offline navigation & manifest category migration
+                                                              # without fetching or touching sync run stats
 ```
 
 ## Automation
