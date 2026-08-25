@@ -1,0 +1,228 @@
+<div class="ep-doc-area-cherry cherry-markdown cherry-wecom" id="js-ep-doc-cnt-md"><div data-code-block-theme="coy" data-inline-code-theme="red"><dir class="toc" data-lines="1" data-sign="d0e7ef047bb476790ab55ddc06ed3118-1"><p class="toc-title">目录</p><li class="toc-li"><a class="level-3" href="#%E9%99%84%E5%BD%95"><strong>附录</strong></a></li><li class="toc-li">      <a class="level-4" href="#%E9%99%841%EF%BC%9Adate%E6%8E%A7%E4%BB%B6%EF%BC%88%E6%97%A5%E6%9C%9F%E6%97%A5%E6%9C%9F%E6%97%B6%E9%97%B4%E6%8E%A7%E4%BB%B6%EF%BC%89config%E8%AF%B4%E6%98%8E%EF%BC%9A"><strong>附1：Date控件（日期/日期+时间控件）config说明：</strong></a></li><li class="toc-li">      <a class="level-4" href="#%E9%99%842%EF%BC%9Aselector%E6%8E%A7%E4%BB%B6%EF%BC%88%E5%8D%95%E9%80%89%E5%A4%9A%E9%80%89%E6%8E%A7%E4%BB%B6%EF%BC%89config%E8%AF%B4%E6%98%8E%EF%BC%9A"><strong>附2：Selector控件（单选/多选控件）config说明：</strong></a></li><li class="toc-li">      <a class="level-4" href="#%E9%99%843%EF%BC%9Acontact%E6%8E%A7%E4%BB%B6%EF%BC%88%E6%88%90%E5%91%98%E9%83%A8%E9%97%A8%E6%8E%A7%E4%BB%B6%EF%BC%89config%E8%AF%B4%E6%98%8E%EF%BC%9A"><strong>附3：Contact控件（成员/部门控件）config说明：</strong></a></li><li class="toc-li">      <a class="level-4" href="#%E9%99%844%EF%BC%9Atable%EF%BC%88%E6%98%8E%E7%BB%86%E6%8E%A7%E4%BB%B6%EF%BC%89config%E8%AF%B4%E6%98%8E%EF%BC%9A"><strong>附4：Table（明细控件）config说明：</strong></a></li><li class="toc-li">      <a class="level-4" href="#%E9%99%845%EF%BC%9Aattendance%E6%8E%A7%E4%BB%B6%EF%BC%88%E5%81%87%E5%8B%A4%E6%8E%A7%E4%BB%B6%EF%BC%89config%E8%AF%B4%E6%98%8E%EF%BC%9A"><strong>附5：Attendance控件（假勤控件）config说明：</strong></a></li><li class="toc-li">      <a class="level-4" href="#%E9%99%846%EF%BC%9Avacation%E6%8E%A7%E4%BB%B6%EF%BC%88%E5%81%87%E5%8B%A4%E6%8E%A7%E4%BB%B6%EF%BC%89%E8%AF%B4%E6%98%8E%EF%BC%9A"><strong>附6：Vacation控件（假勤控件）说明：</strong></a></li><li class="toc-li">      <a class="level-4" href="#%E9%99%847%EF%BC%9Atips%E6%8E%A7%E4%BB%B6%EF%BC%88%E8%AF%B4%E6%98%8E%E6%96%87%E5%AD%97%E6%8E%A7%E4%BB%B6%EF%BC%89config%E8%AF%B4%E6%98%8E%EF%BC%9A"><strong>附7：Tips控件（说明文字控件）config说明：</strong></a></li><li class="toc-li"><a class="level-3" href="#%E9%94%99%E8%AF%AF%E8%AF%B4%E6%98%8E"><strong>错误说明</strong></a></li></dir><p data-lines="3" data-sign="907c029dd158ab03f87fd02ffaf4d823" data-type="p"><strong>请求方式：</strong>POST（<strong>HTTPS</strong>）<br/><strong>请求地址：</strong>https://qyapi.weixin.qq.com/cgi-bin/oa/gettemplatedetail?access_token=ACCESS_TOKEN</p><p data-lines="2" data-sign="0eaf88df03cd3784619d00af1ca68a35" data-type="p"><strong>请求示例：</strong></p><div data-lines="6" data-sign="189ea0626fea2991803b8527708ce585" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">   <span class="token property">"template_id"</span> <span class="token operator">:</span> <span class="token string">"ZLqk8pcsAoXZ1eYa6vpAgfX28MPdYU3ayMaSPHaaa"</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><blockquote data-lines="1" data-sign="877229ab0bcdb78fb52350dbf4805ee2_1">较早时间创建的模板，id为类似“1910324946027731_1688852032423522_1808577376_15111111111”的数字串。</blockquote><p data-lines="2" data-sign="f2e21495051cadd2d5b0f8a3eedbae8d" data-type="p"><strong>参数说明：</strong></p><div class="cherry-table-container" data-lines="4" data-sign="9f40d257c66d10130e436b6e2efc9555">
+<table class="cherry-table"><thead><tr><th>参数</th><th>必须</th><th>说明</th></tr></thead><tbody><tr><td>access_token</td><td>是</td><td>调用接口凭证</td></tr><tr><td>template_id</td><td>是</td><td>模板的唯一标识id。可在“获取审批单据详情”、“审批状态变化回调通知”中获得，也可在审批模板的模板编辑页面浏览器Url链接中获得。</td></tr></tbody></table></div><div class="cherry-table-container" data-lines="5" data-sign="9ea60c837b32040556e2114d37955696">
+<table class="cherry-table"><thead><tr><th>应用类型</th><th>权限要求</th></tr></thead><tbody><tr><td>自建应用</td><td>配置到「<a href="#17893/%E9%85%8D%E7%BD%AE%E5%8F%AF%E8%B0%83%E7%94%A8%E6%8E%A5%E5%8F%A3%E7%9A%84%E5%BA%94%E7%94%A8" rel="nofollow">审批 - 可调用接口的应用</a>」中</td></tr><tr><td>代开发应用</td><td>具有「审批」权限</td></tr><tr><td>第三方应用</td><td>具有「审批」权限</td></tr></tbody></table></div><blockquote data-lines="2" data-sign="1769f92d10d229cf9355197df095cf58_2">1.第三方应用可以获取第三方应用添加的模板详情。<br/>2.自建应用的Secret可获取企业自建模板的模板详情。<br/>3.接口调用频率限制为600次/分钟。</blockquote><p data-lines="3" data-sign="1cd962ad1e12bb60257bdd32103bcd08" data-type="p"><em>注：</em> 从2023年12月1日0点起，不再支持通过系统应用secret调用接口，存量企业暂不受影响 <a href="https://developer.work.weixin.qq.com/document/51165" rel="nofollow">查看详情</a><br/> </p><hr data-lines="1" data-sign="hr1"/><p data-lines="2" data-sign="0b789d7580f376b3feaff0d57431f7b7" data-type="p"><strong>返回结果 ：</strong></p><div data-lines="63" data-sign="810b38fe4e7c6f3e18f18ff603a53183" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token property">"errcode"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"errmsg"</span><span class="token operator">:</span> <span class="token string">"ok"</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"template_names"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">        <span class="token punctuation">{</span></span>
+<span class="code-line">            <span class="token property">"text"</span><span class="token operator">:</span> <span class="token string">"全字段"</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token property">"lang"</span><span class="token operator">:</span> <span class="token string">"zh_CN"</span></span>
+<span class="code-line">        <span class="token punctuation">}</span></span>
+<span class="code-line">    <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"template_content"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">        <span class="token property">"controls"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">            <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token property">"property"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token property">"control"</span><span class="token operator">:</span> <span class="token string">"Selector"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"id"</span><span class="token operator">:</span> <span class="token string">"Selector-15111111111"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"title"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                        <span class="token punctuation">{</span></span>
+<span class="code-line">                            <span class="token property">"text"</span><span class="token operator">:</span> <span class="token string">"单选控件"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token property">"lang"</span><span class="token operator">:</span> <span class="token string">"zh_CN"</span></span>
+<span class="code-line">                        <span class="token punctuation">}</span></span>
+<span class="code-line">                    <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"placeholder"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                        <span class="token punctuation">{</span></span>
+<span class="code-line">                            <span class="token property">"text"</span><span class="token operator">:</span> <span class="token string">"这是单选控件的说明"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token property">"lang"</span><span class="token operator">:</span> <span class="token string">"zh_CN"</span></span>
+<span class="code-line">                        <span class="token punctuation">}</span></span>
+<span class="code-line">                    <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"require"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"un_print"</span><span class="token operator">:</span> <span class="token number">0</span></span>
+<span class="code-line">                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token property">"config"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token property">"selector"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"single"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token property">"exp_type"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token property">"options"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token property">"key"</span><span class="token operator">:</span> <span class="token string">"option-15111111111"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token property">"value"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                                    <span class="token punctuation">{</span></span>
+<span class="code-line">                                        <span class="token property">"text"</span><span class="token operator">:</span> <span class="token string">"选项1"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                        <span class="token property">"lang"</span><span class="token operator">:</span> <span class="token string">"zh_CN"</span></span>
+<span class="code-line">                                    <span class="token punctuation">}</span></span>
+<span class="code-line">                                <span class="token punctuation">]</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token property">"key"</span><span class="token operator">:</span> <span class="token string">"option-15222222222"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                <span class="token property">"value"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                                    <span class="token punctuation">{</span></span>
+<span class="code-line">                                        <span class="token property">"text"</span><span class="token operator">:</span> <span class="token string">"选项2"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                        <span class="token property">"lang"</span><span class="token operator">:</span> <span class="token string">"zh_CN"</span></span>
+<span class="code-line">                                    <span class="token punctuation">}</span></span>
+<span class="code-line">                                <span class="token punctuation">]</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span></span>
+<span class="code-line">                        <span class="token punctuation">]</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span></span>
+<span class="code-line">                <span class="token punctuation">}</span></span>
+<span class="code-line">            <span class="token punctuation">}</span></span>
+<span class="code-line">        <span class="token punctuation">]</span></span>
+<span class="code-line">    <span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><p data-lines="2" data-sign="f2e21495051cadd2d5b0f8a3eedbae8d" data-type="p"><strong>参数说明：</strong></p><div class="cherry-table-container" data-lines="13" data-sign="ae8edc80c6e43de834d578510ca62bc2">
+<table class="cherry-table"><thead><tr><th>参数</th><th>说明</th></tr></thead><tbody><tr><td>template_names</td><td>模板名称，若配置了多语言则会包含中英文的模板名称，默认为zh_CN中文</td></tr><tr><td>template_content</td><td>模板控件信息</td></tr><tr><td>└ controls</td><td>模板控件数组。模板详情由多个不同类型的控件组成，控件类型详细说明见附录。</td></tr><tr><td>└ └ property</td><td>模板控件属性，包含了模板内控件的各种属性信息</td></tr><tr><td>└ └ └ control</td><td>控件类型：Text-文本；Textarea-多行文本；Number-数字；Money-金额；Date-日期/日期+时间；Selector-单选/多选；Contact-成员/部门；Tips-说明文字；File-附件；Table-明细；Attendance-假勤控件；Vacation-请假控件；Location-位置；RelatedApproval-关联审批单；Formula-公式；DateRange-时长；BankAccount-收款账户</td></tr><tr><td>└ └ └ id</td><td>控件id</td></tr><tr><td>└ └ └ title</td><td>控件名称，若配置了多语言则会包含中英文的控件名称，默认为zh_CN中文</td></tr><tr><td>└ └ └ placeholder</td><td>控件说明，向申请者展示的控件填写说明，若配置了多语言则会包含中英文的控件说明，默认为zh_CN中文</td></tr><tr><td>└ └ └ require</td><td>是否必填：1-必填；0-非必填</td></tr><tr><td>└ └ └ un_print</td><td>是否参与打印：1-不参与打印；0-参与打印</td></tr><tr><td>└ └ config</td><td>模板控件配置，包含了部分控件类型的附加类型、属性，详见附录说明。目前有配置信息的控件类型有：Date-日期/日期+时间；Selector-单选/多选；Contact-成员/部门；Table-明细；Attendance-假勤组件（请假、外出、出差、加班）</td></tr></tbody></table></div><hr data-lines="2" data-sign="hr2"/><h3 data-lines="1" data-sign="966c810b32a7d4bd97c0f7b7dfe23fec" id="%E9%99%84%E5%BD%95"><a class="anchor" href="#%E9%99%84%E5%BD%95"></a><strong>附录</strong></h3><p data-lines="2" data-sign="br2" data-type="br"> </p><h4 data-lines="1" data-sign="295660b1c9ec2a4be6d0a5198a84af22" id="%E9%99%841%EF%BC%9Adate%E6%8E%A7%E4%BB%B6%EF%BC%88%E6%97%A5%E6%9C%9F%E6%97%A5%E6%9C%9F%E6%97%B6%E9%97%B4%E6%8E%A7%E4%BB%B6%EF%BC%89config%E8%AF%B4%E6%98%8E%EF%BC%9A"><a class="anchor" href="#%E9%99%841%EF%BC%9Adate%E6%8E%A7%E4%BB%B6%EF%BC%88%E6%97%A5%E6%9C%9F%E6%97%A5%E6%9C%9F%E6%97%B6%E9%97%B4%E6%8E%A7%E4%BB%B6%EF%BC%89config%E8%AF%B4%E6%98%8E%EF%BC%9A"></a><strong>附1：Date控件（日期/日期+时间控件）config说明：</strong></h4><div data-lines="7" data-sign="189a91760de6d529f13f8e5cace35a5d" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token property">"date"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">        <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"day"</span></span>
+<span class="code-line">    <span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><div class="cherry-table-container" data-lines="4" data-sign="19811ad8ea5603b28095a49d5e1bf7fa">
+<table class="cherry-table"><thead><tr><th>参数</th><th>说明</th></tr></thead><tbody><tr><td>date</td><td>类型标志，日期/日期+时间控件的config中会包含此参数</td></tr><tr><td>└ type</td><td>时间展示类型：day-日期；hour-日期+时间</td></tr></tbody></table></div><h4 data-lines="2" data-sign="2462f818e147a9b6c1ffaf264499c86b" id="%E9%99%842%EF%BC%9Aselector%E6%8E%A7%E4%BB%B6%EF%BC%88%E5%8D%95%E9%80%89%E5%A4%9A%E9%80%89%E6%8E%A7%E4%BB%B6%EF%BC%89config%E8%AF%B4%E6%98%8E%EF%BC%9A"><a class="anchor" href="#%E9%99%842%EF%BC%9Aselector%E6%8E%A7%E4%BB%B6%EF%BC%88%E5%8D%95%E9%80%89%E5%A4%9A%E9%80%89%E6%8E%A7%E4%BB%B6%EF%BC%89config%E8%AF%B4%E6%98%8E%EF%BC%9A"></a><strong>附2：Selector控件（单选/多选控件）config说明：</strong></h4><div data-lines="28" data-sign="d91fa465331b02d94a1c62d22b268f99" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token property">"selector"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">        <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"single"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"options"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">            <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token property">"key"</span><span class="token operator">:</span> <span class="token string">"option-15111111111"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token property">"value"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                    <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token property">"text"</span><span class="token operator">:</span> <span class="token string">"选项1"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token property">"lang"</span><span class="token operator">:</span> <span class="token string">"zh_CN"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span></span>
+<span class="code-line">                <span class="token punctuation">]</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token property">"key"</span><span class="token operator">:</span> <span class="token string">"option-15222222222"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token property">"value"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                    <span class="token punctuation">{</span></span>
+<span class="code-line">                        <span class="token property">"text"</span><span class="token operator">:</span> <span class="token string">"选项2"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token property">"lang"</span><span class="token operator">:</span> <span class="token string">"zh_CN"</span></span>
+<span class="code-line">                    <span class="token punctuation">}</span></span>
+<span class="code-line">                <span class="token punctuation">]</span></span>
+<span class="code-line">            <span class="token punctuation">}</span></span>
+<span class="code-line">        <span class="token punctuation">]</span></span>
+<span class="code-line">    <span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><div class="cherry-table-container" data-lines="12" data-sign="fc4abb8e94f399ec81a588176a0ab429">
+<table class="cherry-table"><thead><tr><th>参数</th><th>说明</th></tr></thead><tbody><tr><td>selector</td><td>类型标志，单选/多选控件的config中会包含此参数</td></tr><tr><td>└ type</td><td>选择类型：single-单选；multi-多选</td></tr><tr><td>└ options</td><td>选项，包含单选/多选控件中的所有选项，可能有多个</td></tr><tr><td>└ └ key</td><td>选项key，选项的唯一id，可用于发起审批申请，为单选/多选控件赋值</td></tr><tr><td>└ └ value</td><td>选项值，若配置了多语言则会包含中英文的选项值，默认为zh_CN中文</td></tr><tr><td>└ op_relations</td><td>如果设置了控件关联，则会有此项</td></tr><tr><td>└ └ key</td><td>关联的选项key</td></tr><tr><td>└ └ relation_list</td><td>关联的控件信息</td></tr><tr><td>└ └ └ related_control_id</td><td>关联的控件id</td></tr><tr><td>└ └ └ action</td><td>关联的动作 1:关联控件显示隐藏状态</td></tr></tbody></table></div><h4 data-lines="2" data-sign="eb11461dc15232a09fa6507d396ec906" id="%E9%99%843%EF%BC%9Acontact%E6%8E%A7%E4%BB%B6%EF%BC%88%E6%88%90%E5%91%98%E9%83%A8%E9%97%A8%E6%8E%A7%E4%BB%B6%EF%BC%89config%E8%AF%B4%E6%98%8E%EF%BC%9A"><a class="anchor" href="#%E9%99%843%EF%BC%9Acontact%E6%8E%A7%E4%BB%B6%EF%BC%88%E6%88%90%E5%91%98%E9%83%A8%E9%97%A8%E6%8E%A7%E4%BB%B6%EF%BC%89config%E8%AF%B4%E6%98%8E%EF%BC%9A"></a><strong>附3：Contact控件（成员/部门控件）config说明：</strong></h4><div data-lines="8" data-sign="55c85e2aba4d240197b55504479f47da" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token property">"contact"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">        <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"multi"</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"mode"</span><span class="token operator">:</span> <span class="token string">"department"</span></span>
+<span class="code-line">    <span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><div class="cherry-table-container" data-lines="5" data-sign="53ac95182486dc58caff3ff7ee9a1f8f">
+<table class="cherry-table"><thead><tr><th>参数</th><th>说明</th></tr></thead><tbody><tr><td>contact</td><td>类型标志，单选/多选控件的config中会包含此参数</td></tr><tr><td>└ type</td><td>选择方式：single-单选；multi-多选</td></tr><tr><td>└ mode</td><td>选择对象：user-成员；department-部门</td></tr></tbody></table></div><h4 data-lines="2" data-sign="404132b13c3878d97df0be13128a2d39" id="%E9%99%844%EF%BC%9Atable%EF%BC%88%E6%98%8E%E7%BB%86%E6%8E%A7%E4%BB%B6%EF%BC%89config%E8%AF%B4%E6%98%8E%EF%BC%9A"><a class="anchor" href="#%E9%99%844%EF%BC%9Atable%EF%BC%88%E6%98%8E%E7%BB%86%E6%8E%A7%E4%BB%B6%EF%BC%89config%E8%AF%B4%E6%98%8E%EF%BC%9A"></a><strong>附4：Table（明细控件）config说明：</strong></h4><div data-lines="29" data-sign="afdcd63252ae4f6d53af4d2631a27c45" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token property">"table"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">        <span class="token property">"children"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">            <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token property">"property"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token property">"control"</span><span class="token operator">:</span> <span class="token string">"Text"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"id"</span><span class="token operator">:</span> <span class="token string">"Text-15111111111"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"title"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                        <span class="token punctuation">{</span></span>
+<span class="code-line">                            <span class="token property">"text"</span><span class="token operator">:</span> <span class="token string">"明细内文本控件"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token property">"lang"</span><span class="token operator">:</span> <span class="token string">"zh_CN"</span></span>
+<span class="code-line">                        <span class="token punctuation">}</span></span>
+<span class="code-line">                    <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"placeholder"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                        <span class="token punctuation">{</span></span>
+<span class="code-line">                            <span class="token property">"text"</span><span class="token operator">:</span> <span class="token string">"这是明细内文本控件的说明"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token property">"lang"</span><span class="token operator">:</span> <span class="token string">"zh_CN"</span></span>
+<span class="code-line">                        <span class="token punctuation">}</span></span>
+<span class="code-line">                    <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"require"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span></span>
+<span class="code-line">                    <span class="token property">"un_print"</span><span class="token operator">:</span> <span class="token number">0</span></span>
+<span class="code-line">                <span class="token punctuation">}</span></span>
+<span class="code-line">            <span class="token punctuation">}</span></span>
+<span class="code-line">        <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token property">"stat_field"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span></span>
+<span class="code-line">    <span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><div class="cherry-table-container" data-lines="4" data-sign="a235a9b58df8eba04c0a8d674d2eaa55">
+<table class="cherry-table"><thead><tr><th>参数</th><th>说明</th></tr></thead><tbody><tr><td>table</td><td>类型标志，明细控件的config中会包含此参数</td></tr><tr><td>└ children</td><td>明细内的子控件，内部结构同controls</td></tr></tbody></table></div><h4 data-lines="2" data-sign="f7e99380268b134c7e2fc345a602bac7" id="%E9%99%845%EF%BC%9Aattendance%E6%8E%A7%E4%BB%B6%EF%BC%88%E5%81%87%E5%8B%A4%E6%8E%A7%E4%BB%B6%EF%BC%89config%E8%AF%B4%E6%98%8E%EF%BC%9A"><a class="anchor" href="#%E9%99%845%EF%BC%9Aattendance%E6%8E%A7%E4%BB%B6%EF%BC%88%E5%81%87%E5%8B%A4%E6%8E%A7%E4%BB%B6%EF%BC%89config%E8%AF%B4%E6%98%8E%EF%BC%9A"></a><strong>附5：Attendance控件（假勤控件）config说明：</strong></h4><p data-lines="1" data-sign="492eddd091036544116a99581e97c905" data-type="p">说明:【出差】【加班】【外出】模板特有的控件</p><div data-lines="10" data-sign="87f0d9b53c8feb6ddadbe3ed478b761f" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">	<span class="token property">"attendance"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">		<span class="token property">"date_range"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">			<span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"hour"</span></span>
+<span class="code-line">		<span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">		<span class="token property">"type"</span><span class="token operator">:</span> <span class="token number">3</span></span>
+<span class="code-line">	<span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><div class="cherry-table-container" data-lines="6" data-sign="b8d3944deb0ea2d37e08c9f206e84b28">
+<table class="cherry-table"><thead><tr><th>参数</th><th>说明</th></tr></thead><tbody><tr><td>attendance</td><td>类型标志，假勤控件的config中会包含此参数</td></tr><tr><td>└ date_range</td><td>假期控件属性</td></tr><tr><td>└└ type</td><td>时间刻度：hour-精确到分钟, halfday—上午/下午</td></tr><tr><td>└ type</td><td>假勤控件类型：1-请假，3-出差，4-外出，5-加班</td></tr></tbody></table></div><h4 data-lines="2" data-sign="a1971b1a709ea75c590e55ce420dd601" id="%E9%99%846%EF%BC%9Avacation%E6%8E%A7%E4%BB%B6%EF%BC%88%E5%81%87%E5%8B%A4%E6%8E%A7%E4%BB%B6%EF%BC%89%E8%AF%B4%E6%98%8E%EF%BC%9A"><a class="anchor" href="#%E9%99%846%EF%BC%9Avacation%E6%8E%A7%E4%BB%B6%EF%BC%88%E5%81%87%E5%8B%A4%E6%8E%A7%E4%BB%B6%EF%BC%89%E8%AF%B4%E6%98%8E%EF%BC%9A"></a><strong>附6：Vacation控件（假勤控件）说明：</strong></h4><p data-lines="1" data-sign="c1e69186702b87b595cc0fc01ece511a" data-type="p">说明:【请假】模板特有控件, 请假类型强关联审批应用中的假期管理。</p><div data-lines="21" data-sign="5a566615c3086511db35339218aa7f8a" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">	<span class="token property">"vacation_list"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">		<span class="token property">"item"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{</span></span>
+<span class="code-line">			<span class="token property">"id"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">			<span class="token property">"name"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{</span></span>
+<span class="code-line">				<span class="token property">"text"</span><span class="token operator">:</span> <span class="token string">"年假"</span><span class="token punctuation">,</span></span>
+<span class="code-line">				<span class="token property">"lang"</span><span class="token operator">:</span> <span class="token string">"zh_CN"</span></span>
+<span class="code-line">			<span class="token punctuation">}</span><span class="token punctuation">]</span></span>
+<span class="code-line">		<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span></span>
+<span class="code-line">			<span class="token property">"id"</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span></span>
+<span class="code-line">			<span class="token property">"name"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{</span></span>
+<span class="code-line">				<span class="token property">"text"</span><span class="token operator">:</span> <span class="token string">"事假"</span><span class="token punctuation">,</span></span>
+<span class="code-line">				<span class="token property">"lang"</span><span class="token operator">:</span> <span class="token string">"zh_CN"</span></span>
+<span class="code-line">			<span class="token punctuation">}</span><span class="token punctuation">]</span></span>
+<span class="code-line">		<span class="token punctuation">}</span></span>
+<span class="code-line">		...<span class="token comment">//省略 </span></span>
+<span class="code-line">		<span class="token punctuation">]</span></span>
+<span class="code-line">	<span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><div class="cherry-table-container" data-lines="6" data-sign="d4694d64ce3542da99e5b6cfb8e01ecf">
+<table class="cherry-table"><thead><tr><th>参数</th><th>说明</th></tr></thead><tbody><tr><td>vacation_list</td><td>假期类型数组</td></tr><tr><td>└ item</td><td>单个假期类型属性</td></tr><tr><td>└└ id</td><td>假期类型标识id</td></tr><tr><td>└└ name</td><td>假期类型名称，默认zh_CN中文名称</td></tr></tbody></table></div><h4 data-lines="2" data-sign="e1749a7d6e63f48ca330ff46226a7a39" id="%E9%99%847%EF%BC%9Atips%E6%8E%A7%E4%BB%B6%EF%BC%88%E8%AF%B4%E6%98%8E%E6%96%87%E5%AD%97%E6%8E%A7%E4%BB%B6%EF%BC%89config%E8%AF%B4%E6%98%8E%EF%BC%9A"><a class="anchor" href="#%E9%99%847%EF%BC%9Atips%E6%8E%A7%E4%BB%B6%EF%BC%88%E8%AF%B4%E6%98%8E%E6%96%87%E5%AD%97%E6%8E%A7%E4%BB%B6%EF%BC%89config%E8%AF%B4%E6%98%8E%EF%BC%9A"></a><strong>附7：Tips控件（说明文字控件）config说明：</strong></h4><div data-lines="56" data-sign="7d2a1b26ea12e00c1658f08e6258a0c4" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token property">"tips"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">        <span class="token property">"tips_content"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">            <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token property">"text"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token property">"sub_text"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                        <span class="token punctuation">{</span></span>
+<span class="code-line">                            <span class="token property">"type"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token property">"content"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token property">"plain_text"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                                    <span class="token property">"content"</span><span class="token operator">:</span> <span class="token string">"说明文字"</span></span>
+<span class="code-line">                                <span class="token punctuation">}</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span></span>
+<span class="code-line">                        <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token punctuation">{</span></span>
+<span class="code-line">                            <span class="token property">"type"</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token property">"content"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token property">"link"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                                    <span class="token property">"title"</span><span class="token operator">:</span> <span class="token string">"这是一个链接"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                    <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"https://work.weixin.qq.com"</span></span>
+<span class="code-line">                                <span class="token punctuation">}</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span></span>
+<span class="code-line">                        <span class="token punctuation">}</span></span>
+<span class="code-line">                    <span class="token punctuation">]</span></span>
+<span class="code-line">                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token property">"lang"</span><span class="token operator">:</span> <span class="token string">"zh_CN"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token punctuation">{</span></span>
+<span class="code-line">                <span class="token property">"text"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                    <span class="token property">"sub_text"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                        <span class="token punctuation">{</span></span>
+<span class="code-line">                            <span class="token property">"type"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token property">"content"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token property">"plain_text"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                                    <span class="token property">"content"</span><span class="token operator">:</span> <span class="token string">"tips"</span></span>
+<span class="code-line">                                <span class="token punctuation">}</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span></span>
+<span class="code-line">                        <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                        <span class="token punctuation">{</span></span>
+<span class="code-line">                            <span class="token property">"type"</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span></span>
+<span class="code-line">                            <span class="token property">"content"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                                <span class="token property">"link"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">                                    <span class="token property">"title"</span><span class="token operator">:</span> <span class="token string">"this is a link"</span><span class="token punctuation">,</span></span>
+<span class="code-line">                                    <span class="token property">"url"</span><span class="token operator">:</span> <span class="token string">"https://work.weixin.qq.com"</span></span>
+<span class="code-line">                                <span class="token punctuation">}</span></span>
+<span class="code-line">                            <span class="token punctuation">}</span></span>
+<span class="code-line">                        <span class="token punctuation">}</span></span>
+<span class="code-line">                    <span class="token punctuation">]</span></span>
+<span class="code-line">                <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">                <span class="token property">"lang"</span><span class="token operator">:</span> <span class="token string">"en"</span></span>
+<span class="code-line">            <span class="token punctuation">}</span></span>
+<span class="code-line">        <span class="token punctuation">]</span></span>
+<span class="code-line">    <span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><div class="cherry-table-container" data-lines="13" data-sign="4c4ecd276327bbf0127699c9a7fa3eb5">
+<table class="cherry-table"><thead><tr><th>参数</th><th>说明</th></tr></thead><tbody><tr><td>tips_content</td><td>说明文字数组，元素为不同语言的富文本说明文字</td></tr><tr><td>└ text</td><td>某个语言的富文本说明文字数组，元素为不同文本类型的说明文字分段</td></tr><tr><td>└lang</td><td>语言类型</td></tr><tr><td>└└ sub_text</td><td>说明文字分段</td></tr><tr><td>└└└ type</td><td>文本类型 1:纯文本 2:链接，每个说明文字中只支持包含一个链接</td></tr><tr><td>└└└ content</td><td>内容</td></tr><tr><td>└└└└plain_text</td><td>纯文本类型的内容</td></tr><tr><td>└└└└└content</td><td>纯文本文字</td></tr><tr><td>└└└└link</td><td>链接类型的内容</td></tr><tr><td>└└└└└title</td><td>链接标题</td></tr><tr><td>└└└└└url</td><td>链接url</td></tr></tbody></table></div><hr data-lines="2" data-sign="hr2"/><h3 data-lines="1" data-sign="e54fe2a65aabe534779c817b2cf6d354" id="%E9%94%99%E8%AF%AF%E8%AF%B4%E6%98%8E"><a class="anchor" href="#%E9%94%99%E8%AF%AF%E8%AF%B4%E6%98%8E"></a><strong>错误说明</strong></h3><div class="cherry-table-container" data-lines="4" data-sign="781d17921b9999659e71e3cd1039b57d">
+<table class="cherry-table"><thead><tr><th>错误码</th><th>说明</th></tr></thead><tbody><tr><td>301025</td><td>参数错误，请求template_id非法</td></tr><tr><td>301026</td><td>通用错误码，拉取审批模板内部接口失败</td></tr></tbody></table></div></div></div>
