@@ -1,0 +1,62 @@
+<div class="ep-doc-area-cherry cherry-markdown cherry-wecom" id="js-ep-doc-cnt-md"><div data-code-block-theme="coy" data-inline-code-theme="red"><p data-lines="1" data-sign="7eac908685d25677eeac28c84f9a4d08" data-type="p">通过此接口可以获取指定的健康上报任务详情。</p><p data-lines="3" data-sign="e00a1682d2a56dba1e72736170a4ec9e" data-type="p"><strong>请求方式：</strong>POST（<strong>HTTPS</strong>）<br/><strong>请求地址：</strong>https://qyapi.weixin.qq.com/cgi-bin/health/get_report_job_info?access_token=ACCESS_TOKEN</p><p data-lines="2" data-sign="382edfac6a8b56ec46332834f416136e" data-type="p"><strong>请求包体：</strong></p><div data-lines="7" data-sign="a7082e0aa1a39fe82163c9bda2d1ca03" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">	<span class="token property">"jobid"</span><span class="token operator">:</span> <span class="token string">"jobid1"</span><span class="token punctuation">,</span></span>
+<span class="code-line">	<span class="token property">"date"</span><span class="token operator">:</span> <span class="token string">"2020-03-27"</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><p data-lines="2" data-sign="f2e21495051cadd2d5b0f8a3eedbae8d" data-type="p"><strong>参数说明：</strong></p><div class="cherry-table-container" data-lines="5" data-sign="24823cc0ab5753526a0936c4d5a83c38">
+<table class="cherry-table"><thead><tr><th align="left">参数</th><th align="left">必须</th><th align="left">说明</th></tr></thead><tbody><tr><td align="left">access_token</td><td align="left">是</td><td align="left">调用接口凭证</td></tr><tr><td align="left">jobid</td><td align="left">是</td><td align="left">任务ID</td></tr><tr><td align="left">date</td><td align="left">是</td><td align="left">具体某天任务详情，仅支持获取最近14天数据</td></tr></tbody></table></div><p data-lines="3" data-sign="br3" data-type="br"> </p><p data-lines="1" data-sign="be69a8d80807fc12104a6f71258f88a9" data-type="p"><strong>权限说明：</strong></p><div class="cherry-table-container" data-lines="5" data-sign="cff8ce317fc11120a9d53c3d5974bc81">
+<table class="cherry-table"><thead><tr><th>应用类型</th><th>权限要求</th></tr></thead><tbody><tr><td>自建应用</td><td>配置到「<span style="color:#ff0000">健康上报 - 可调用接口的应用</span>」中</td></tr><tr><td>代开发应用</td><td>暂不支持</td></tr><tr><td>第三方应用</td><td>暂不支持</td></tr></tbody></table></div><p data-lines="1" data-sign="0d9e8df569fd1af08e5af1a04c3f7f01" data-type="p"> <em>注：</em> 从2023年12月1日0点起，不再支持通过系统应用secret调用接口，存量企业暂不受影响 <a href="https://developer.work.weixin.qq.com/document/51165" rel="nofollow">查看详情</a></p><p data-lines="2" data-sign="8c8bd07f58486862a201112e85376126" data-type="p"><strong>返回结果：</strong></p><div data-lines="55" data-sign="5967b7ff9d10b0a16c7a663648a0d4ea" data-type="codeBlock">
+<pre class="language-javascript"><code class="language-javascript wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">   <span class="token string">"errcode"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span></span>
+<span class="code-line">   <span class="token string">"errmsg"</span><span class="token operator">:</span> <span class="token string">"ok"</span><span class="token punctuation">,</span></span>
+<span class="code-line">   <span class="token string">"job_info"</span><span class="token operator">:</span><span class="token punctuation">{</span></span>
+<span class="code-line">		<span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"职工收集任务"</span><span class="token punctuation">,</span></span>
+<span class="code-line">		<span class="token string">"creator"</span>： <span class="token string">"creator_userid"</span><span class="token punctuation">,</span></span>
+<span class="code-line">		<span class="token string">"type"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">		<span class="token string">"apply_range"</span><span class="token operator">:</span> <span class="token punctuation">{</span></span>
+<span class="code-line">			<span class="token string">"userids"</span><span class="token operator">:</span><span class="token punctuation">[</span></span>
+<span class="code-line">				<span class="token string">"userid1"</span><span class="token punctuation">,</span></span>
+<span class="code-line">				<span class="token string">"userid2"</span></span>
+<span class="code-line">			<span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">			<span class="token string">"partyids"</span><span class="token operator">:</span><span class="token punctuation">[</span></span>
+<span class="code-line">				<span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">				<span class="token number">2</span></span>
+<span class="code-line">			<span class="token punctuation">]</span></span>
+<span class="code-line">		<span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">		<span class="token string">"report_to"</span><span class="token operator">:</span><span class="token punctuation">{</span></span>
+<span class="code-line">			<span class="token string">"userids"</span><span class="token operator">:</span><span class="token punctuation">[</span></span>
+<span class="code-line">				<span class="token string">"userid1"</span><span class="token punctuation">,</span></span>
+<span class="code-line">				<span class="token string">"userid2"</span></span>
+<span class="code-line">			<span class="token punctuation">]</span></span>
+<span class="code-line">		<span class="token punctuation">}</span></span>
+<span class="code-line">		<span class="token string">"report_type"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">		<span class="token string">"skip_weekend"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span></span>
+<span class="code-line">		<span class="token string">"finish_cnt"</span><span class="token operator">:</span> <span class="token number">10</span><span class="token punctuation">,</span></span>
+<span class="code-line">		<span class="token string">"question_templates"</span><span class="token operator">:</span><span class="token punctuation">[</span></span>
+<span class="code-line">			<span class="token punctuation">{</span></span>
+<span class="code-line">				<span class="token string">"question_id"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">				<span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"请问你有任何身体不适吗？"</span><span class="token punctuation">,</span></span>
+<span class="code-line">				<span class="token string">"question_type"</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span></span>
+<span class="code-line">				<span class="token string">"is_required"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">				<span class="token string">"option_list"</span><span class="token operator">:</span><span class="token punctuation">[</span></span>
+<span class="code-line">					<span class="token punctuation">{</span></span>
+<span class="code-line">						<span class="token string">"option_id"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">						<span class="token string">"option_text"</span><span class="token operator">:</span> <span class="token string">"有"</span></span>
+<span class="code-line">					<span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">					<span class="token punctuation">{</span></span>
+<span class="code-line">						<span class="token string">"option_id"</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span></span>
+<span class="code-line">						<span class="token string">"option_text"</span><span class="token operator">:</span> <span class="token string">"没有"</span></span>
+<span class="code-line">					<span class="token punctuation">}</span></span>
+<span class="code-line">				<span class="token punctuation">]</span></span>
+<span class="code-line">			<span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">			<span class="token punctuation">{</span></span>
+<span class="code-line">				<span class="token string">"question_id"</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span></span>
+<span class="code-line">				<span class="token string">"title"</span><span class="token operator">:</span> <span class="token string">"常驻地址"</span><span class="token punctuation">,</span></span>
+<span class="code-line">				<span class="token string">"question_type"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">				<span class="token string">"is_required"</span><span class="token operator">:</span> <span class="token number">0</span></span>
+<span class="code-line">			<span class="token punctuation">}</span></span>
+<span class="code-line">		<span class="token punctuation">]</span></span>
+<span class="code-line">   <span class="token punctuation">}</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><p data-lines="1" data-sign="f2e21495051cadd2d5b0f8a3eedbae8d" data-type="p"><strong>参数说明：</strong></p><div class="cherry-table-container" data-lines="22" data-sign="a3aa03c7b80137e6cca71f4a5cae1955">
+<table class="cherry-table"><thead><tr><th align="left">参数</th><th align="left">说明</th></tr></thead><tbody><tr><td align="left">errcode</td><td align="left">返回码</td></tr><tr><td align="left">errmsg</td><td align="left">对返回码的文本描述内容</td></tr><tr><td align="left">title</td><td align="left">任务名称</td></tr><tr><td align="left">creator</td><td align="left">发起人的userid</td></tr><tr><td align="left">type</td><td align="left">任务类型。1：表示企业内部成员，2：表示家长</td></tr><tr><td align="left">apply_range</td><td align="left">适用范围</td></tr><tr><td align="left">apply_range.userids</td><td align="left">type=1时表示企业成员的userid，type=2时表示学生的userid</td></tr><tr><td align="left">apply_range.partyids</td><td align="left">type=1时表示企业通讯录的部门id，type=2时表示学校通讯录的部门id</td></tr><tr><td align="left">report_to.userids</td><td align="left">汇报对象的企业通讯录userid</td></tr><tr><td align="left">report_type</td><td align="left">上报方式。1表示仅上报一次，2表示每天都上报</td></tr><tr><td align="left">skip_weekend</td><td align="left">非工作日是否需要上报。0表示周末需要上报，1表示周末不需要上报</td></tr><tr><td align="left">finish_cnt</td><td align="left">已填表人数</td></tr><tr><td align="left">question_templates</td><td align="left">健康上报问题列表</td></tr><tr><td align="left">question_templates.question_id</td><td align="left">问题的question_id</td></tr><tr><td align="left">question_templates.title</td><td align="left">问题的title</td></tr><tr><td align="left">question_templates.question_type</td><td align="left">问题类型，1：表示是填空题(包括地理位置和日期)，2：表示是单选题，3：表示多选题，4：表示收集文件/图片题，5：签名链接，6：行程卡截图</td></tr><tr><td align="left">question_templates.is_required</td><td align="left">问题是否必填，1：表示“是”，0：表示“否”</td></tr><tr><td align="left">question_templates.option_list</td><td align="left">选项列表，仅当该题为单/多选题时才有该字段</td></tr><tr><td align="left">question_templates.option_list.option_id</td><td align="left">该选项的option_id</td></tr><tr><td align="left">question_templates.option_list.option_text</td><td align="left">该选项的文案说明</td></tr></tbody></table></div></div></div>

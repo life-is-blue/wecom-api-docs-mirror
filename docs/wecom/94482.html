@@ -1,0 +1,34 @@
+<div class="ep-doc-area-cherry cherry-markdown cherry-wecom" id="js-ep-doc-cnt-md"><div data-code-block-theme="coy" data-inline-code-theme="red"><p data-lines="2" data-sign="92555df195ef326346d1c69f2cf1a5f5" data-type="p"><strong>请求方式：</strong> POST（<strong>HTTPS</strong>）<br/><strong>请求地址：</strong> https://qyapi.weixin.qq.com/cgi-bin/report/grid/get_user_grid_info?access_token=ACCESS_TOKEN</p><p data-lines="2" data-sign="382edfac6a8b56ec46332834f416136e" data-type="p"><strong>请求包体：</strong></p><div data-lines="7" data-sign="2a8ba0f7473cb4e36a98020fce2db19c" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">	<span class="token property">"userid"</span><span class="token operator">:</span> <span class="token string">"zhangsan"</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span>
+<span class="code-line"></span></code></pre>
+</div><p data-lines="2" data-sign="f2e21495051cadd2d5b0f8a3eedbae8d" data-type="p"><strong>参数说明：</strong></p><div class="cherry-table-container" data-lines="4" data-sign="cb11c8ddcb8c8331860f27396723ac8e">
+<table class="cherry-table"><thead><tr><th>参数</th><th>必须</th><th>说明</th></tr></thead><tbody><tr><td>access_token</td><td>是</td><td>调用接口凭证。“<a href="https://work.weixin.qq.com/api/doc/90001/90143/90605" rel="nofollow">获取access_token</a>”</td></tr><tr><td>userid</td><td>是</td><td>需要查询的成员userid</td></tr></tbody></table></div><p data-lines="2" data-sign="be69a8d80807fc12104a6f71258f88a9" data-type="p"><strong>权限说明：</strong></p><div class="cherry-table-container" data-lines="5" data-sign="ec6b96aabcca80b806677d50709d22de">
+<table class="cherry-table"><thead><tr><th>应用类型</th><th>权限要求</th></tr></thead><tbody><tr><td>自建应用</td><td>配置到「<a href="#30633/%E9%85%8D%E7%BD%AE%E5%8F%AF%E8%B0%83%E7%94%A8%E6%8E%A5%E5%8F%A3%E7%9A%84%E5%BA%94%E7%94%A8" rel="nofollow">居民联系 - 可调用接口的应用</a>」中</td></tr><tr><td>代开发应用</td><td>支持，需要勾选「居民联系权限」</td></tr><tr><td>第三方应用</td><td>暂不支持</td></tr></tbody></table></div><p data-lines="1" data-sign="0d9e8df569fd1af08e5af1a04c3f7f01" data-type="p"> <em>注：</em> 从2023年12月1日0点起，不再支持通过系统应用secret调用接口，存量企业暂不受影响 <a href="https://developer.work.weixin.qq.com/document/51165" rel="nofollow">查看详情</a></p><p data-lines="2" data-sign="8c8bd07f58486862a201112e85376126" data-type="p"><strong>返回结果：</strong></p><div data-lines="27" data-sign="0a244fa0a019ddce03b4f3d47e9727d5" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">    <span class="token property">"errcode"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"errmsg"</span><span class="token operator">:</span> <span class="token string">"ok"</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"manage_grids"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">        <span class="token punctuation">{</span></span>
+<span class="code-line">            <span class="token property">"grid_id"</span><span class="token operator">:</span> <span class="token string">"grid_id1"</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token property">"grid_name"</span><span class="token operator">:</span> <span class="token string">"grid_name1"</span></span>
+<span class="code-line">        <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token punctuation">{</span></span>
+<span class="code-line">            <span class="token property">"grid_id"</span><span class="token operator">:</span> <span class="token string">"grid_id2"</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token property">"grid_name"</span><span class="token operator">:</span> <span class="token string">"grid_name2"</span></span>
+<span class="code-line">        <span class="token punctuation">}</span></span>
+<span class="code-line">    <span class="token punctuation">]</span><span class="token punctuation">,</span></span>
+<span class="code-line">    <span class="token property">"joined_grids"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">        <span class="token punctuation">{</span></span>
+<span class="code-line">            <span class="token property">"grid_id"</span><span class="token operator">:</span> <span class="token string">"grid_id1"</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token property">"grid_name"</span><span class="token operator">:</span> <span class="token string">"grid_name1"</span></span>
+<span class="code-line">        <span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">        <span class="token punctuation">{</span></span>
+<span class="code-line">            <span class="token property">"grid_id"</span><span class="token operator">:</span> <span class="token string">"grid_id2"</span><span class="token punctuation">,</span></span>
+<span class="code-line">            <span class="token property">"grid_name"</span><span class="token operator">:</span> <span class="token string">"grid_name2"</span></span>
+<span class="code-line">        <span class="token punctuation">}</span></span>
+<span class="code-line">    <span class="token punctuation">]</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><p data-lines="2" data-sign="f2e21495051cadd2d5b0f8a3eedbae8d" data-type="p"><strong>参数说明：</strong></p><div class="cherry-table-container" data-lines="10" data-sign="54045ecd1245c72b40cad74c4427523c">
+<table class="cherry-table"><thead><tr><th>参数</th><th>说明</th></tr></thead><tbody><tr><td>errcode</td><td>返回码</td></tr><tr><td>errmsg</td><td>对返回码的文本描述内容</td></tr><tr><td>manage_grids</td><td>作为管理员管理的网格信息</td></tr><tr><td>manage_grids.grid_id</td><td>网格id</td></tr><tr><td>manage_grids.grid_name</td><td>网格名称</td></tr><tr><td>joined_grids</td><td>作为成员参与的grid信息</td></tr><tr><td>joined_grids.grid_id</td><td>网格id</td></tr><tr><td>joined_grids.grid_name</td><td>网格名称</td></tr></tbody></table></div></div></div>

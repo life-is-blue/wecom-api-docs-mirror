@@ -1,0 +1,73 @@
+<div class="ep-doc-area-cherry cherry-markdown cherry-wecom" id="js-ep-doc-cnt-md"><div data-code-block-theme="coy" data-inline-code-theme="red"><dir class="toc" data-lines="1" data-sign="080cbab33fed83981d480f90d3cb0fa3-1"><p class="toc-title">目录</p><li class="toc-li"><a class="level-2" href="#%E8%8E%B7%E5%8F%96%E7%94%A8%E6%88%B7%E5%A1%AB%E5%86%99%E7%AD%94%E6%A1%88">获取用户填写答案</a></li></dir><h2 data-lines="2" data-sign="205b8c8f6591556d6a8873c17f71444b" id="%E8%8E%B7%E5%8F%96%E7%94%A8%E6%88%B7%E5%A1%AB%E5%86%99%E7%AD%94%E6%A1%88"><a class="anchor" href="#%E8%8E%B7%E5%8F%96%E7%94%A8%E6%88%B7%E5%A1%AB%E5%86%99%E7%AD%94%E6%A1%88"></a>获取用户填写答案</h2><p data-lines="1" data-sign="7eac908685d25677eeac28c84f9a4d08" data-type="p">通过此接口可以获取指定的健康上报任务详情。</p><p data-lines="3" data-sign="397b85a744b3520aeda8af0a9343b9fe" data-type="p"><strong>请求方式：</strong>POST（<strong>HTTPS</strong>）<br/><strong>请求地址：</strong>https://qyapi.weixin.qq.com/cgi-bin/health/get_report_answer?access_token=ACCESS_TOKEN</p><p data-lines="2" data-sign="382edfac6a8b56ec46332834f416136e" data-type="p"><strong>请求包体：</strong></p><div data-lines="9" data-sign="593bf6b1dcc5ec81ac30c29ba5a19ad1" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">	<span class="token property">"jobid"</span><span class="token operator">:</span> <span class="token string">"jobid1"</span><span class="token punctuation">,</span></span>
+<span class="code-line">	<span class="token property">"date"</span><span class="token operator">:</span> <span class="token string">"2020-03-27"</span><span class="token punctuation">,</span></span>
+<span class="code-line">	<span class="token property">"offset"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span></span>
+<span class="code-line">	<span class="token property">"limit"</span><span class="token operator">:</span> <span class="token number">100</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><p data-lines="2" data-sign="f2e21495051cadd2d5b0f8a3eedbae8d" data-type="p"><strong>参数说明：</strong></p><div class="cherry-table-container" data-lines="7" data-sign="463c6630c913b0c87a143520685de338">
+<table class="cherry-table"><thead><tr><th align="left">参数</th><th align="left">必须</th><th align="left">说明</th></tr></thead><tbody><tr><td align="left">access_token</td><td align="left">是</td><td align="left">调用接口凭证</td></tr><tr><td align="left">jobid</td><td align="left">是</td><td align="left">任务ID</td></tr><tr><td align="left">date</td><td align="left">是</td><td align="left">具体某天任务的填写答案，仅支持获取最近14天数据</td></tr><tr><td align="left">offset</td><td align="left">否</td><td align="left">数据偏移量</td></tr><tr><td align="left">limit</td><td align="left">否</td><td align="left">拉取的数据量，最大值100</td></tr></tbody></table></div><p data-lines="3" data-sign="br3" data-type="br"> </p><p data-lines="2" data-sign="c48714067fc35d66ced8fe6e6b773006" data-type="p"><strong>权限说明：</strong><br/>调用的应用需要满足如下的权限：</p><div class="cherry-table-container" data-lines="5" data-sign="cff8ce317fc11120a9d53c3d5974bc81">
+<table class="cherry-table"><thead><tr><th>应用类型</th><th>权限要求</th></tr></thead><tbody><tr><td>自建应用</td><td>配置到「<span style="color:#ff0000">健康上报 - 可调用接口的应用</span>」中</td></tr><tr><td>代开发应用</td><td>暂不支持</td></tr><tr><td>第三方应用</td><td>暂不支持</td></tr></tbody></table></div><p data-lines="1" data-sign="0d9e8df569fd1af08e5af1a04c3f7f01" data-type="p"> <em>注：</em> 从2023年12月1日0点起，不再支持通过系统应用secret调用接口，存量企业暂不受影响 <a href="https://developer.work.weixin.qq.com/document/51165" rel="nofollow">查看详情</a></p><p data-lines="2" data-sign="8c8bd07f58486862a201112e85376126" data-type="p"><strong>返回结果：</strong></p><div data-lines="64" data-sign="59cf4f159a0269fa30b041e06f6b02fb" data-type="codeBlock">
+<pre class="language-json"><code class="language-json wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">   <span class="token property">"errcode"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span></span>
+<span class="code-line">   <span class="token property">"errmsg"</span><span class="token operator">:</span> <span class="token string">"ok"</span><span class="token punctuation">,</span></span>
+<span class="code-line">   <span class="token property">"answers"</span><span class="token operator">:</span><span class="token punctuation">[</span></span>
+<span class="code-line">		<span class="token punctuation">{</span></span>
+<span class="code-line">			<span class="token property">"id_type"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">			<span class="token property">"userid"</span><span class="token operator">:</span> <span class="token string">"userid2"</span><span class="token punctuation">,</span></span>
+<span class="code-line">			<span class="token property">"report_time"</span><span class="token operator">:</span> <span class="token number">123456789</span><span class="token punctuation">,</span></span>
+<span class="code-line">			<span class="token property">"report_values"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">				<span class="token punctuation">{</span></span>
+<span class="code-line">					<span class="token property">"question_id"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">					<span class="token property">"single_choice"</span><span class="token operator">:</span> <span class="token number">2</span></span>
+<span class="code-line">				<span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">				<span class="token punctuation">{</span></span>
+<span class="code-line">					<span class="token property">"question_id"</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span></span>
+<span class="code-line">					<span class="token property">"text"</span><span class="token operator">:</span> <span class="token string">"广东省广州市"</span></span>
+<span class="code-line">				<span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">				<span class="token punctuation">{</span></span>
+<span class="code-line">					<span class="token property">"question_id"</span><span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span></span>
+<span class="code-line">					<span class="token property">"multi_choice"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">						<span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">3</span></span>
+<span class="code-line">					<span class="token punctuation">]</span></span>
+<span class="code-line">				<span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">				<span class="token punctuation">{</span></span>
+<span class="code-line">					<span class="token property">"question_id"</span><span class="token operator">:</span> <span class="token number">4</span><span class="token punctuation">,</span></span>
+<span class="code-line">					<span class="token property">"fileid"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                        <span class="token string">"XXXXXXX"</span></span>
+<span class="code-line">                    <span class="token punctuation">]</span></span>
+<span class="code-line">				<span class="token punctuation">}</span></span>
+<span class="code-line">			<span class="token punctuation">]</span></span>
+<span class="code-line">		<span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">		<span class="token punctuation">{</span></span>
+<span class="code-line">			<span class="token property">"id_type"</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span></span>
+<span class="code-line">			<span class="token property">"student_userid"</span><span class="token operator">:</span> <span class="token string">"student_userid1"</span><span class="token punctuation">,</span></span>
+<span class="code-line">			<span class="token property">"parent_userid"</span><span class="token operator">:</span> <span class="token string">"parent_userid1"</span><span class="token punctuation">,</span></span>
+<span class="code-line">			<span class="token property">"report_time"</span><span class="token operator">:</span> <span class="token number">123456789</span><span class="token punctuation">,</span></span>
+<span class="code-line">			<span class="token property">"report_values"</span><span class="token operator">:</span><span class="token punctuation">[</span></span>
+<span class="code-line">				<span class="token punctuation">{</span></span>
+<span class="code-line">					<span class="token property">"question_id"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">					<span class="token property">"single_choice"</span><span class="token operator">:</span> <span class="token number">1</span></span>
+<span class="code-line">				<span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">				<span class="token punctuation">{</span></span>
+<span class="code-line">					<span class="token property">"question_id"</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span></span>
+<span class="code-line">					<span class="token property">"text"</span><span class="token operator">:</span> <span class="token string">"广东省深圳市"</span></span>
+<span class="code-line">				<span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">				<span class="token punctuation">{</span></span>
+<span class="code-line">					<span class="token property">"question_id"</span><span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span></span>
+<span class="code-line">					<span class="token property">"multi_choice"</span><span class="token operator">:</span><span class="token punctuation">[</span></span>
+<span class="code-line">						<span class="token number">1</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">,</span><span class="token number">3</span></span>
+<span class="code-line">					<span class="token punctuation">]</span></span>
+<span class="code-line">				<span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">				<span class="token punctuation">{</span></span>
+<span class="code-line">					<span class="token property">"question_id"</span><span class="token operator">:</span> <span class="token number">4</span><span class="token punctuation">,</span></span>
+<span class="code-line">					<span class="token property">"fileid"</span><span class="token operator">:</span> <span class="token punctuation">[</span></span>
+<span class="code-line">                        <span class="token string">"XXXXXXX"</span></span>
+<span class="code-line">                    <span class="token punctuation">]</span></span>
+<span class="code-line">				<span class="token punctuation">}</span></span>
+<span class="code-line">			<span class="token punctuation">]</span></span>
+<span class="code-line">		<span class="token punctuation">}</span></span>
+<span class="code-line">	<span class="token punctuation">]</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span></code></pre>
+</div><p data-lines="1" data-sign="f2e21495051cadd2d5b0f8a3eedbae8d" data-type="p"><strong>参数说明：</strong></p><div class="cherry-table-container" data-lines="20" data-sign="7d2bb71b925f1b3672397012d458c3c2">
+<table class="cherry-table"><thead><tr><th align="left">参数</th><th align="left">说明</th></tr></thead><tbody><tr><td align="left">errcode</td><td align="left">返回码</td></tr><tr><td align="left">errmsg</td><td align="left">对返回码的文本描述内容</td></tr><tr><td align="left">answers</td><td align="left">答案列表</td></tr><tr><td align="left">creator</td><td align="left">发起人的userid</td></tr><tr><td align="left">answers.id_type</td><td align="left">id类型：1：表示返回企业内部成员的userid，2：表示返回的是家长和学生的userid</td></tr><tr><td align="left">answers.userid</td><td align="left">企业内部成员的userid，id_type=1时返回</td></tr><tr><td align="left">answers.student_userid</td><td align="left">学生的userid，id_type=2时返回</td></tr><tr><td align="left">answers.parent_userid</td><td align="left">家长的userid，id_type=2时返回</td></tr><tr><td align="left">answers.report_time</td><td align="left">用户填写时的时间戳</td></tr><tr><td align="left">answers.report_values</td><td align="left">用户填写的答案列表</td></tr><tr><td align="left">answers.report_values.question_id</td><td align="left">问题的id</td></tr><tr><td align="left">answers.report_values.single_choice</td><td align="left">单选题答案编号</td></tr><tr><td align="left">answers.report_values.text</td><td align="left">填空题答案内容</td></tr><tr><td align="left">answers.report_values.multi_choice</td><td align="left">多选题答案编号</td></tr><tr><td align="left">answers.report_values.fileid</td><td align="left">文件id，可以用<a href="#26913" rel="nofollow">下载文件</a>接口下载</td></tr><tr><td align="left">answers.report_values.url</td><td align="left">签名的url，目前仅签名类型的问题会返回该字段</td></tr><tr><td align="left">answers.report_values.itinerary_card_type</td><td align="left">行程卡类型，仅行程卡类型的问题会返回该字段，0:行程码状态识别失败、1:绿码、2:红码、3:黄码、4:橙码、5:未识别出行程卡</td></tr><tr><td align="left">answers.report_values.high_risk_area</td><td align="left">高风险行程信息，仅行程卡类型的问题会返回该字段</td></tr></tbody></table></div></div></div>

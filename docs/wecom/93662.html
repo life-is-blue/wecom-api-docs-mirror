@@ -1,0 +1,57 @@
+<div class="ep-doc-area-cherry cherry-markdown cherry-wecom" id="js-ep-doc-cnt-md"><div data-code-block-theme="coy" data-inline-code-theme="red"><p data-lines="1" data-sign="89d00d5dc112d3460a60934240f57c24" data-type="p">企业可通过此接口，按时间范围拉取成功接通的公费电话拨打记录。</p><p data-lines="3" data-sign="21ccf13e4c1645be75b09efc0962ef91" data-type="p"><strong>请求方式：</strong>POST（<strong>HTTPS</strong>）<br/><strong>请求地址：</strong>https://qyapi.weixin.qq.com/cgi-bin/dial/get_dial_record?access_token=ACCESS_TOKEN</p><p data-lines="2" data-sign="382edfac6a8b56ec46332834f416136e" data-type="p"><strong>请求包体：</strong></p><div data-lines="11" data-sign="f7968c0cdde2f8c9fe002ca1541dc637" data-type="codeBlock">
+<pre class="language-javascript"><code class="language-javascript wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">   <span class="token string">"start_time"</span><span class="token operator">:</span> <span class="token number">1536508800</span><span class="token punctuation">,</span></span>
+<span class="code-line">   <span class="token string">"end_time"</span><span class="token operator">:</span> <span class="token number">1536940800</span><span class="token punctuation">,</span></span>
+<span class="code-line">   <span class="token string">"offset"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span></span>
+<span class="code-line">   <span class="token string">"limit"</span><span class="token operator">:</span> <span class="token number">100</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span>
+<span class="code-line"></span>
+<span class="code-line"></span></code></pre>
+</div><p data-lines="1" data-sign="f2e21495051cadd2d5b0f8a3eedbae8d" data-type="p"><strong>参数说明：</strong></p><div class="cherry-table-container" data-lines="7" data-sign="970a225e21e470221b602b5c91275154">
+<table class="cherry-table"><thead><tr><th align="left">参数</th><th align="left">必须</th><th align="left">说明</th></tr></thead><tbody><tr><td align="left">access_token</td><td align="left">是</td><td align="left">调用接口凭证</td></tr><tr><td align="left">start_time</td><td align="left">否</td><td align="left">查询的起始时间戳</td></tr><tr><td align="left">end_time</td><td align="left">否</td><td align="left">查询的结束时间戳</td></tr><tr><td align="left">offset</td><td align="left">否</td><td align="left">分页查询的偏移量</td></tr><tr><td align="left">limit</td><td align="left">否</td><td align="left">分页查询的每页大小,默认为100条，如该参数大于100则按100处理</td></tr></tbody></table></div><p data-lines="4" data-sign="d7930a92072d16049a8c689410ae6b20" data-type="p">请注意，查询的时间范围为[start_time,end_time]，即前后均为闭区间。在两个参数都指定了的情况下，结束时间不得小于开始时间，开始时间也不得早于当前时间，否则会返回600018错误码(无效的起止时间)。<br/>受限于网络传输，起止时间的最大跨度为30天，如超过30天，则以结束时间为基准向前取30天进行查询。<br/>如果未指定起止时间，则默认查询最近30天范围内数据。</p><p data-lines="1" data-sign="be69a8d80807fc12104a6f71258f88a9" data-type="p"><strong>权限说明：</strong></p><ul class="cherry-list__default" data-lines="1" data-sign="4060de70281bc2d245df040e4cfcc5e3list1"><li>调用的应用需要满足如下的权限：</li></ul><div class="cherry-table-container" data-lines="5" data-sign="1be7e733eaff639f3e8ac00a6fcc2f8d">
+<table class="cherry-table"><thead><tr><th>应用类型</th><th>权限要求</th></tr></thead><tbody><tr><td>自建应用</td><td>配置到「<span style="color:#ff0000">公费电话 - 可调用接口的应用</span>」中</td></tr><tr><td>代开发应用</td><td>暂不支持</td></tr><tr><td>第三方应用</td><td>暂不支持</td></tr></tbody></table></div><p data-lines="1" data-sign="0d9e8df569fd1af08e5af1a04c3f7f01" data-type="p"> <em>注：</em> 从2023年12月1日0点起，不再支持通过系统应用secret调用接口，存量企业暂不受影响 <a href="https://developer.work.weixin.qq.com/document/51165" rel="nofollow">查看详情</a></p><p data-lines="2" data-sign="8c8bd07f58486862a201112e85376126" data-type="p"><strong>返回结果：</strong></p><div data-lines="46" data-sign="55e980ea6512fe8fb7a7e2bacbe9b467" data-type="codeBlock">
+<pre class="language-javascript"><code class="language-javascript wrap"><span class="code-line"><span class="token punctuation">{</span></span>
+<span class="code-line">   <span class="token string">"errcode"</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span></span>
+<span class="code-line">   <span class="token string">"errmsg"</span><span class="token operator">:</span> <span class="token string">"ok"</span><span class="token punctuation">,</span></span>
+<span class="code-line">   <span class="token string">"record"</span><span class="token operator">:</span><span class="token punctuation">[</span></span>
+<span class="code-line">   		<span class="token punctuation">{</span></span>
+<span class="code-line">			<span class="token string">"call_time"</span><span class="token operator">:</span><span class="token number">1536508800</span><span class="token punctuation">,</span></span>
+<span class="code-line">			<span class="token string">"total_duration"</span><span class="token operator">:</span><span class="token number">10</span><span class="token punctuation">,</span></span>
+<span class="code-line">			<span class="token string">"call_type"</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">,</span></span>
+<span class="code-line">			<span class="token string">"caller"</span><span class="token operator">:</span></span>
+<span class="code-line">			<span class="token punctuation">{</span></span>
+<span class="code-line">				<span class="token string">"userid"</span><span class="token operator">:</span><span class="token string">"tony"</span><span class="token punctuation">,</span></span>
+<span class="code-line">				<span class="token string">"duration"</span><span class="token operator">:</span><span class="token number">10</span></span>
+<span class="code-line">			<span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">			<span class="token string">"callee"</span><span class="token operator">:</span><span class="token punctuation">[</span></span>
+<span class="code-line">			<span class="token punctuation">{</span></span>
+<span class="code-line">				<span class="token string">"phone"</span><span class="token operator">:</span><span class="token number">138000800</span><span class="token punctuation">,</span></span>
+<span class="code-line">				<span class="token string">"duration"</span><span class="token operator">:</span><span class="token number">10</span></span>
+<span class="code-line">			<span class="token punctuation">}</span></span>
+<span class="code-line">			<span class="token punctuation">]</span></span>
+<span class="code-line">		<span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">		<span class="token punctuation">{</span></span>
+<span class="code-line">			<span class="token string">"call_time"</span><span class="token operator">:</span><span class="token number">1536940800</span><span class="token punctuation">,</span></span>
+<span class="code-line">			<span class="token string">"total_duration"</span><span class="token operator">:</span><span class="token number">20</span><span class="token punctuation">,</span></span>
+<span class="code-line">			<span class="token string">"call_type"</span><span class="token operator">:</span><span class="token number">2</span><span class="token punctuation">,</span></span>
+<span class="code-line">			<span class="token string">"caller"</span><span class="token operator">:</span></span>
+<span class="code-line">			<span class="token punctuation">{</span></span>
+<span class="code-line">				<span class="token string">"userid"</span><span class="token operator">:</span><span class="token string">"tony"</span><span class="token punctuation">,</span></span>
+<span class="code-line">				<span class="token string">"duration"</span><span class="token operator">:</span><span class="token number">10</span></span>
+<span class="code-line">			<span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">			<span class="token string">"callee"</span><span class="token operator">:</span><span class="token punctuation">[</span></span>
+<span class="code-line">				<span class="token punctuation">{</span></span>
+<span class="code-line">					<span class="token string">"phone"</span><span class="token operator">:</span><span class="token number">138000800</span><span class="token punctuation">,</span></span>
+<span class="code-line">					<span class="token string">"duration"</span><span class="token operator">:</span><span class="token number">5</span></span>
+<span class="code-line">				<span class="token punctuation">}</span><span class="token punctuation">,</span></span>
+<span class="code-line">				<span class="token punctuation">{</span></span>
+<span class="code-line">					<span class="token string">"userid"</span><span class="token operator">:</span><span class="token string">"tom"</span><span class="token punctuation">,</span></span>
+<span class="code-line">					<span class="token string">"duration"</span><span class="token operator">:</span><span class="token number">5</span></span>
+<span class="code-line">				<span class="token punctuation">}</span></span>
+<span class="code-line">			<span class="token punctuation">]</span></span>
+<span class="code-line">		<span class="token punctuation">}</span></span>
+<span class="code-line">   <span class="token punctuation">]</span></span>
+<span class="code-line"><span class="token punctuation">}</span></span>
+<span class="code-line"></span></code></pre>
+</div><p data-lines="1" data-sign="4bb834cc95a01c5bf00ce9a388d79b02" data-type="p"><strong>返回字段说明：</strong></p><div class="cherry-table-container" data-lines="12" data-sign="d5a0f4bc3e46d79d6e6839b2a55b9fe0">
+<table class="cherry-table"><thead><tr><th>字段名</th><th>说明</th></tr></thead><tbody><tr><td>errcode</td><td>返回码</td></tr><tr><td>errmsg</td><td>对返回码的文本描述内容</td></tr><tr><td>record.call_time</td><td>拨出时间</td></tr><tr><td>record.total_duration</td><td>总通话时长，单位为<font color="#DC143C">分钟</font></td></tr><tr><td>record.call_type</td><td>通话类型，1-单人通话 2-多人通话</td></tr><tr><td>record.caller.userid</td><td>主叫用户的userid</td></tr><tr><td>record.caller.duration</td><td>主叫用户的通话时长</td></tr><tr><td>record.callee.userid</td><td>被叫用户的userid，当被叫用户为企业内用户时返回</td></tr><tr><td>record.callee.phone</td><td>被叫用户的号码，当被叫用户为外部用户时返回</td></tr><tr><td>record.callee.duration</td><td>被叫用户的通话时长</td></tr></tbody></table></div><blockquote data-lines="1" data-sign="ae60a030a94f32033b3b3688bdd92f21_1"><code>应用可见范围外用户相关的record会被过滤掉，不会返回</code></blockquote><p data-lines="2" data-sign="97949bbe13a2cd49fb3e08c5d9ab45eb" data-type="p">通话类型为单人通话时，总通话时长等于单人通话时长，通话类型为多人通话时，总通话时长等于包括主叫用户在内的每个接入用户的通话时长之和。</p></div></div>
