@@ -1,0 +1,4954 @@
+[
+  {
+    "label": "样式库 WeUI for Work",
+    "link": "wecom/90305.md"
+  },
+  {
+    "label": "设计资源下载",
+    "link": "wecom/90306.md"
+  },
+  {
+    "label": "加解密库下载与返回码",
+    "link": "wecom/90307.md"
+  },
+  {
+    "label": "接口代码参考示例",
+    "link": "wecom/90308.md"
+  },
+  {
+    "label": "与企业号接口差异",
+    "link": "wecom/90311.md"
+  },
+  {
+    "label": "访问频率限制",
+    "link": "wecom/90312.md"
+  },
+  {
+    "label": "全局错误码",
+    "link": "wecom/90313.md"
+  },
+  {
+    "label": "企业规模与行业信息",
+    "link": "wecom/90314.md"
+  },
+  {
+    "label": "常见问题 - FAQ",
+    "link": "wecom/90315.md"
+  },
+  {
+    "label": "简易教程",
+    "link": "wecom/90487.md"
+  },
+  {
+    "label": "概述",
+    "link": "wecom/90556.md"
+  },
+  {
+    "label": "开发者工具",
+    "link": "wecom/90678.md"
+  },
+  {
+    "label": "加解密方案说明",
+    "link": "wecom/90968.md"
+  },
+  {
+    "label": "移动端SDK资源下载",
+    "link": "wecom/91074.md"
+  },
+  {
+    "label": "更新日志",
+    "link": "wecom/93221.md"
+  },
+  {
+    "label": "深色模式适配指南",
+    "link": "wecom/94555.md"
+  },
+  {
+    "label": "企业微信应用深色模式色值表",
+    "link": "wecom/94600.md"
+  },
+  {
+    "label": "JS-SDK",
+    "items": [
+      {
+        "label": "Wi-Fi",
+        "items": [
+          {
+            "label": "Wi-Fi-概述",
+            "link": "wecom/100540.md"
+          },
+          {
+            "label": "初始化 Wi-Fi 模块",
+            "link": "wecom/100541.md"
+          },
+          {
+            "label": "关闭 Wi-Fi 模块",
+            "link": "wecom/100542.md"
+          },
+          {
+            "label": "连接 Wi-Fi",
+            "link": "wecom/100543.md"
+          },
+          {
+            "label": "获取 Wi-Fi 列表",
+            "link": "wecom/100544.md"
+          },
+          {
+            "label": "监听 Wi-Fi 列表更新",
+            "link": "wecom/100545.md"
+          },
+          {
+            "label": "监听 Wi-Fi 连接成功",
+            "link": "wecom/100546.md"
+          },
+          {
+            "label": "获取已连接中的 Wi-Fi 信息",
+            "link": "wecom/100547.md"
+          }
+        ]
+      },
+      {
+        "label": "iBeacon",
+        "items": [
+          {
+            "label": "概述",
+            "link": "wecom/100567.md"
+          },
+          {
+            "label": "搜索附近设备",
+            "link": "wecom/100568.md"
+          },
+          {
+            "label": "停止搜索设备",
+            "link": "wecom/100569.md"
+          },
+          {
+            "label": "获取已搜索到的设备",
+            "link": "wecom/100570.md"
+          },
+          {
+            "label": "监听设备更新",
+            "link": "wecom/100571.md"
+          },
+          {
+            "label": "监听设备服务状态",
+            "link": "wecom/100572.md"
+          }
+        ]
+      },
+      {
+        "label": "上下游",
+        "items": [
+          {
+            "label": "获取上下游联系人ID",
+            "link": "wecom/100367.md"
+          },
+          {
+            "label": "获取上下游互联群ID",
+            "link": "wecom/100368.md"
+          },
+          {
+            "label": "上下游聊天工具栏",
+            "link": "wecom/95709.md"
+          }
+        ]
+      },
+      {
+        "label": "企业通讯录",
+        "items": [
+          {
+            "label": "选择通讯录成员",
+            "link": "wecom/91793.md"
+          },
+          {
+            "label": "打开个人信息页接口",
+            "link": "wecom/91795.md"
+          },
+          {
+            "label": "企业互联/上下游选人接口",
+            "link": "wecom/94187.md"
+          },
+          {
+            "label": "认领老师班级",
+            "link": "wecom/94434.md"
+          }
+        ]
+      },
+      {
+        "label": "会议",
+        "items": [
+          {
+            "label": "创建快速会议",
+            "link": "wecom/93806.md"
+          },
+          {
+            "label": "进入会议",
+            "link": "wecom/93807.md"
+          }
+        ]
+      },
+      {
+        "label": "会话",
+        "items": [
+          {
+            "label": "打开会话",
+            "link": "wecom/92525.md"
+          },
+          {
+            "label": "变更群成员",
+            "link": "wecom/93223.md"
+          },
+          {
+            "label": "打开个人聊天窗口schema",
+            "link": "wecom/94345.md"
+          },
+          {
+            "label": "创建企业互联/上下游会话",
+            "link": "wecom/94430.md"
+          },
+          {
+            "label": "变更企业互联/上下游群成员",
+            "link": "wecom/94432.md"
+          },
+          {
+            "label": "打开已有群聊并发送消息",
+            "link": "wecom/94549.md"
+          }
+        ]
+      },
+      {
+        "label": "分享",
+        "items": [
+          {
+            "label": "概述",
+            "link": "wecom/100501.md"
+          },
+          {
+            "label": "监听「转发」按钮点击",
+            "link": "wecom/100502.md"
+          },
+          {
+            "label": "监听「微信」按钮点击",
+            "link": "wecom/100503.md"
+          },
+          {
+            "label": "监听「朋友圈」按钮点击",
+            "link": "wecom/100504.md"
+          },
+          {
+            "label": "自定义转发到会话",
+            "link": "wecom/100505.md"
+          },
+          {
+            "label": "自定义转发到微信",
+            "link": "wecom/100506.md"
+          }
+        ]
+      },
+      {
+        "label": "剪贴板",
+        "items": [
+          {
+            "label": "获取剪贴板内容",
+            "link": "wecom/100575.md"
+          },
+          {
+            "label": "设置剪贴板内容",
+            "link": "wecom/100576.md"
+          }
+        ]
+      },
+      {
+        "label": "图像",
+        "items": [
+          {
+            "label": "选择图片",
+            "link": "wecom/100520.md"
+          },
+          {
+            "label": "预览图片",
+            "link": "wecom/100521.md"
+          },
+          {
+            "label": "上传图片",
+            "link": "wecom/100522.md"
+          },
+          {
+            "label": "下载图片",
+            "link": "wecom/100523.md"
+          },
+          {
+            "label": "获取本地图片",
+            "link": "wecom/100524.md"
+          }
+        ]
+      },
+      {
+        "label": "地理位置",
+        "items": [
+          {
+            "label": "打开内置地图",
+            "link": "wecom/100577.md"
+          },
+          {
+            "label": "获取地理位置",
+            "link": "wecom/100578.md"
+          },
+          {
+            "label": "打开持续定位",
+            "link": "wecom/100579.md"
+          },
+          {
+            "label": "停止持续定位",
+            "link": "wecom/100580.md"
+          },
+          {
+            "label": "监听地理位置",
+            "link": "wecom/100581.md"
+          }
+        ]
+      },
+      {
+        "label": "基础接口",
+        "items": [
+          {
+            "label": "ww.getSignature",
+            "link": "wecom/100694.md"
+          },
+          {
+            "label": "ww.checkJsApi",
+            "link": "wecom/94312.md"
+          },
+          {
+            "label": "ww.register",
+            "link": "wecom/94313.md"
+          },
+          {
+            "label": "ww.getContext",
+            "link": "wecom/94315.md"
+          }
+        ]
+      },
+      {
+        "label": "审批",
+        "items": [
+          {
+            "label": "保存选择的选项",
+            "link": "wecom/100722.md"
+          },
+          {
+            "label": "获取已选择的选项",
+            "link": "wecom/100723.md"
+          },
+          {
+            "label": "审批控件中的外部选项",
+            "link": "wecom/97067.md"
+          },
+          {
+            "label": "应用发起审批",
+            "link": "wecom/97202.md"
+          }
+        ]
+      },
+      {
+        "label": "客户联系",
+        "items": [
+          {
+            "label": "聊天工具栏接口",
+            "link": "wecom/91789.md"
+          },
+          {
+            "label": "外部联系人选人接口",
+            "link": "wecom/91797.md"
+          },
+          {
+            "label": "打开个人信息页接口",
+            "link": "wecom/91798.md"
+          },
+          {
+            "label": "进入添加客户界面",
+            "link": "wecom/93071.md"
+          },
+          {
+            "label": "群发消息给客户",
+            "link": "wecom/93555.md"
+          },
+          {
+            "label": "群发消息到客户群",
+            "link": "wecom/93556.md"
+          },
+          {
+            "label": "发表内容到客户朋友圈",
+            "link": "wecom/94607.md"
+          },
+          {
+            "label": "设置朋友圈封面与签名",
+            "link": "wecom/94845.md"
+          }
+        ]
+      },
+      {
+        "label": "家校沟通",
+        "items": [
+          {
+            "label": "发起班级收款",
+            "link": "wecom/94784.md"
+          },
+          {
+            "label": "微信H5页面唤起填写学生资料页面",
+            "link": "wecom/94936.md"
+          }
+        ]
+      },
+      {
+        "label": "对外收款",
+        "items": [
+          {
+            "label": "发起对外收款",
+            "link": "wecom/95927.md"
+          },
+          {
+            "label": "发起退款",
+            "link": "wecom/95928.md"
+          }
+        ]
+      },
+      {
+        "label": "应用管理",
+        "items": [
+          {
+            "label": "打开应用管理页面",
+            "link": "wecom/95536.md"
+          }
+        ]
+      },
+      {
+        "label": "开发指南",
+        "items": [
+          {
+            "label": "概述",
+            "link": "wecom/90513.md"
+          },
+          {
+            "label": "开始使用",
+            "link": "wecom/90514.md"
+          }
+        ]
+      },
+      {
+        "label": "开放接口",
+        "items": [
+          {
+            "label": "创建企业微信登录面板",
+            "link": "wecom/98268.md"
+          }
+        ]
+      },
+      {
+        "label": "待办",
+        "items": [
+          {
+            "label": "创建待办",
+            "link": "wecom/101530.md"
+          },
+          {
+            "label": "查看待办详情",
+            "link": "wecom/101531.md"
+          }
+        ]
+      },
+      {
+        "label": "微信客服",
+        "items": [
+          {
+            "label": "聊天工具栏接口",
+            "link": "wecom/94764.md"
+          },
+          {
+            "label": "进入微信客服消息界面",
+            "link": "wecom/94869.md"
+          }
+        ]
+      },
+      {
+        "label": "微盘",
+        "items": [
+          {
+            "label": "选择目录位置",
+            "link": "wecom/99009.md"
+          },
+          {
+            "label": "选择文件",
+            "link": "wecom/99154.md"
+          },
+          {
+            "label": "文件/文档标题展示组件",
+            "link": "wecom/99345.md"
+          }
+        ]
+      },
+      {
+        "label": "政民沟通",
+        "items": [
+          {
+            "label": "微信进入居民上报小程序",
+            "link": "wecom/94938.md"
+          }
+        ]
+      },
+      {
+        "label": "数据与智能专区",
+        "items": [
+          {
+            "label": "数据与智能专区文档选择",
+            "link": "wecom/101499.md"
+          },
+          {
+            "label": "数据与智能专区文件选择",
+            "link": "wecom/101544.md"
+          }
+        ]
+      },
+      {
+        "label": "文件",
+        "items": [
+          {
+            "label": "预览文件",
+            "link": "wecom/100538.md"
+          },
+          {
+            "label": "从会话选择文件",
+            "link": "wecom/100539.md"
+          },
+          {
+            "label": "获取本地临时文件",
+            "link": "wecom/100767.md"
+          }
+        ]
+      },
+      {
+        "label": "文档",
+        "items": [
+          {
+            "label": "创建文档",
+            "link": "wecom/98066.md"
+          },
+          {
+            "label": "选择文档",
+            "link": "wecom/99157.md"
+          },
+          {
+            "label": "文件/文档标题展示组件",
+            "link": "wecom/99344.md"
+          }
+        ]
+      },
+      {
+        "label": "日程",
+        "items": [
+          {
+            "label": "查看日程闲忙状态",
+            "link": "wecom/97312.md"
+          }
+        ]
+      },
+      {
+        "label": "界面",
+        "items": [
+          {
+            "label": "隐藏右上角菜单",
+            "link": "wecom/100512.md"
+          },
+          {
+            "label": "显示右上角菜单",
+            "link": "wecom/100513.md"
+          },
+          {
+            "label": "关闭当前窗口",
+            "link": "wecom/100514.md"
+          },
+          {
+            "label": "批量隐藏功能按钮",
+            "link": "wecom/100515.md"
+          },
+          {
+            "label": "批量显示功能按钮",
+            "link": "wecom/100516.md"
+          },
+          {
+            "label": "隐藏非基础按钮",
+            "link": "wecom/100517.md"
+          },
+          {
+            "label": "打开默认浏览器",
+            "link": "wecom/100518.md"
+          },
+          {
+            "label": "监听截屏事件",
+            "link": "wecom/100519.md"
+          },
+          {
+            "label": "监听页面返回",
+            "link": "wecom/100850.md"
+          },
+          {
+            "label": "显示非基础按钮",
+            "link": "wecom/98235.md"
+          }
+        ]
+      },
+      {
+        "label": "直播",
+        "items": [
+          {
+            "label": "创建立即直播",
+            "link": "wecom/93808.md"
+          },
+          {
+            "label": "进入直播",
+            "link": "wecom/93809.md"
+          },
+          {
+            "label": "观看直播回放",
+            "link": "wecom/93810.md"
+          },
+          {
+            "label": "下载直播回放",
+            "link": "wecom/93811.md"
+          }
+        ]
+      },
+      {
+        "label": "私密分享",
+        "items": [
+          {
+            "label": "概述",
+            "link": "wecom/100507.md"
+          },
+          {
+            "label": "设置私密消息",
+            "link": "wecom/100508.md"
+          },
+          {
+            "label": "获取私密消息Ticket",
+            "link": "wecom/100509.md"
+          },
+          {
+            "label": "获取私密消息信息",
+            "link": "wecom/100510.md"
+          }
+        ]
+      },
+      {
+        "label": "系统界面",
+        "items": [
+          {
+            "label": "调起扫一扫",
+            "link": "wecom/90492.md"
+          },
+          {
+            "label": "调起电子发票",
+            "link": "wecom/90493.md"
+          },
+          {
+            "label": "跳转到认证界面",
+            "link": "wecom/91717.md"
+          },
+          {
+            "label": "跳转到小程序",
+            "link": "wecom/93098.md"
+          },
+          {
+            "label": "保持屏幕常亮",
+            "link": "wecom/97267.md"
+          }
+        ]
+      },
+      {
+        "label": "网络",
+        "items": [
+          {
+            "label": "获取网络状态",
+            "link": "wecom/100573.md"
+          },
+          {
+            "label": "监听网络状态",
+            "link": "wecom/100574.md"
+          }
+        ]
+      },
+      {
+        "label": "聊天工具栏",
+        "items": [
+          {
+            "label": "获取当前客户ID",
+            "link": "wecom/100746.md"
+          },
+          {
+            "label": "获取当前客户群的群ID",
+            "link": "wecom/100747.md"
+          },
+          {
+            "label": "隐藏聊天附件栏的发送按钮",
+            "link": "wecom/100748.md"
+          },
+          {
+            "label": "分享消息到当前会话",
+            "link": "wecom/100749.md"
+          }
+        ]
+      },
+      {
+        "label": "蓝牙",
+        "items": [
+          {
+            "label": "概述",
+            "link": "wecom/100548.md"
+          },
+          {
+            "label": "初始化蓝牙模块",
+            "link": "wecom/100549.md"
+          },
+          {
+            "label": "关闭蓝牙模块",
+            "link": "wecom/100550.md"
+          },
+          {
+            "label": "获取本机蓝牙状态",
+            "link": "wecom/100551.md"
+          },
+          {
+            "label": "监听蓝牙状态变化",
+            "link": "wecom/100552.md"
+          },
+          {
+            "label": "开始搜寻附近的蓝牙外围设备",
+            "link": "wecom/100553.md"
+          },
+          {
+            "label": "停止搜寻蓝牙外围设备",
+            "link": "wecom/100554.md"
+          },
+          {
+            "label": "获取已发现的蓝牙设备",
+            "link": "wecom/100555.md"
+          },
+          {
+            "label": "监听寻找到新设备",
+            "link": "wecom/100556.md"
+          },
+          {
+            "label": "获取已连接状态的设备",
+            "link": "wecom/100557.md"
+          }
+        ]
+      },
+      {
+        "label": "蓝牙（BLE）",
+        "items": [
+          {
+            "label": "连接BLE设备",
+            "link": "wecom/100558.md"
+          },
+          {
+            "label": "断开设备连接",
+            "link": "wecom/100559.md"
+          },
+          {
+            "label": "监听BLE设备连接状态",
+            "link": "wecom/100560.md"
+          },
+          {
+            "label": "获取BLE设备所有服务",
+            "link": "wecom/100561.md"
+          },
+          {
+            "label": "获取BLE设备特征值",
+            "link": "wecom/100562.md"
+          },
+          {
+            "label": "读取BLE设备特征值数据",
+            "link": "wecom/100563.md"
+          },
+          {
+            "label": "写入BLE设备特征值数据",
+            "link": "wecom/100564.md"
+          },
+          {
+            "label": "启用BLE设备特征值订阅",
+            "link": "wecom/100565.md"
+          },
+          {
+            "label": "监听BLE设备特征值变化",
+            "link": "wecom/100566.md"
+          },
+          {
+            "label": "概述",
+            "link": "wecom/100707.md"
+          }
+        ]
+      },
+      {
+        "label": "附录",
+        "items": [
+          {
+            "label": "JS-SDK 签名算法",
+            "link": "wecom/90506.md"
+          },
+          {
+            "label": "所有菜单项列表",
+            "link": "wecom/90508.md"
+          },
+          {
+            "label": "常见错误及解决方法",
+            "link": "wecom/90509.md"
+          }
+        ]
+      },
+      {
+        "label": "音频",
+        "items": [
+          {
+            "label": "开始录音",
+            "link": "wecom/100528.md"
+          },
+          {
+            "label": "停止录音",
+            "link": "wecom/100529.md"
+          },
+          {
+            "label": "监听录音自动停止",
+            "link": "wecom/100530.md"
+          },
+          {
+            "label": "播放语音",
+            "link": "wecom/100531.md"
+          },
+          {
+            "label": "暂停播放",
+            "link": "wecom/100532.md"
+          },
+          {
+            "label": "停止播放",
+            "link": "wecom/100533.md"
+          },
+          {
+            "label": "监听播放完毕",
+            "link": "wecom/100534.md"
+          },
+          {
+            "label": "上传语音",
+            "link": "wecom/100535.md"
+          },
+          {
+            "label": "下载语音",
+            "link": "wecom/100536.md"
+          },
+          {
+            "label": "语音转文字",
+            "link": "wecom/100537.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "上下游",
+    "items": [
+      {
+        "label": "概述",
+        "link": "wecom/97213.md"
+      },
+      {
+        "label": "上下游规则",
+        "items": [
+          {
+            "label": "获取对接规则id列表",
+            "link": "wecom/95631.md"
+          },
+          {
+            "label": "删除对接规则",
+            "link": "wecom/95632.md"
+          },
+          {
+            "label": "获取对接规则详情",
+            "link": "wecom/95633.md"
+          },
+          {
+            "label": "新增对接规则",
+            "link": "wecom/95634.md"
+          },
+          {
+            "label": "更新对接规则",
+            "link": "wecom/95635.md"
+          }
+        ]
+      },
+      {
+        "label": "上下游通讯录管理",
+        "items": [
+          {
+            "label": "获取上下游信息",
+            "link": "wecom/95820.md"
+          },
+          {
+            "label": "批量导入上下游联系人",
+            "link": "wecom/95821.md"
+          },
+          {
+            "label": "移除企业",
+            "link": "wecom/95822.md"
+          },
+          {
+            "label": "获取异步任务结果",
+            "link": "wecom/95823.md"
+          },
+          {
+            "label": "查询成员自定义id",
+            "link": "wecom/97441.md"
+          },
+          {
+            "label": "获取下级企业加入的上下游",
+            "link": "wecom/97442.md"
+          }
+        ]
+      },
+      {
+        "label": "回调事件",
+        "items": [
+          {
+            "label": "概述",
+            "link": "wecom/95794.md"
+          },
+          {
+            "label": "上下游变更回调",
+            "link": "wecom/95796.md"
+          },
+          {
+            "label": "异步任务完成通知",
+            "link": "wecom/95797.md"
+          }
+        ]
+      },
+      {
+        "label": "基础接口",
+        "items": [
+          {
+            "label": "获取应用共享信息",
+            "link": "wecom/95813.md"
+          },
+          {
+            "label": "获取下级/下游企业的access_token",
+            "link": "wecom/95816.md"
+          },
+          {
+            "label": "获取下级/下游企业小程序session",
+            "link": "wecom/95817.md"
+          },
+          {
+            "label": "上下游关联客户信息-已添加客户",
+            "link": "wecom/95818.md"
+          },
+          {
+            "label": "上下游关联客户信息-未添加客户",
+            "link": "wecom/97357.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "人事助手",
+    "items": [
+      {
+        "label": "花名册",
+        "items": [
+          {
+            "label": "概述",
+            "link": "wecom/99130.md"
+          },
+          {
+            "label": "获取员工字段配置",
+            "link": "wecom/99131.md"
+          },
+          {
+            "label": "获取员工花名册信息",
+            "link": "wecom/99132.md"
+          },
+          {
+            "label": "更新员工花名册信息",
+            "link": "wecom/99133.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "企业互联",
+    "items": [
+      {
+        "label": "获取下级/下游企业小程序session",
+        "link": "wecom/93355.md"
+      },
+      {
+        "label": "获取下级/下游企业的access_token",
+        "link": "wecom/93359.md"
+      },
+      {
+        "label": "概述",
+        "link": "wecom/93360.md"
+      },
+      {
+        "label": "获取应用共享信息",
+        "link": "wecom/93403.md"
+      }
+    ]
+  },
+  {
+    "label": "企业支付",
+    "items": [
+      {
+        "label": "概述",
+        "link": "wecom/90273.md"
+      },
+      {
+        "label": "向员工收款",
+        "link": "wecom/90280.md"
+      },
+      {
+        "label": "签名算法",
+        "link": "wecom/90281.md"
+      },
+      {
+        "label": "企业红包",
+        "items": [
+          {
+            "label": "发放企业红包",
+            "link": "wecom/90275.md"
+          },
+          {
+            "label": "查询红包记录",
+            "link": "wecom/90276.md"
+          }
+        ]
+      },
+      {
+        "label": "创建对外收款账户",
+        "items": [
+          {
+            "label": "提交图片",
+            "link": "wecom/98972.md"
+          },
+          {
+            "label": "提交创建对外收款账户的申请单",
+            "link": "wecom/98973.md"
+          },
+          {
+            "label": "查询申请单状态",
+            "link": "wecom/98974.md"
+          }
+        ]
+      },
+      {
+        "label": "向员工付款",
+        "items": [
+          {
+            "label": "向员工付款",
+            "link": "wecom/90278.md"
+          },
+          {
+            "label": "查询付款记录",
+            "link": "wecom/90279.md"
+          }
+        ]
+      },
+      {
+        "label": "对外收款",
+        "items": [
+          {
+            "label": "概述",
+            "link": "wecom/93665.md"
+          },
+          {
+            "label": "收款商户号管理",
+            "link": "wecom/93666.md"
+          },
+          {
+            "label": "获取对外收款记录",
+            "link": "wecom/93667.md"
+          },
+          {
+            "label": "获取收款项目的商户单号",
+            "link": "wecom/95944.md"
+          },
+          {
+            "label": "获取资金流水",
+            "link": "wecom/98100.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "会议",
+    "items": [
+      {
+        "label": "概述",
+        "link": "wecom/93626.md"
+      },
+      {
+        "label": "Rooms会议室管理",
+        "items": [
+          {
+            "label": "预定Rooms会议室",
+            "link": "wecom/98791.md"
+          },
+          {
+            "label": "释放Rooms会议室",
+            "link": "wecom/98792.md"
+          },
+          {
+            "label": "获取Rooms会议室详情",
+            "link": "wecom/98793.md"
+          },
+          {
+            "label": "获取Rooms会议室列表",
+            "link": "wecom/98795.md"
+          },
+          {
+            "label": "获取Rooms会议室下的会议列表",
+            "link": "wecom/98796.md"
+          },
+          {
+            "label": "获取设备列表",
+            "link": "wecom/98798.md"
+          },
+          {
+            "label": "获取控制器列表",
+            "link": "wecom/98799.md"
+          },
+          {
+            "label": "获取Rooms会议室配置项",
+            "link": "wecom/98802.md"
+          },
+          {
+            "label": "呼叫Rooms会议室",
+            "link": "wecom/98804.md"
+          },
+          {
+            "label": "取消呼叫Rooms会议室",
+            "link": "wecom/98805.md"
+          },
+          {
+            "label": "获取Rooms会议室应答状态",
+            "link": "wecom/98806.md"
+          },
+          {
+            "label": "获取Rooms会议室资源",
+            "link": "wecom/98809.md"
+          }
+        ]
+      },
+      {
+        "label": "会中控制管理",
+        "items": [
+          {
+            "label": "管理会中设置",
+            "link": "wecom/98175.md"
+          },
+          {
+            "label": "管理联席主持人",
+            "link": "wecom/98180.md"
+          },
+          {
+            "label": "移出成员",
+            "link": "wecom/98181.md"
+          },
+          {
+            "label": "静音成员",
+            "link": "wecom/98184.md"
+          },
+          {
+            "label": "关闭成员屏幕共享",
+            "link": "wecom/98185.md"
+          },
+          {
+            "label": "管理等候室成员",
+            "link": "wecom/98186.md"
+          },
+          {
+            "label": "结束会议",
+            "link": "wecom/98187.md"
+          },
+          {
+            "label": "修改成员在会中显示的昵称",
+            "link": "wecom/98188.md"
+          },
+          {
+            "label": "关闭或开启成员视频",
+            "link": "wecom/98189.md"
+          },
+          {
+            "label": "创建会议投票主题",
+            "link": "wecom/98834.md"
+          },
+          {
+            "label": "修改会议投票主题",
+            "link": "wecom/98835.md"
+          },
+          {
+            "label": "获取会议投票列表",
+            "link": "wecom/98836.md"
+          },
+          {
+            "label": "获取会议投票主题信息",
+            "link": "wecom/98837.md"
+          },
+          {
+            "label": "获取会议投票详情",
+            "link": "wecom/98838.md"
+          },
+          {
+            "label": "删除会议投票",
+            "link": "wecom/98839.md"
+          },
+          {
+            "label": "发起会议投票",
+            "link": "wecom/98840.md"
+          },
+          {
+            "label": "结束会议投票",
+            "link": "wecom/98841.md"
+          }
+        ]
+      },
+      {
+        "label": "会议室连接器（MRA）管理",
+        "items": [
+          {
+            "label": "获取 MRA 状态信息",
+            "link": "wecom/98786.md"
+          },
+          {
+            "label": "切换 MRA 默认布局",
+            "link": "wecom/98787.md"
+          },
+          {
+            "label": "设置 MRA 举手或手放下",
+            "link": "wecom/98788.md"
+          },
+          {
+            "label": "挂断 MRA 呼叫",
+            "link": "wecom/98789.md"
+          }
+        ]
+      },
+      {
+        "label": "会议布局和背景管理",
+        "items": [
+          {
+            "label": "获取布局模板列表",
+            "link": "wecom/98844.md"
+          },
+          {
+            "label": "添加会议基础布局",
+            "link": "wecom/98845.md"
+          },
+          {
+            "label": "修改会议基础布局",
+            "link": "wecom/98846.md"
+          },
+          {
+            "label": "设置会议默认布局",
+            "link": "wecom/98847.md"
+          },
+          {
+            "label": "添加会议背景",
+            "link": "wecom/98851.md"
+          },
+          {
+            "label": "设置会议默认背景",
+            "link": "wecom/98852.md"
+          },
+          {
+            "label": "删除会议背景",
+            "link": "wecom/98853.md"
+          },
+          {
+            "label": "批量删除会议背景",
+            "link": "wecom/98854.md"
+          },
+          {
+            "label": "获取会议背景列表",
+            "link": "wecom/98856.md"
+          },
+          {
+            "label": "添加会议高级布局",
+            "link": "wecom/98861.md"
+          },
+          {
+            "label": "获取会议布局列表",
+            "link": "wecom/98862.md"
+          },
+          {
+            "label": "获取用户布局",
+            "link": "wecom/98865.md"
+          },
+          {
+            "label": "批量删除布局",
+            "link": "wecom/98866.md"
+          },
+          {
+            "label": "修改会议高级布局",
+            "link": "wecom/98868.md"
+          },
+          {
+            "label": "设置高级布局",
+            "link": "wecom/98869.md"
+          }
+        ]
+      },
+      {
+        "label": "会议统计管理",
+        "items": [
+          {
+            "label": "获取会议发起记录",
+            "link": "wecom/99651.md"
+          }
+        ]
+      },
+      {
+        "label": "回调通知",
+        "items": [
+          {
+            "label": "会议开始事件",
+            "link": "wecom/98333.md"
+          },
+          {
+            "label": "会议结束事件",
+            "link": "wecom/98337.md"
+          },
+          {
+            "label": "会议全体静音事件",
+            "link": "wecom/98341.md"
+          },
+          {
+            "label": "会议解除全体静音事件",
+            "link": "wecom/98345.md"
+          },
+          {
+            "label": "成员入会事件",
+            "link": "wecom/98348.md"
+          },
+          {
+            "label": "成员离会事件",
+            "link": "wecom/98352.md"
+          },
+          {
+            "label": "成员等待主持人入会事件",
+            "link": "wecom/98353.md"
+          },
+          {
+            "label": "成员进入等候室事件",
+            "link": "wecom/98354.md"
+          },
+          {
+            "label": "成员离开等候室事件",
+            "link": "wecom/98355.md"
+          },
+          {
+            "label": "成员从等候室进入会议事件",
+            "link": "wecom/98393.md"
+          },
+          {
+            "label": "成员从会议中被移入等候室事件",
+            "link": "wecom/98394.md"
+          },
+          {
+            "label": "共享屏幕开启事件",
+            "link": "wecom/98395.md"
+          },
+          {
+            "label": "共享屏幕结束事件",
+            "link": "wecom/98396.md"
+          },
+          {
+            "label": "会议成员角色变更事件",
+            "link": "wecom/98397.md"
+          },
+          {
+            "label": "开始云录制事件",
+            "link": "wecom/98398.md"
+          },
+          {
+            "label": "暂停云录制事件",
+            "link": "wecom/98399.md"
+          },
+          {
+            "label": "恢复云录制事件",
+            "link": "wecom/98400.md"
+          },
+          {
+            "label": "停止云录制事件",
+            "link": "wecom/98401.md"
+          },
+          {
+            "label": "云录制已完成事件",
+            "link": "wecom/98402.md"
+          },
+          {
+            "label": "删除云录制事件",
+            "link": "wecom/98404.md"
+          },
+          {
+            "label": "网络研讨会成员角色变更事件",
+            "link": "wecom/98771.md"
+          },
+          {
+            "label": "网络研讨会暖场上传结果",
+            "link": "wecom/98773.md"
+          },
+          {
+            "label": "PSTN 外呼状态更新事件",
+            "link": "wecom/98774.md"
+          },
+          {
+            "label": "素材上传结果",
+            "link": "wecom/98775.md"
+          },
+          {
+            "label": "用户报名事件",
+            "link": "wecom/98781.md"
+          },
+          {
+            "label": "用户取消报名事件",
+            "link": "wecom/98782.md"
+          },
+          {
+            "label": "会议室应答事件",
+            "link": "wecom/98783.md"
+          },
+          {
+            "label": "修改会议事件",
+            "link": "wecom/99081.md"
+          },
+          {
+            "label": "取消会议事件",
+            "link": "wecom/99082.md"
+          },
+          {
+            "label": "概述",
+            "link": "wecom/99103.md"
+          },
+          {
+            "label": "会议发起事件",
+            "link": "wecom/99648.md"
+          }
+        ]
+      },
+      {
+        "label": "录制管理",
+        "items": [
+          {
+            "label": "获取会议录制列表",
+            "link": "wecom/98192.md"
+          },
+          {
+            "label": "获取会议录制地址",
+            "link": "wecom/98196.md"
+          },
+          {
+            "label": "获取单个录制文件详情",
+            "link": "wecom/98205.md"
+          },
+          {
+            "label": "删除会议录制",
+            "link": "wecom/98206.md"
+          },
+          {
+            "label": "删除单个录制文件",
+            "link": "wecom/98207.md"
+          },
+          {
+            "label": "修改会议录制共享设置",
+            "link": "wecom/98208.md"
+          },
+          {
+            "label": "获取录制文件访问统计",
+            "link": "wecom/98209.md"
+          },
+          {
+            "label": "获取录制转写详情",
+            "link": "wecom/98211.md"
+          },
+          {
+            "label": "获取录制转写段落信息",
+            "link": "wecom/98212.md"
+          },
+          {
+            "label": "获取录制转写搜索结果",
+            "link": "wecom/98213.md"
+          }
+        ]
+      },
+      {
+        "label": "电话入会（PSTN）管理",
+        "items": [
+          {
+            "label": "批量外呼",
+            "link": "wecom/98823.md"
+          },
+          {
+            "label": "获取会议的外呼状态",
+            "link": "wecom/98824.md"
+          },
+          {
+            "label": "获取电话入会的成员ID",
+            "link": "wecom/98825.md"
+          }
+        ]
+      },
+      {
+        "label": "网络研讨会 (Webinar) 管理",
+        "items": [
+          {
+            "label": "创建网络研讨会",
+            "link": "wecom/98842.md"
+          },
+          {
+            "label": "修改网络研讨会",
+            "link": "wecom/98843.md"
+          },
+          {
+            "label": "获取网络研讨会详情",
+            "link": "wecom/98860.md"
+          },
+          {
+            "label": "取消网络研讨会",
+            "link": "wecom/98870.md"
+          },
+          {
+            "label": "获取网络研讨会嘉宾列表",
+            "link": "wecom/98871.md"
+          },
+          {
+            "label": "更新网络研讨会嘉宾列表",
+            "link": "wecom/98872.md"
+          },
+          {
+            "label": "获取网络研讨会成员报名 ID",
+            "link": "wecom/98873.md"
+          },
+          {
+            "label": "获取网络研讨会报名配置",
+            "link": "wecom/98874.md"
+          },
+          {
+            "label": "修改网络研讨会报名配置",
+            "link": "wecom/98875.md"
+          },
+          {
+            "label": "获取网络研讨会报名信息",
+            "link": "wecom/98876.md"
+          },
+          {
+            "label": "审批网络研讨会报名信息",
+            "link": "wecom/98877.md"
+          },
+          {
+            "label": "导入网络研讨会报名信息",
+            "link": "wecom/98880.md"
+          },
+          {
+            "label": "删除网络研讨会报名信息",
+            "link": "wecom/98881.md"
+          },
+          {
+            "label": "管理网络研讨会暖场配置",
+            "link": "wecom/98882.md"
+          }
+        ]
+      },
+      {
+        "label": "预约会议基础管理",
+        "items": [
+          {
+            "label": "修改预约会议",
+            "link": "wecom/99047.md"
+          },
+          {
+            "label": "取消预约会议",
+            "link": "wecom/99048.md"
+          },
+          {
+            "label": "获取会议详情",
+            "link": "wecom/99049.md"
+          },
+          {
+            "label": "获取成员会议ID列表",
+            "link": "wecom/99050.md"
+          },
+          {
+            "label": "创建预约会议",
+            "link": "wecom/99104.md"
+          }
+        ]
+      },
+      {
+        "label": "预约会议高级管理",
+        "items": [
+          {
+            "label": "创建预约会议",
+            "link": "wecom/98148.md"
+          },
+          {
+            "label": "获取会议详情",
+            "link": "wecom/98149.md"
+          },
+          {
+            "label": "取消预约会议",
+            "link": "wecom/98153.md"
+          },
+          {
+            "label": "修改预约会议",
+            "link": "wecom/98154.md"
+          },
+          {
+            "label": "获取已参会成员列表",
+            "link": "wecom/98156.md"
+          },
+          {
+            "label": "获取实时会中成员列表",
+            "link": "wecom/98157.md"
+          },
+          {
+            "label": "获取会议受邀成员列表",
+            "link": "wecom/98160.md"
+          },
+          {
+            "label": "更新会议受邀成员列表",
+            "link": "wecom/98162.md"
+          },
+          {
+            "label": "获取实时等候室成员列表",
+            "link": "wecom/98163.md"
+          },
+          {
+            "label": "获取等候室成员记录",
+            "link": "wecom/98164.md"
+          },
+          {
+            "label": "获取成员设备是否入会",
+            "link": "wecom/98165.md"
+          },
+          {
+            "label": "获取成员会议ID列表",
+            "link": "wecom/98714.md"
+          },
+          {
+            "label": "获取会议成员报名 ID",
+            "link": "wecom/98794.md"
+          },
+          {
+            "label": "修改会议报名配置",
+            "link": "wecom/98797.md"
+          },
+          {
+            "label": "获取会议报名配置",
+            "link": "wecom/98800.md"
+          },
+          {
+            "label": "审批会议报名信息",
+            "link": "wecom/98807.md"
+          },
+          {
+            "label": "获取会议报名信息",
+            "link": "wecom/98810.md"
+          },
+          {
+            "label": "导入会议报名信息",
+            "link": "wecom/98816.md"
+          },
+          {
+            "label": "删除会议报名信息",
+            "link": "wecom/98817.md"
+          },
+          {
+            "label": "创建用户专属参会链接",
+            "link": "wecom/98818.md"
+          },
+          {
+            "label": "获取用户专属参会链接",
+            "link": "wecom/98819.md"
+          },
+          {
+            "label": "获取会议健康度",
+            "link": "wecom/98821.md"
+          },
+          {
+            "label": "获取会议嘉宾列表",
+            "link": "wecom/99039.md"
+          },
+          {
+            "label": "更新会议嘉宾列表",
+            "link": "wecom/99040.md"
+          }
+        ]
+      },
+      {
+        "label": "高级功能账号管理",
+        "items": [
+          {
+            "label": "分配高级功能账号",
+            "link": "wecom/99508.md"
+          },
+          {
+            "label": "取消高级功能账号",
+            "link": "wecom/99509.md"
+          },
+          {
+            "label": "获取高级功能账号列表",
+            "link": "wecom/99510.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "会议室",
+    "items": [
+      {
+        "label": "概述",
+        "link": "wecom/93618.md"
+      },
+      {
+        "label": "会议室管理",
+        "link": "wecom/93619.md"
+      },
+      {
+        "label": "会议室预定管理",
+        "link": "wecom/93620.md"
+      },
+      {
+        "label": "回调事件",
+        "link": "wecom/95333.md"
+      }
+    ]
+  },
+  {
+    "label": "会话内容存档",
+    "items": [
+      {
+        "label": "概述",
+        "link": "wecom/91360.md"
+      },
+      {
+        "label": "使用前帮助",
+        "link": "wecom/91361.md"
+      },
+      {
+        "label": "开发案例演示",
+        "link": "wecom/91551.md"
+      },
+      {
+        "label": "常见问题解答",
+        "link": "wecom/91552.md"
+      },
+      {
+        "label": "获取会话内容存档开启成员列表",
+        "link": "wecom/91614.md"
+      },
+      {
+        "label": "获取会话内容",
+        "link": "wecom/91774.md"
+      },
+      {
+        "label": "获取会话同意情况",
+        "link": "wecom/91782.md"
+      },
+      {
+        "label": "客户同意进行聊天内容存档事件回调",
+        "link": "wecom/92005.md"
+      },
+      {
+        "label": "获取会话内容存档内部群信息",
+        "link": "wecom/92951.md"
+      },
+      {
+        "label": "产生会话回调事件",
+        "link": "wecom/95039.md"
+      }
+    ]
+  },
+  {
+    "label": "公费电话",
+    "items": [
+      {
+        "label": "获取公费电话拨打记录",
+        "link": "wecom/93662.md"
+      }
+    ]
+  },
+  {
+    "label": "安全管理",
+    "items": [
+      {
+        "label": "获取企业微信域名IP信息",
+        "link": "wecom/100079.md"
+      },
+      {
+        "label": "回调通知",
+        "link": "wecom/100080.md"
+      },
+      {
+        "label": "截屏/录屏管理",
+        "link": "wecom/100128.md"
+      },
+      {
+        "label": "文件防泄漏",
+        "link": "wecom/98079.md"
+      },
+      {
+        "label": "设备管理",
+        "link": "wecom/98920.md"
+      },
+      {
+        "label": "操作日志",
+        "items": [
+          {
+            "label": "获取成员操作记录",
+            "link": "wecom/100178.md"
+          },
+          {
+            "label": "获取管理端操作日志",
+            "link": "wecom/100179.md"
+          }
+        ]
+      },
+      {
+        "label": "高级功能账号管理",
+        "items": [
+          {
+            "label": "分配高级功能账号",
+            "link": "wecom/99503.md"
+          },
+          {
+            "label": "取消高级功能账号",
+            "link": "wecom/99505.md"
+          },
+          {
+            "label": "获取高级功能账号列表",
+            "link": "wecom/99506.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "审批",
+    "items": [
+      {
+        "label": "审批流程引擎",
+        "link": "wecom/90269.md"
+      },
+      {
+        "label": "获取审批数据（旧）",
+        "link": "wecom/91530.md"
+      },
+      {
+        "label": "审批申请状态变化回调通知",
+        "link": "wecom/91815.md"
+      },
+      {
+        "label": "批量获取审批单号",
+        "link": "wecom/91816.md"
+      },
+      {
+        "label": "提交审批申请",
+        "link": "wecom/91853.md"
+      },
+      {
+        "label": "概述",
+        "link": "wecom/91854.md"
+      },
+      {
+        "label": "获取审批模板详情",
+        "link": "wecom/91982.md"
+      },
+      {
+        "label": "获取审批申请详情",
+        "link": "wecom/91983.md"
+      },
+      {
+        "label": "获取企业假期管理配置",
+        "link": "wecom/93375.md"
+      },
+      {
+        "label": "获取成员假期余额",
+        "link": "wecom/93376.md"
+      },
+      {
+        "label": "修改成员假期余额",
+        "link": "wecom/93377.md"
+      },
+      {
+        "label": "创建审批模板",
+        "link": "wecom/97437.md"
+      },
+      {
+        "label": "更新审批模板",
+        "link": "wecom/97438.md"
+      }
+    ]
+  },
+  {
+    "label": "客户联系",
+    "items": [
+      {
+        "label": "概述",
+        "link": "wecom/92109.md"
+      },
+      {
+        "label": "成员对外信息",
+        "link": "wecom/92230.md"
+      },
+      {
+        "label": "管理商品图册",
+        "link": "wecom/95096.md"
+      },
+      {
+        "label": "管理聊天敏感词",
+        "link": "wecom/95097.md"
+      },
+      {
+        "label": "上传附件资源",
+        "link": "wecom/95098.md"
+      },
+      {
+        "label": "获取已服务的外部联系人",
+        "link": "wecom/99434.md"
+      },
+      {
+        "label": "企业服务人员管理",
+        "items": [
+          {
+            "label": "获取配置了客户联系功能的成员列表",
+            "link": "wecom/92571.md"
+          }
+        ]
+      },
+      {
+        "label": "回调通知",
+        "items": [
+          {
+            "label": "概述",
+            "link": "wecom/92129.md"
+          },
+          {
+            "label": "事件格式",
+            "link": "wecom/92130.md"
+          },
+          {
+            "label": "获客助手事件通知",
+            "link": "wecom/97299.md"
+          }
+        ]
+      },
+      {
+        "label": "在职继承",
+        "items": [
+          {
+            "label": "分配在职成员的客户",
+            "link": "wecom/92125.md"
+          },
+          {
+            "label": "查询客户接替状态",
+            "link": "wecom/94088.md"
+          },
+          {
+            "label": "分配在职成员的客户群",
+            "link": "wecom/95703.md"
+          }
+        ]
+      },
+      {
+        "label": "客户朋友圈",
+        "items": [
+          {
+            "label": "获取客户朋友圈全部的发表记录",
+            "link": "wecom/93333.md"
+          },
+          {
+            "label": "概述",
+            "link": "wecom/93506.md"
+          },
+          {
+            "label": "客户朋友圈规则组管理",
+            "link": "wecom/94890.md"
+          },
+          {
+            "label": "企业发表内容到客户的朋友圈",
+            "link": "wecom/95094.md"
+          },
+          {
+            "label": "停止发表企业朋友圈",
+            "link": "wecom/97612.md"
+          }
+        ]
+      },
+      {
+        "label": "客户标签管理",
+        "items": [
+          {
+            "label": "管理企业标签",
+            "link": "wecom/92117.md"
+          },
+          {
+            "label": "编辑客户企业标签",
+            "link": "wecom/92118.md"
+          },
+          {
+            "label": "管理企业规则组下的客户标签",
+            "link": "wecom/94882.md"
+          }
+        ]
+      },
+      {
+        "label": "客户管理",
+        "items": [
+          {
+            "label": "获取客户列表",
+            "link": "wecom/92113.md"
+          },
+          {
+            "label": "获取客户详情",
+            "link": "wecom/92114.md"
+          },
+          {
+            "label": "修改客户备注信息",
+            "link": "wecom/92115.md"
+          },
+          {
+            "label": "批量获取客户详情",
+            "link": "wecom/92994.md"
+          },
+          {
+            "label": "客户联系规则组管理",
+            "link": "wecom/94883.md"
+          }
+        ]
+      },
+      {
+        "label": "客户群管理",
+        "items": [
+          {
+            "label": "获取客户群列表",
+            "link": "wecom/92120.md"
+          },
+          {
+            "label": "获取客户群详情",
+            "link": "wecom/92122.md"
+          },
+          {
+            "label": "客户群opengid转换",
+            "link": "wecom/94822.md"
+          }
+        ]
+      },
+      {
+        "label": "消息推送",
+        "items": [
+          {
+            "label": "创建企业群发",
+            "link": "wecom/92135.md"
+          },
+          {
+            "label": "发送新客户欢迎语",
+            "link": "wecom/92137.md"
+          },
+          {
+            "label": "入群欢迎语素材管理",
+            "link": "wecom/92366.md"
+          },
+          {
+            "label": "获取企业的全部群发记录",
+            "link": "wecom/93338.md"
+          },
+          {
+            "label": "提醒成员群发",
+            "link": "wecom/97610.md"
+          },
+          {
+            "label": "停止企业群发",
+            "link": "wecom/97611.md"
+          }
+        ]
+      },
+      {
+        "label": "离职继承",
+        "items": [
+          {
+            "label": "获取待分配的离职成员列表",
+            "link": "wecom/92124.md"
+          },
+          {
+            "label": "分配离职成员的客户群",
+            "link": "wecom/92127.md"
+          },
+          {
+            "label": "分配离职成员的客户",
+            "link": "wecom/94081.md"
+          },
+          {
+            "label": "查询客户接替状态",
+            "link": "wecom/94082.md"
+          }
+        ]
+      },
+      {
+        "label": "统计管理",
+        "items": [
+          {
+            "label": "获取「联系客户统计」数据",
+            "link": "wecom/92132.md"
+          },
+          {
+            "label": "获取「群聊数据统计」数据",
+            "link": "wecom/92133.md"
+          }
+        ]
+      },
+      {
+        "label": "联系我与客户入群方式",
+        "items": [
+          {
+            "label": "客户联系「联系我」管理",
+            "link": "wecom/92228.md"
+          },
+          {
+            "label": "客户群「加入群聊」管理",
+            "link": "wecom/92229.md"
+          }
+        ]
+      },
+      {
+        "label": "获客助手",
+        "items": [
+          {
+            "label": "获取成员多次收消息详情",
+            "link": "wecom/100130.md"
+          },
+          {
+            "label": "获客链接管理",
+            "link": "wecom/97297.md"
+          },
+          {
+            "label": "获取由获客链接添加的客户信息",
+            "link": "wecom/97298.md"
+          },
+          {
+            "label": "获客助手额度管理与使用统计",
+            "link": "wecom/97375.md"
+          },
+          {
+            "label": "提升广告有效率",
+            "link": "wecom/99596.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "家校应用",
+    "items": [
+      {
+        "label": "上课直播",
+        "items": [
+          {
+            "label": "获取老师直播ID列表",
+            "link": "wecom/93739.md"
+          },
+          {
+            "label": "获取直播详情",
+            "link": "wecom/93740.md"
+          },
+          {
+            "label": "获取观看直播统计",
+            "link": "wecom/93741.md"
+          },
+          {
+            "label": "获取未观看直播统计",
+            "link": "wecom/93742.md"
+          },
+          {
+            "label": "删除直播回放",
+            "link": "wecom/93743.md"
+          },
+          {
+            "label": "获取观看直播统计V2",
+            "link": "wecom/95793.md"
+          },
+          {
+            "label": "获取未观看直播统计V2",
+            "link": "wecom/95795.md"
+          }
+        ]
+      },
+      {
+        "label": "健康上报",
+        "items": [
+          {
+            "label": "获取健康上报使用统计",
+            "link": "wecom/93676.md"
+          },
+          {
+            "label": "获取健康上报任务ID列表",
+            "link": "wecom/93677.md"
+          },
+          {
+            "label": "获取健康上报任务详情",
+            "link": "wecom/93678.md"
+          },
+          {
+            "label": "获取用户填写答案",
+            "link": "wecom/93679.md"
+          }
+        ]
+      },
+      {
+        "label": "班级收款",
+        "items": [
+          {
+            "label": "获取学生付款结果",
+            "link": "wecom/94470.md"
+          },
+          {
+            "label": "获取订单详情",
+            "link": "wecom/94471.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "家校沟通",
+    "items": [
+      {
+        "label": "概述",
+        "link": "wecom/91638.md"
+      },
+      {
+        "label": "基础接口",
+        "items": [
+          {
+            "label": "管理「学校通知」的关注模式",
+            "link": "wecom/92318.md"
+          },
+          {
+            "label": "获取「学校通知」二维码",
+            "link": "wecom/92320.md"
+          },
+          {
+            "label": "发送「学校通知」",
+            "link": "wecom/92321.md"
+          },
+          {
+            "label": "外部联系人openid转换",
+            "link": "wecom/92323.md"
+          },
+          {
+            "label": "管理「班级群创建方式」",
+            "link": "wecom/92430.md"
+          },
+          {
+            "label": "获取可使用的家长范围",
+            "link": "wecom/94895.md"
+          }
+        ]
+      },
+      {
+        "label": "学生与家长管理",
+        "items": [
+          {
+            "label": "创建学生",
+            "link": "wecom/92325.md"
+          },
+          {
+            "label": "删除学生",
+            "link": "wecom/92326.md"
+          },
+          {
+            "label": "更新学生",
+            "link": "wecom/92327.md"
+          },
+          {
+            "label": "批量创建学生",
+            "link": "wecom/92328.md"
+          },
+          {
+            "label": "批量删除学生",
+            "link": "wecom/92329.md"
+          },
+          {
+            "label": "批量更新学生",
+            "link": "wecom/92330.md"
+          },
+          {
+            "label": "创建家长",
+            "link": "wecom/92331.md"
+          },
+          {
+            "label": "删除家长",
+            "link": "wecom/92332.md"
+          },
+          {
+            "label": "更新家长",
+            "link": "wecom/92333.md"
+          },
+          {
+            "label": "批量创建家长",
+            "link": "wecom/92334.md"
+          },
+          {
+            "label": "批量删除家长",
+            "link": "wecom/92335.md"
+          },
+          {
+            "label": "批量更新家长",
+            "link": "wecom/92336.md"
+          },
+          {
+            "label": "读取学生或家长",
+            "link": "wecom/92337.md"
+          },
+          {
+            "label": "获取部门学生详情",
+            "link": "wecom/92338.md"
+          },
+          {
+            "label": "设置家校通讯录自动同步模式",
+            "link": "wecom/92345.md"
+          },
+          {
+            "label": "获取部门家长详情",
+            "link": "wecom/92446.md"
+          }
+        ]
+      },
+      {
+        "label": "家校通讯录变更回调",
+        "items": [
+          {
+            "label": "成员变更事件",
+            "link": "wecom/92032.md"
+          },
+          {
+            "label": "部门变更事件",
+            "link": "wecom/92052.md"
+          }
+        ]
+      },
+      {
+        "label": "网页授权登录",
+        "items": [
+          {
+            "label": "获取访问用户身份",
+            "link": "wecom/91707.md"
+          },
+          {
+            "label": "开始开发",
+            "link": "wecom/91856.md"
+          },
+          {
+            "label": "构造网页授权链接",
+            "link": "wecom/91857.md"
+          },
+          {
+            "label": "获取家校访问用户身份",
+            "link": "wecom/95791.md"
+          }
+        ]
+      },
+      {
+        "label": "部门管理",
+        "items": [
+          {
+            "label": "创建部门",
+            "link": "wecom/92340.md"
+          },
+          {
+            "label": "更新部门",
+            "link": "wecom/92341.md"
+          },
+          {
+            "label": "删除部门",
+            "link": "wecom/92342.md"
+          },
+          {
+            "label": "获取部门列表",
+            "link": "wecom/92343.md"
+          },
+          {
+            "label": "标准年级对照表",
+            "link": "wecom/92344.md"
+          },
+          {
+            "label": "修改自动升年级的配置",
+            "link": "wecom/92949.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "小程序",
+    "items": [
+      {
+        "label": "NFC接口",
+        "items": [
+          {
+            "label": "wx.qy.getNFCReaderState",
+            "link": "wecom/91526.md"
+          },
+          {
+            "label": "wx.qy.startNFCReader",
+            "link": "wecom/91527.md"
+          },
+          {
+            "label": "wx.qy.stopNFCReader",
+            "link": "wecom/91528.md"
+          },
+          {
+            "label": "onNFCReadMessage",
+            "link": "wecom/91529.md"
+          }
+        ]
+      },
+      {
+        "label": "上下游",
+        "items": [
+          {
+            "label": "聊天工具栏接口",
+            "link": "wecom/95706.md"
+          }
+        ]
+      },
+      {
+        "label": "企业通讯录",
+        "items": [
+          {
+            "label": "wx.qy.getEnterpriseUserInfo",
+            "link": "wecom/91617.md"
+          },
+          {
+            "label": "wx.qy.getAvatar",
+            "link": "wecom/91618.md"
+          },
+          {
+            "label": "wx.qy.getQrCode",
+            "link": "wecom/91619.md"
+          },
+          {
+            "label": "wx.qy.getMobile",
+            "link": "wecom/91620.md"
+          },
+          {
+            "label": "wx.qy.getEmail",
+            "link": "wecom/91621.md"
+          },
+          {
+            "label": "wx.qy.selectEnterpriseContact",
+            "link": "wecom/93861.md"
+          },
+          {
+            "label": "wx.qy.openUserProfile",
+            "link": "wecom/93866.md"
+          },
+          {
+            "label": "wx.qy.selectCorpGroupContact",
+            "link": "wecom/94184.md"
+          },
+          {
+            "label": "wx.qy.claimClassAdmin",
+            "link": "wecom/94435.md"
+          }
+        ]
+      },
+      {
+        "label": "会议",
+        "items": [
+          {
+            "label": "创建快速会议",
+            "link": "wecom/93814.md"
+          },
+          {
+            "label": "进入会议",
+            "link": "wecom/93815.md"
+          }
+        ]
+      },
+      {
+        "label": "会话",
+        "items": [
+          {
+            "label": "wx.qy.openEnterpriseChat",
+            "link": "wecom/91519.md"
+          },
+          {
+            "label": "wx.qy.updateEnterpriseChat",
+            "link": "wecom/93222.md"
+          },
+          {
+            "label": "wx.qy.sendChatMessage",
+            "link": "wecom/94370.md"
+          },
+          {
+            "label": "wx.qy.createCorpGroupChat",
+            "link": "wecom/94426.md"
+          },
+          {
+            "label": "wx.qy.updateCorpGroupChat",
+            "link": "wecom/94427.md"
+          },
+          {
+            "label": "私密消息",
+            "link": "wecom/94488.md"
+          }
+        ]
+      },
+      {
+        "label": "基础接口",
+        "items": [
+          {
+            "label": "wx.getSystemInfo",
+            "link": "wecom/91510.md"
+          },
+          {
+            "label": "wx.getSystemInfoSync",
+            "link": "wecom/91511.md"
+          },
+          {
+            "label": "wx.qy.canIUse",
+            "link": "wecom/91512.md"
+          },
+          {
+            "label": "wx.qy.getContext",
+            "link": "wecom/94321.md"
+          },
+          {
+            "label": "wx.qy.getSystemInfo",
+            "link": "wecom/95046.md"
+          }
+        ]
+      },
+      {
+        "label": "客户联系",
+        "items": [
+          {
+            "label": "wx.qy.openUserProfile",
+            "link": "wecom/93567.md"
+          },
+          {
+            "label": "wx.qy.getCurExternalContact",
+            "link": "wecom/93568.md"
+          },
+          {
+            "label": "wx.qy.getCurExternalChat",
+            "link": "wecom/93570.md"
+          },
+          {
+            "label": "wx.qy.shareToExternalContact",
+            "link": "wecom/93571.md"
+          },
+          {
+            "label": "wx.qy.shareToExternalChat",
+            "link": "wecom/93572.md"
+          },
+          {
+            "label": "「联系我」插件",
+            "link": "wecom/93582.md"
+          },
+          {
+            "label": "wx.qy.sendChatMessage",
+            "link": "wecom/93863.md"
+          },
+          {
+            "label": "wx.qy.navigateToAddCustomer",
+            "link": "wecom/93864.md"
+          },
+          {
+            "label": "wx.qy.selectExternalContact",
+            "link": "wecom/93867.md"
+          },
+          {
+            "label": "在小程序中加入群聊",
+            "link": "wecom/93884.md"
+          },
+          {
+            "label": "wx.qy.shareToExternalMoments",
+            "link": "wecom/94608.md"
+          },
+          {
+            "label": "wx.qy.updateMomentsSetting",
+            "link": "wecom/94846.md"
+          }
+        ]
+      },
+      {
+        "label": "家校沟通",
+        "items": [
+          {
+            "label": "发起班级收款",
+            "link": "wecom/94788.md"
+          },
+          {
+            "label": "微信小程序进入填写学生资料页面",
+            "link": "wecom/94935.md"
+          }
+        ]
+      },
+      {
+        "label": "对外收款",
+        "items": [
+          {
+            "label": "发起对外收款",
+            "link": "wecom/95952.md"
+          },
+          {
+            "label": "发起退款",
+            "link": "wecom/95953.md"
+          }
+        ]
+      },
+      {
+        "label": "应用管理",
+        "items": [
+          {
+            "label": "打开应用管理页面",
+            "link": "wecom/95537.md"
+          }
+        ]
+      },
+      {
+        "label": "开发指南",
+        "items": [
+          {
+            "label": "开发者工具插件支持",
+            "link": "wecom/91502.md"
+          },
+          {
+            "label": "微信小程序API支持情况",
+            "link": "wecom/91503.md"
+          },
+          {
+            "label": "微信小程序组件支持情况",
+            "link": "wecom/91504.md"
+          },
+          {
+            "label": "小程序关联到企业微信",
+            "link": "wecom/92370.md"
+          },
+          {
+            "label": "小程序体验版配置",
+            "link": "wecom/92380.md"
+          },
+          {
+            "label": "开发前须知",
+            "link": "wecom/92455.md"
+          }
+        ]
+      },
+      {
+        "label": "微信客服",
+        "items": [
+          {
+            "label": "微信小程序打开微信客服",
+            "link": "wecom/94739.md"
+          },
+          {
+            "label": "客服工具栏接口",
+            "link": "wecom/94766.md"
+          }
+        ]
+      },
+      {
+        "label": "微盘",
+        "items": [
+          {
+            "label": "选择目录位置",
+            "link": "wecom/99008.md"
+          },
+          {
+            "label": "选择文件",
+            "link": "wecom/99165.md"
+          }
+        ]
+      },
+      {
+        "label": "政民沟通",
+        "items": [
+          {
+            "label": "微信进入居民上报小程序",
+            "link": "wecom/94934.md"
+          }
+        ]
+      },
+      {
+        "label": "数据与智能专区",
+        "items": [
+          {
+            "label": "数据与智能专区文档选择",
+            "link": "wecom/101497.md"
+          },
+          {
+            "label": "数据与智能专区文件选择",
+            "link": "wecom/101542.md"
+          }
+        ]
+      },
+      {
+        "label": "文档",
+        "items": [
+          {
+            "label": "创建文档",
+            "link": "wecom/98060.md"
+          },
+          {
+            "label": "选择文档",
+            "link": "wecom/99168.md"
+          }
+        ]
+      },
+      {
+        "label": "日程",
+        "items": [
+          {
+            "label": "查看日程闲忙状态",
+            "link": "wecom/97693.md"
+          }
+        ]
+      },
+      {
+        "label": "更多",
+        "items": [
+          {
+            "label": "小程序发送通知",
+            "link": "wecom/92372.md"
+          },
+          {
+            "label": "语音转文字接口",
+            "link": "wecom/92373.md"
+          },
+          {
+            "label": "转发成功回调",
+            "link": "wecom/92374.md"
+          },
+          {
+            "label": "从会话选择文件",
+            "link": "wecom/95026.md"
+          }
+        ]
+      },
+      {
+        "label": "登录",
+        "items": [
+          {
+            "label": "wx.qy.login",
+            "link": "wecom/91506.md"
+          },
+          {
+            "label": "code2Session",
+            "link": "wecom/91507.md"
+          },
+          {
+            "label": "wx.qy.checkSession",
+            "link": "wecom/91508.md"
+          },
+          {
+            "label": "小程序登录流程",
+            "link": "wecom/92426.md"
+          }
+        ]
+      },
+      {
+        "label": "直播",
+        "items": [
+          {
+            "label": "创建立即直播",
+            "link": "wecom/93816.md"
+          },
+          {
+            "label": "进入直播",
+            "link": "wecom/93817.md"
+          },
+          {
+            "label": "观看直播回放",
+            "link": "wecom/93818.md"
+          },
+          {
+            "label": "下载直播回放",
+            "link": "wecom/93819.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "小程序接入对外收款",
+    "items": [
+      {
+        "label": "概述",
+        "link": "wecom/98723.md"
+      },
+      {
+        "label": "回调通知",
+        "items": [
+          {
+            "label": "支付通知",
+            "link": "wecom/97335.md"
+          },
+          {
+            "label": "退款通知",
+            "link": "wecom/97338.md"
+          },
+          {
+            "label": "概述",
+            "link": "wecom/97478.md"
+          }
+        ]
+      },
+      {
+        "label": "普通支付",
+        "items": [
+          {
+            "label": "小程序下单",
+            "link": "wecom/97322.md"
+          },
+          {
+            "label": "查询订单",
+            "link": "wecom/97323.md"
+          },
+          {
+            "label": "关闭订单",
+            "link": "wecom/97324.md"
+          },
+          {
+            "label": "获取支付签名",
+            "link": "wecom/98130.md"
+          }
+        ]
+      },
+      {
+        "label": "账单",
+        "items": [
+          {
+            "label": "交易账单申请",
+            "link": "wecom/98115.md"
+          }
+        ]
+      },
+      {
+        "label": "退款",
+        "items": [
+          {
+            "label": "申请退款",
+            "link": "wecom/97333.md"
+          },
+          {
+            "label": "查询退款",
+            "link": "wecom/97352.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "应用管理",
+    "items": [
+      {
+        "label": "概述",
+        "link": "wecom/90226.md"
+      },
+      {
+        "label": "获取应用",
+        "link": "wecom/90227.md"
+      },
+      {
+        "label": "设置应用",
+        "link": "wecom/90228.md"
+      },
+      {
+        "label": "设置工作台自定义展示",
+        "link": "wecom/92535.md"
+      },
+      {
+        "label": "自定义菜单",
+        "items": [
+          {
+            "label": "创建菜单",
+            "link": "wecom/90231.md"
+          },
+          {
+            "label": "获取菜单",
+            "link": "wecom/90232.md"
+          },
+          {
+            "label": "删除菜单",
+            "link": "wecom/90233.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "开发指南",
+    "items": [
+      {
+        "label": "开发前必读",
+        "link": "wecom/90664.md"
+      },
+      {
+        "label": "基本概念介绍",
+        "link": "wecom/90665.md"
+      },
+      {
+        "label": "回调配置",
+        "link": "wecom/90930.md"
+      },
+      {
+        "label": "获取access_token",
+        "link": "wecom/91039.md"
+      },
+      {
+        "label": "获取企业微信接口IP段",
+        "link": "wecom/92520.md"
+      },
+      {
+        "label": "获取企业微信回调IP段",
+        "link": "wecom/92521.md"
+      }
+    ]
+  },
+  {
+    "label": "待办",
+    "items": [
+      {
+        "label": "获取待办详情",
+        "link": "wecom/101524.md"
+      },
+      {
+        "label": "更新待办状态",
+        "link": "wecom/101534.md"
+      }
+    ]
+  },
+  {
+    "label": "微信客服",
+    "items": [
+      {
+        "label": "概述",
+        "link": "wecom/94638.md"
+      },
+      {
+        "label": "「升级服务」配置",
+        "link": "wecom/94674.md"
+      },
+      {
+        "label": "回调通知",
+        "link": "wecom/97712.md"
+      },
+      {
+        "label": "会话分配与消息收发",
+        "items": [
+          {
+            "label": "分配客服会话",
+            "link": "wecom/94669.md"
+          },
+          {
+            "label": "接收消息和事件",
+            "link": "wecom/94670.md"
+          },
+          {
+            "label": "发送消息",
+            "link": "wecom/94677.md"
+          },
+          {
+            "label": "发送欢迎语等事件响应消息",
+            "link": "wecom/95122.md"
+          }
+        ]
+      },
+      {
+        "label": "其他基础信息获取",
+        "items": [
+          {
+            "label": "获取客户基础信息",
+            "link": "wecom/95159.md"
+          }
+        ]
+      },
+      {
+        "label": "客服账号管理",
+        "items": [
+          {
+            "label": "获取客服账号列表",
+            "link": "wecom/94661.md"
+          },
+          {
+            "label": "添加客服账号",
+            "link": "wecom/94662.md"
+          },
+          {
+            "label": "删除客服账号",
+            "link": "wecom/94663.md"
+          },
+          {
+            "label": "修改客服账号",
+            "link": "wecom/94664.md"
+          },
+          {
+            "label": "获取客服账号链接",
+            "link": "wecom/94665.md"
+          }
+        ]
+      },
+      {
+        "label": "接待人员管理",
+        "items": [
+          {
+            "label": "获取接待人员列表",
+            "link": "wecom/94645.md"
+          },
+          {
+            "label": "添加接待人员",
+            "link": "wecom/94646.md"
+          },
+          {
+            "label": "删除接待人员",
+            "link": "wecom/94647.md"
+          }
+        ]
+      },
+      {
+        "label": "机器人管理",
+        "items": [
+          {
+            "label": "知识库分组管理",
+            "link": "wecom/95971.md"
+          },
+          {
+            "label": "知识库问答管理",
+            "link": "wecom/95972.md"
+          }
+        ]
+      },
+      {
+        "label": "统计管理",
+        "items": [
+          {
+            "label": "获取「客户数据统计」企业汇总数据",
+            "link": "wecom/95489.md"
+          },
+          {
+            "label": "获取「客户数据统计」接待人员明细数据",
+            "link": "wecom/95490.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "微盘",
+    "items": [
+      {
+        "label": "概述",
+        "link": "wecom/93654.md"
+      },
+      {
+        "label": "版本和容量管理",
+        "link": "wecom/95856.md"
+      },
+      {
+        "label": "回调通知",
+        "items": [
+          {
+            "label": "概述",
+            "link": "wecom/97482.md"
+          },
+          {
+            "label": "微盘容量不足事件",
+            "link": "wecom/97898.md"
+          },
+          {
+            "label": "空间变更事件",
+            "link": "wecom/97899.md"
+          },
+          {
+            "label": "文件变更事件",
+            "link": "wecom/97900.md"
+          },
+          {
+            "label": "解散空间",
+            "link": "wecom/97901.md"
+          },
+          {
+            "label": "修改空间成员",
+            "link": "wecom/97902.md"
+          },
+          {
+            "label": "修改空间安全设置",
+            "link": "wecom/97903.md"
+          }
+        ]
+      },
+      {
+        "label": "管理文件",
+        "items": [
+          {
+            "label": "获取文件列表",
+            "link": "wecom/93657.md"
+          },
+          {
+            "label": "上传文件",
+            "link": "wecom/97880.md"
+          },
+          {
+            "label": "下载文件",
+            "link": "wecom/97881.md"
+          },
+          {
+            "label": "新建文件夹/文档",
+            "link": "wecom/97882.md"
+          },
+          {
+            "label": "重命名文件",
+            "link": "wecom/97883.md"
+          },
+          {
+            "label": "移动文件",
+            "link": "wecom/97884.md"
+          },
+          {
+            "label": "删除文件",
+            "link": "wecom/97885.md"
+          },
+          {
+            "label": "获取文件信息",
+            "link": "wecom/97886.md"
+          },
+          {
+            "label": "文件分块上传",
+            "link": "wecom/98004.md"
+          }
+        ]
+      },
+      {
+        "label": "管理文件权限",
+        "items": [
+          {
+            "label": "新增成员",
+            "link": "wecom/93658.md"
+          },
+          {
+            "label": "删除成员",
+            "link": "wecom/97888.md"
+          },
+          {
+            "label": "分享设置",
+            "link": "wecom/97889.md"
+          },
+          {
+            "label": "获取分享链接",
+            "link": "wecom/97890.md"
+          },
+          {
+            "label": "获取文件权限信息",
+            "link": "wecom/97891.md"
+          },
+          {
+            "label": "修改文件安全设置",
+            "link": "wecom/97892.md"
+          }
+        ]
+      },
+      {
+        "label": "管理空间",
+        "items": [
+          {
+            "label": "新建空间",
+            "link": "wecom/93655.md"
+          },
+          {
+            "label": "重命名空间",
+            "link": "wecom/97856.md"
+          },
+          {
+            "label": "解散空间",
+            "link": "wecom/97857.md"
+          },
+          {
+            "label": "获取空间信息",
+            "link": "wecom/97858.md"
+          }
+        ]
+      },
+      {
+        "label": "管理空间权限",
+        "items": [
+          {
+            "label": "添加成员/部门",
+            "link": "wecom/93656.md"
+          },
+          {
+            "label": "移除成员/部门",
+            "link": "wecom/97875.md"
+          },
+          {
+            "label": "安全设置",
+            "link": "wecom/97876.md"
+          },
+          {
+            "label": "获取邀请链接",
+            "link": "wecom/97877.md"
+          },
+          {
+            "label": "获取空间信息",
+            "link": "wecom/97878.md"
+          }
+        ]
+      },
+      {
+        "label": "高级功能账号管理",
+        "items": [
+          {
+            "label": "分配高级功能账号",
+            "link": "wecom/99512.md"
+          },
+          {
+            "label": "取消高级功能账号",
+            "link": "wecom/99513.md"
+          },
+          {
+            "label": "获取高级功能账号列表",
+            "link": "wecom/99514.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "打卡",
+    "items": [
+      {
+        "label": "获取打卡记录数据",
+        "link": "wecom/90262.md"
+      },
+      {
+        "label": "获取员工打卡规则",
+        "link": "wecom/90263.md"
+      },
+      {
+        "label": "获取打卡日报数据",
+        "link": "wecom/93374.md"
+      },
+      {
+        "label": "录入打卡人员人脸信息",
+        "link": "wecom/93378.md"
+      },
+      {
+        "label": "获取打卡人员排班信息",
+        "link": "wecom/93380.md"
+      },
+      {
+        "label": "获取企业所有打卡规则",
+        "link": "wecom/93384.md"
+      },
+      {
+        "label": "为打卡人员排班",
+        "link": "wecom/93385.md"
+      },
+      {
+        "label": "获取打卡月报数据",
+        "link": "wecom/93387.md"
+      },
+      {
+        "label": "获取设备打卡数据",
+        "link": "wecom/94126.md"
+      },
+      {
+        "label": "为打卡人员补卡",
+        "link": "wecom/95803.md"
+      },
+      {
+        "label": "管理打卡规则",
+        "link": "wecom/98041.md"
+      },
+      {
+        "label": "添加打卡记录",
+        "link": "wecom/99647.md"
+      }
+    ]
+  },
+  {
+    "label": "政民沟通",
+    "items": [
+      {
+        "label": "居民上报",
+        "items": [
+          {
+            "label": "概述",
+            "link": "wecom/93513.md"
+          },
+          {
+            "label": "获取配置的网格及网格负责人",
+            "link": "wecom/93514.md"
+          },
+          {
+            "label": "获取单位居民上报数据统计",
+            "link": "wecom/93515.md"
+          },
+          {
+            "label": "获取个人居民上报数据统计",
+            "link": "wecom/93516.md"
+          },
+          {
+            "label": "获取上报事件分类统计",
+            "link": "wecom/93517.md"
+          },
+          {
+            "label": "获取居民上报事件列表",
+            "link": "wecom/93518.md"
+          },
+          {
+            "label": "获取居民上报的事件详情信息",
+            "link": "wecom/93519.md"
+          }
+        ]
+      },
+      {
+        "label": "巡查上报",
+        "items": [
+          {
+            "label": "概述",
+            "link": "wecom/93520.md"
+          },
+          {
+            "label": "获取配置的网格及网格负责人",
+            "link": "wecom/93531.md"
+          },
+          {
+            "label": "获取单位巡查上报数据统计",
+            "link": "wecom/93532.md"
+          },
+          {
+            "label": "获取个人巡查上报数据统计",
+            "link": "wecom/93533.md"
+          },
+          {
+            "label": "获取上报事件分类统计",
+            "link": "wecom/93534.md"
+          },
+          {
+            "label": "获取巡查上报的事件详情信息",
+            "link": "wecom/93535.md"
+          },
+          {
+            "label": "获取巡查上报事件列表",
+            "link": "wecom/93536.md"
+          }
+        ]
+      },
+      {
+        "label": "配置事件类别",
+        "items": [
+          {
+            "label": "添加事件类别",
+            "link": "wecom/94536.md"
+          },
+          {
+            "label": "修改事件类别",
+            "link": "wecom/94537.md"
+          },
+          {
+            "label": "删除事件类别",
+            "link": "wecom/94538.md"
+          },
+          {
+            "label": "获取事件类别列表",
+            "link": "wecom/94540.md"
+          }
+        ]
+      },
+      {
+        "label": "配置网格结构",
+        "items": [
+          {
+            "label": "添加网格",
+            "link": "wecom/94478.md"
+          },
+          {
+            "label": "编辑网格",
+            "link": "wecom/94479.md"
+          },
+          {
+            "label": "删除网格",
+            "link": "wecom/94480.md"
+          },
+          {
+            "label": "获取网格列表",
+            "link": "wecom/94481.md"
+          },
+          {
+            "label": "获取用户负责及参与的网格列表",
+            "link": "wecom/94482.md"
+          },
+          {
+            "label": "概述",
+            "link": "wecom/94557.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "数据与智能专区",
+    "items": [
+      {
+        "label": "专区程序示例",
+        "link": "wecom/100052.md"
+      },
+      {
+        "label": "专区程序开发指引",
+        "link": "wecom/100057.md"
+      },
+      {
+        "label": "会话展示组件",
+        "link": "wecom/100076.md"
+      },
+      {
+        "label": "常见问题",
+        "link": "wecom/100142.md"
+      },
+      {
+        "label": "专区程序SDK和示例下载",
+        "link": "wecom/100249.md"
+      },
+      {
+        "label": "文档存档",
+        "link": "wecom/101501.md"
+      },
+      {
+        "label": "接入指引",
+        "link": "wecom/99871.md"
+      },
+      {
+        "label": "概述",
+        "link": "wecom/99941.md"
+      },
+      {
+        "label": "基本概念介绍",
+        "link": "wecom/99942.md"
+      },
+      {
+        "label": "镜像文件配置指引",
+        "link": "wecom/99955.md"
+      },
+      {
+        "label": "专区程序接收事件通知",
+        "items": [
+          {
+            "label": "概述",
+            "link": "wecom/99992.md"
+          },
+          {
+            "label": "客户同意进行聊天内容存档事件回调",
+            "link": "wecom/99993.md"
+          },
+          {
+            "label": "产生会话回调通知",
+            "link": "wecom/99994.md"
+          },
+          {
+            "label": "命中关键词规则通知",
+            "link": "wecom/99995.md"
+          },
+          {
+            "label": "知识集管理回调",
+            "link": "wecom/99996.md"
+          },
+          {
+            "label": "会话内容导出完成通知",
+            "link": "wecom/99997.md"
+          }
+        ]
+      },
+      {
+        "label": "专区程序调用sdk",
+        "items": [
+          {
+            "label": "员工或客户名称搜索",
+            "link": "wecom/100243.md"
+          },
+          {
+            "label": "通用模型",
+            "link": "wecom/99875.md"
+          },
+          {
+            "label": "概述",
+            "link": "wecom/99967.md"
+          },
+          {
+            "label": "获取会话记录",
+            "link": "wecom/99968.md"
+          },
+          {
+            "label": "获取会话同意情况",
+            "link": "wecom/99969.md"
+          },
+          {
+            "label": "获取内部群信息",
+            "link": "wecom/99970.md"
+          },
+          {
+            "label": "会话名称搜索",
+            "link": "wecom/99971.md"
+          },
+          {
+            "label": "会话消息搜索",
+            "link": "wecom/99972.md"
+          },
+          {
+            "label": "关键词规则管理",
+            "link": "wecom/99973.md"
+          },
+          {
+            "label": "获取命中关键词规则的会话记录",
+            "link": "wecom/99974.md"
+          },
+          {
+            "label": "管理企业知识集",
+            "link": "wecom/99975.md"
+          },
+          {
+            "label": "话术推荐模型",
+            "link": "wecom/99977.md"
+          },
+          {
+            "label": "客户标签模型",
+            "link": "wecom/99979.md"
+          },
+          {
+            "label": "会话摘要模型",
+            "link": "wecom/99980.md"
+          },
+          {
+            "label": "情感分析模型",
+            "link": "wecom/99983.md"
+          },
+          {
+            "label": "自有模型分析",
+            "link": "wecom/99985.md"
+          },
+          {
+            "label": "会话反垃圾分析",
+            "link": "wecom/99986.md"
+          },
+          {
+            "label": "会话内容导出",
+            "link": "wecom/99987.md"
+          },
+          {
+            "label": "异步调用自有分析程序",
+            "link": "wecom/99988.md"
+          },
+          {
+            "label": "上报异步任务结果",
+            "link": "wecom/99989.md"
+          },
+          {
+            "label": "专区通知应用",
+            "link": "wecom/99990.md"
+          }
+        ]
+      },
+      {
+        "label": "专区调试模式",
+        "items": [
+          {
+            "label": "调试说明",
+            "link": "wecom/100086.md"
+          },
+          {
+            "label": "开启专区调试模式",
+            "link": "wecom/100087.md"
+          },
+          {
+            "label": "关闭专区调试模式",
+            "link": "wecom/100088.md"
+          },
+          {
+            "label": "获取专区调试模式状态",
+            "link": "wecom/100113.md"
+          }
+        ]
+      },
+      {
+        "label": "基础接口",
+        "items": [
+          {
+            "label": "设置日志打印级别",
+            "link": "wecom/100108.md"
+          },
+          {
+            "label": "会话组件敏感信息隐藏设置",
+            "link": "wecom/100139.md"
+          },
+          {
+            "label": "上传临时文件到专区",
+            "link": "wecom/100174.md"
+          },
+          {
+            "label": "设置公钥",
+            "link": "wecom/99961.md"
+          },
+          {
+            "label": "获取授权存档的成员列表",
+            "link": "wecom/99962.md"
+          },
+          {
+            "label": "设置专区接收回调事件",
+            "link": "wecom/99963.md"
+          }
+        ]
+      },
+      {
+        "label": "应用接收专区通知",
+        "items": [
+          {
+            "label": "应用接收专区通知",
+            "link": "wecom/99998.md"
+          }
+        ]
+      },
+      {
+        "label": "应用调用专区程序",
+        "items": [
+          {
+            "label": "概述",
+            "link": "wecom/99964.md"
+          },
+          {
+            "label": "应用同步调用专区程序",
+            "link": "wecom/99965.md"
+          },
+          {
+            "label": "应用异步调用专区程序",
+            "link": "wecom/99966.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "文档",
+    "items": [
+      {
+        "label": "概述",
+        "link": "wecom/97392.md"
+      },
+      {
+        "label": "回调通知",
+        "items": [
+          {
+            "label": "记录变更事件",
+            "link": "wecom/100986.md"
+          },
+          {
+            "label": "字段变更事件",
+            "link": "wecom/100987.md"
+          },
+          {
+            "label": "概述",
+            "link": "wecom/97316.md"
+          },
+          {
+            "label": "修改文档成员事件",
+            "link": "wecom/97833.md"
+          },
+          {
+            "label": "删除文档事件",
+            "link": "wecom/97834.md"
+          },
+          {
+            "label": "收集表完成事件",
+            "link": "wecom/97835.md"
+          },
+          {
+            "label": "删除收集表事件",
+            "link": "wecom/98095.md"
+          },
+          {
+            "label": "修改收集表设置事件",
+            "link": "wecom/98096.md"
+          }
+        ]
+      },
+      {
+        "label": "接收外部数据到智能表格",
+        "items": [
+          {
+            "label": "概述",
+            "link": "wecom/101239.md"
+          },
+          {
+            "label": "添加记录",
+            "link": "wecom/101240.md"
+          },
+          {
+            "label": "更新记录",
+            "link": "wecom/101241.md"
+          }
+        ]
+      },
+      {
+        "label": "管理收集表",
+        "items": [
+          {
+            "label": "创建收集表",
+            "link": "wecom/97462.md"
+          },
+          {
+            "label": "编辑收集表",
+            "link": "wecom/97816.md"
+          },
+          {
+            "label": "获取收集表信息",
+            "link": "wecom/97817.md"
+          },
+          {
+            "label": "收集表的统计信息查询",
+            "link": "wecom/97818.md"
+          },
+          {
+            "label": "读取收集表答案",
+            "link": "wecom/97819.md"
+          }
+        ]
+      },
+      {
+        "label": "管理文档",
+        "items": [
+          {
+            "label": "新建文档",
+            "link": "wecom/97460.md"
+          },
+          {
+            "label": "分享文档",
+            "link": "wecom/97733.md"
+          },
+          {
+            "label": "获取文档基础信息",
+            "link": "wecom/97734.md"
+          },
+          {
+            "label": "删除文档",
+            "link": "wecom/97735.md"
+          },
+          {
+            "label": "重命名文档",
+            "link": "wecom/97736.md"
+          }
+        ]
+      },
+      {
+        "label": "管理文档内容",
+        "items": [
+          {
+            "label": "获取文档数据",
+            "link": "wecom/101161.md"
+          },
+          {
+            "label": "编辑文档内容",
+            "link": "wecom/97626.md"
+          }
+        ]
+      },
+      {
+        "label": "管理智能文档内容",
+        "items": [
+          {
+            "label": "发布智能文档",
+            "link": "wecom/101616.md"
+          },
+          {
+            "label": "取消发布智能文档",
+            "link": "wecom/101617.md"
+          },
+          {
+            "label": "修改发布页可查看范围",
+            "link": "wecom/101618.md"
+          },
+          {
+            "label": "获取页面结构",
+            "link": "wecom/101619.md"
+          },
+          {
+            "label": "添加页面",
+            "link": "wecom/101620.md"
+          },
+          {
+            "label": "更新页面",
+            "link": "wecom/101621.md"
+          },
+          {
+            "label": "删除页面",
+            "link": "wecom/101622.md"
+          },
+          {
+            "label": "添加内容块",
+            "link": "wecom/101623.md"
+          },
+          {
+            "label": "更新内容块",
+            "link": "wecom/101624.md"
+          },
+          {
+            "label": "删除内容块",
+            "link": "wecom/101625.md"
+          },
+          {
+            "label": "获取内容块列表",
+            "link": "wecom/101626.md"
+          },
+          {
+            "label": "导出内容块",
+            "link": "wecom/101627.md"
+          },
+          {
+            "label": "获取数据源",
+            "link": "wecom/101628.md"
+          },
+          {
+            "label": "添加数据表",
+            "link": "wecom/101629.md"
+          },
+          {
+            "label": "删除数据表",
+            "link": "wecom/101630.md"
+          },
+          {
+            "label": "更新数据表",
+            "link": "wecom/101631.md"
+          }
+        ]
+      },
+      {
+        "label": "管理智能表格内容",
+        "items": [
+          {
+            "label": "添加编组",
+            "link": "wecom/101100.md"
+          },
+          {
+            "label": "更新编组",
+            "link": "wecom/101101.md"
+          },
+          {
+            "label": "删除编组",
+            "link": "wecom/101102.md"
+          },
+          {
+            "label": "获取编组",
+            "link": "wecom/101103.md"
+          },
+          {
+            "label": "查询子表",
+            "link": "wecom/101154.md"
+          },
+          {
+            "label": "查询视图",
+            "link": "wecom/101155.md"
+          },
+          {
+            "label": "查询字段",
+            "link": "wecom/101157.md"
+          },
+          {
+            "label": "查询记录",
+            "link": "wecom/101158.md"
+          },
+          {
+            "label": "添加子表",
+            "link": "wecom/99896.md"
+          },
+          {
+            "label": "更新子表",
+            "link": "wecom/99898.md"
+          },
+          {
+            "label": "删除子表",
+            "link": "wecom/99899.md"
+          },
+          {
+            "label": "添加视图",
+            "link": "wecom/99900.md"
+          },
+          {
+            "label": "删除视图",
+            "link": "wecom/99901.md"
+          },
+          {
+            "label": "更新视图",
+            "link": "wecom/99902.md"
+          },
+          {
+            "label": "添加字段",
+            "link": "wecom/99904.md"
+          },
+          {
+            "label": "删除字段",
+            "link": "wecom/99905.md"
+          },
+          {
+            "label": "更新字段",
+            "link": "wecom/99906.md"
+          },
+          {
+            "label": "添加记录",
+            "link": "wecom/99907.md"
+          },
+          {
+            "label": "删除记录",
+            "link": "wecom/99908.md"
+          },
+          {
+            "label": "更新记录",
+            "link": "wecom/99909.md"
+          }
+        ]
+      },
+      {
+        "label": "管理表格内容",
+        "items": [
+          {
+            "label": "编辑表格内容",
+            "link": "wecom/101168.md"
+          },
+          {
+            "label": "获取表格数据",
+            "link": "wecom/97661.md"
+          },
+          {
+            "label": "获取表格行列信息",
+            "link": "wecom/97711.md"
+          }
+        ]
+      },
+      {
+        "label": "素材管理",
+        "items": [
+          {
+            "label": "上传文档图片",
+            "link": "wecom/99933.md"
+          }
+        ]
+      },
+      {
+        "label": "设置文档权限",
+        "items": [
+          {
+            "label": "获取文档权限信息",
+            "link": "wecom/97461.md"
+          },
+          {
+            "label": "修改文档加入规则",
+            "link": "wecom/97778.md"
+          },
+          {
+            "label": "修改文档成员与权限",
+            "link": "wecom/97781.md"
+          },
+          {
+            "label": "修改文档安全设置",
+            "link": "wecom/97782.md"
+          },
+          {
+            "label": "管理智能表格内容权限",
+            "link": "wecom/99935.md"
+          }
+        ]
+      },
+      {
+        "label": "高级功能账号管理",
+        "items": [
+          {
+            "label": "分配高级功能账号",
+            "link": "wecom/99516.md"
+          },
+          {
+            "label": "取消高级功能账号",
+            "link": "wecom/99517.md"
+          },
+          {
+            "label": "获取高级功能账号列表",
+            "link": "wecom/99518.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "日程",
+    "items": [
+      {
+        "label": "概述",
+        "link": "wecom/93624.md"
+      },
+      {
+        "label": "回调通知",
+        "items": [
+          {
+            "label": "概述",
+            "link": "wecom/93651.md"
+          },
+          {
+            "label": "删除日历事件",
+            "link": "wecom/97728.md"
+          },
+          {
+            "label": "修改日历事件",
+            "link": "wecom/97730.md"
+          },
+          {
+            "label": "修改日程事件",
+            "link": "wecom/97731.md"
+          },
+          {
+            "label": "删除日程事件",
+            "link": "wecom/97732.md"
+          },
+          {
+            "label": "日程回执事件",
+            "link": "wecom/98111.md"
+          }
+        ]
+      },
+      {
+        "label": "管理日历",
+        "items": [
+          {
+            "label": "创建日历",
+            "link": "wecom/93647.md"
+          },
+          {
+            "label": "更新日历",
+            "link": "wecom/97716.md"
+          },
+          {
+            "label": "获取日历详情",
+            "link": "wecom/97717.md"
+          },
+          {
+            "label": "删除日历",
+            "link": "wecom/97718.md"
+          }
+        ]
+      },
+      {
+        "label": "管理日程",
+        "items": [
+          {
+            "label": "创建日程",
+            "link": "wecom/93648.md"
+          },
+          {
+            "label": "更新重复日程",
+            "link": "wecom/96204.md"
+          },
+          {
+            "label": "更新日程",
+            "link": "wecom/97720.md"
+          },
+          {
+            "label": "新增日程参与者",
+            "link": "wecom/97721.md"
+          },
+          {
+            "label": "删除日程参与者",
+            "link": "wecom/97722.md"
+          },
+          {
+            "label": "获取日历下的日程列表",
+            "link": "wecom/97723.md"
+          },
+          {
+            "label": "获取日程详情",
+            "link": "wecom/97724.md"
+          },
+          {
+            "label": "取消日程",
+            "link": "wecom/97725.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "汇报",
+    "items": [
+      {
+        "label": "批量获取汇报记录单号",
+        "link": "wecom/93393.md"
+      },
+      {
+        "label": "获取汇报记录详情",
+        "link": "wecom/93394.md"
+      },
+      {
+        "label": "获取汇报统计数据",
+        "link": "wecom/93395.md"
+      },
+      {
+        "label": "概述",
+        "link": "wecom/93496.md"
+      },
+      {
+        "label": "下载微盘文件",
+        "link": "wecom/98021.md"
+      }
+    ]
+  },
+  {
+    "label": "消息接收与发送",
+    "items": [
+      {
+        "label": "概述",
+        "link": "wecom/90235.md"
+      },
+      {
+        "label": "发送应用消息",
+        "link": "wecom/90236.md"
+      },
+      {
+        "label": "撤回应用消息",
+        "link": "wecom/94867.md"
+      },
+      {
+        "label": "更新模版卡片消息",
+        "link": "wecom/94888.md"
+      },
+      {
+        "label": "家校消息推送",
+        "items": [
+          {
+            "label": "发送「学校通知」",
+            "link": "wecom/91609.md"
+          }
+        ]
+      },
+      {
+        "label": "应用发送消息到群聊会话",
+        "items": [
+          {
+            "label": "概述",
+            "link": "wecom/90244.md"
+          },
+          {
+            "label": "创建群聊会话",
+            "link": "wecom/90245.md"
+          },
+          {
+            "label": "应用推送消息",
+            "link": "wecom/90248.md"
+          },
+          {
+            "label": "修改群聊会话",
+            "link": "wecom/98913.md"
+          },
+          {
+            "label": "获取群聊会话",
+            "link": "wecom/98914.md"
+          }
+        ]
+      },
+      {
+        "label": "接收消息与事件",
+        "items": [
+          {
+            "label": "概述",
+            "link": "wecom/90238.md"
+          },
+          {
+            "label": "消息格式",
+            "link": "wecom/90239.md"
+          },
+          {
+            "label": "事件格式",
+            "link": "wecom/90240.md"
+          },
+          {
+            "label": "被动回复消息格式",
+            "link": "wecom/90241.md"
+          }
+        ]
+      },
+      {
+        "label": "智能机器人",
+        "items": [
+          {
+            "label": "接收消息",
+            "link": "wecom/100719.md"
+          },
+          {
+            "label": "接收事件",
+            "link": "wecom/101027.md"
+          },
+          {
+            "label": "被动回复消息",
+            "link": "wecom/101031.md"
+          },
+          {
+            "label": "模板卡片类型",
+            "link": "wecom/101032.md"
+          },
+          {
+            "label": "回调和回复的加解密方案",
+            "link": "wecom/101033.md"
+          },
+          {
+            "label": "概述",
+            "link": "wecom/101039.md"
+          },
+          {
+            "label": "主动回复消息",
+            "link": "wecom/101138.md"
+          },
+          {
+            "label": "智能机器人长连接",
+            "link": "wecom/101463.md"
+          },
+          {
+            "label": "API模式机器人文档使用说明",
+            "link": "wecom/101468.md"
+          }
+        ]
+      },
+      {
+        "label": "智能表格自动化创建的群聊",
+        "items": [
+          {
+            "label": "获取群聊列表",
+            "link": "wecom/100989.md"
+          },
+          {
+            "label": "获取群聊会话",
+            "link": "wecom/101028.md"
+          },
+          {
+            "label": "修改群聊会话",
+            "link": "wecom/101029.md"
+          }
+        ]
+      },
+      {
+        "label": "消息推送（原“群机器人”）",
+        "items": [
+          {
+            "label": "消息推送配置说明",
+            "link": "wecom/99110.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "消息推送（原“群机器人”）",
+    "items": [
+      {
+        "label": "消息推送配置说明",
+        "link": "wecom/91770.md"
+      }
+    ]
+  },
+  {
+    "label": "电子发票",
+    "items": [
+      {
+        "label": "概述",
+        "link": "wecom/90283.md"
+      },
+      {
+        "label": "查询电子发票",
+        "link": "wecom/90284.md"
+      },
+      {
+        "label": "更新发票状态",
+        "link": "wecom/90285.md"
+      },
+      {
+        "label": "批量更新发票状态",
+        "link": "wecom/90286.md"
+      },
+      {
+        "label": "批量查询电子发票",
+        "link": "wecom/90287.md"
+      }
+    ]
+  },
+  {
+    "label": "直播",
+    "items": [
+      {
+        "label": "概述",
+        "link": "wecom/93633.md"
+      },
+      {
+        "label": "获取成员直播ID列表",
+        "link": "wecom/93634.md"
+      },
+      {
+        "label": "获取直播详情",
+        "link": "wecom/93635.md"
+      },
+      {
+        "label": "获取直播观看明细",
+        "link": "wecom/93636.md"
+      },
+      {
+        "label": "创建预约直播",
+        "link": "wecom/93637.md"
+      },
+      {
+        "label": "取消预约直播",
+        "link": "wecom/93638.md"
+      },
+      {
+        "label": "修改预约直播",
+        "link": "wecom/93640.md"
+      },
+      {
+        "label": "在微信中观看直播或直播回放",
+        "link": "wecom/93641.md"
+      },
+      {
+        "label": "删除直播回放",
+        "link": "wecom/93874.md"
+      },
+      {
+        "label": "直播回调事件",
+        "link": "wecom/94145.md"
+      },
+      {
+        "label": "获取跳转小程序商城的直播观众信息",
+        "link": "wecom/94442.md"
+      }
+    ]
+  },
+  {
+    "label": "移动端SDK",
+    "items": [
+      {
+        "label": "概述",
+        "link": "wecom/90294.md"
+      },
+      {
+        "label": "App跳转微信客服",
+        "link": "wecom/94740.md"
+      },
+      {
+        "label": "企业微信分享",
+        "items": [
+          {
+            "label": "Harmony应用",
+            "link": "wecom/101022.md"
+          },
+          {
+            "label": "iOS应用",
+            "link": "wecom/91195.md"
+          },
+          {
+            "label": "Android应用",
+            "link": "wecom/91196.md"
+          }
+        ]
+      },
+      {
+        "label": "企业微信登录",
+        "items": [
+          {
+            "label": "Harmony应用",
+            "link": "wecom/101021.md"
+          },
+          {
+            "label": "iOS应用",
+            "link": "wecom/91193.md"
+          },
+          {
+            "label": "Android应用",
+            "link": "wecom/91194.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "素材管理",
+    "items": [
+      {
+        "label": "上传临时素材",
+        "link": "wecom/90253.md"
+      },
+      {
+        "label": "获取临时素材",
+        "link": "wecom/90254.md"
+      },
+      {
+        "label": "获取高清语音素材",
+        "link": "wecom/90255.md"
+      },
+      {
+        "label": "上传图片",
+        "link": "wecom/90256.md"
+      },
+      {
+        "label": "概述",
+        "link": "wecom/91054.md"
+      },
+      {
+        "label": "异步上传临时素材",
+        "link": "wecom/96219.md"
+      }
+    ]
+  },
+  {
+    "label": "紧急通知应用",
+    "items": [
+      {
+        "label": "概述",
+        "link": "wecom/91623.md"
+      },
+      {
+        "label": "发起语音电话",
+        "link": "wecom/91627.md"
+      },
+      {
+        "label": "获取接听状态",
+        "link": "wecom/91628.md"
+      }
+    ]
+  },
+  {
+    "label": "账号ID",
+    "items": [
+      {
+        "label": "自建应用与智能机器人的对接",
+        "link": "wecom/101521.md"
+      },
+      {
+        "label": "自建应用与第三方应用的对接",
+        "link": "wecom/95884.md"
+      },
+      {
+        "label": "概述",
+        "link": "wecom/98728.md"
+      },
+      {
+        "label": "tmp_external_userid的转换",
+        "link": "wecom/98729.md"
+      }
+    ]
+  },
+  {
+    "label": "身份验证",
+    "items": [
+      {
+        "label": "二次验证",
+        "items": [
+          {
+            "label": "获取用户二次验证信息",
+            "link": "wecom/99499.md"
+          },
+          {
+            "label": "使用二次验证",
+            "link": "wecom/99500.md"
+          },
+          {
+            "label": "概述",
+            "link": "wecom/99519.md"
+          },
+          {
+            "label": "登录二次验证",
+            "link": "wecom/99521.md"
+          }
+        ]
+      },
+      {
+        "label": "企业微信Web登录",
+        "items": [
+          {
+            "label": "开始开发",
+            "link": "wecom/98151.md"
+          },
+          {
+            "label": "Web登录组件",
+            "link": "wecom/98152.md"
+          },
+          {
+            "label": "获取用户登录身份",
+            "link": "wecom/98176.md"
+          }
+        ]
+      },
+      {
+        "label": "网页授权登录",
+        "items": [
+          {
+            "label": "构造网页授权链接",
+            "link": "wecom/91022.md"
+          },
+          {
+            "label": "获取访问用户身份",
+            "link": "wecom/91023.md"
+          },
+          {
+            "label": "开始开发",
+            "link": "wecom/91335.md"
+          },
+          {
+            "label": "获取访问用户敏感信息",
+            "link": "wecom/95833.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "通讯录管理",
+    "items": [
+      {
+        "label": "概述",
+        "link": "wecom/90193.md"
+      },
+      {
+        "label": "通讯录同步接口调整",
+        "link": "wecom/96079.md"
+      },
+      {
+        "label": "异步导入接口",
+        "items": [
+          {
+            "label": "概述",
+            "link": "wecom/90979.md"
+          },
+          {
+            "label": "增量更新成员",
+            "link": "wecom/90980.md"
+          },
+          {
+            "label": "全量覆盖成员",
+            "link": "wecom/90981.md"
+          },
+          {
+            "label": "全量覆盖部门",
+            "link": "wecom/90982.md"
+          },
+          {
+            "label": "获取异步任务结果",
+            "link": "wecom/90983.md"
+          }
+        ]
+      },
+      {
+        "label": "异步导出接口",
+        "items": [
+          {
+            "label": "导出成员",
+            "link": "wecom/94849.md"
+          },
+          {
+            "label": "概述",
+            "link": "wecom/94850.md"
+          },
+          {
+            "label": "导出成员详情",
+            "link": "wecom/94851.md"
+          },
+          {
+            "label": "导出部门",
+            "link": "wecom/94852.md"
+          },
+          {
+            "label": "导出标签成员",
+            "link": "wecom/94853.md"
+          },
+          {
+            "label": "获取导出结果",
+            "link": "wecom/94854.md"
+          },
+          {
+            "label": "导出任务完成通知",
+            "link": "wecom/94946.md"
+          }
+        ]
+      },
+      {
+        "label": "成员管理",
+        "items": [
+          {
+            "label": "成员扩展属性",
+            "link": "wecom/100067.md"
+          },
+          {
+            "label": "创建成员",
+            "link": "wecom/90195.md"
+          },
+          {
+            "label": "读取成员",
+            "link": "wecom/90196.md"
+          },
+          {
+            "label": "更新成员",
+            "link": "wecom/90197.md"
+          },
+          {
+            "label": "删除成员",
+            "link": "wecom/90198.md"
+          },
+          {
+            "label": "批量删除成员",
+            "link": "wecom/90199.md"
+          },
+          {
+            "label": "获取部门成员",
+            "link": "wecom/90200.md"
+          },
+          {
+            "label": "获取部门成员详情",
+            "link": "wecom/90201.md"
+          },
+          {
+            "label": "userid与openid互换",
+            "link": "wecom/90202.md"
+          },
+          {
+            "label": "登录二次验证",
+            "link": "wecom/90203.md"
+          },
+          {
+            "label": "邀请成员",
+            "link": "wecom/90975.md"
+          },
+          {
+            "label": "获取加入企业二维码",
+            "link": "wecom/91714.md"
+          },
+          {
+            "label": "手机号获取userid",
+            "link": "wecom/95402.md"
+          },
+          {
+            "label": "邮箱获取userid",
+            "link": "wecom/95895.md"
+          },
+          {
+            "label": "获取成员ID列表",
+            "link": "wecom/96067.md"
+          }
+        ]
+      },
+      {
+        "label": "标签管理",
+        "items": [
+          {
+            "label": "创建标签",
+            "link": "wecom/90210.md"
+          },
+          {
+            "label": "更新标签名字",
+            "link": "wecom/90211.md"
+          },
+          {
+            "label": "删除标签",
+            "link": "wecom/90212.md"
+          },
+          {
+            "label": "获取标签成员",
+            "link": "wecom/90213.md"
+          },
+          {
+            "label": "增加标签成员",
+            "link": "wecom/90214.md"
+          },
+          {
+            "label": "删除标签成员",
+            "link": "wecom/90215.md"
+          },
+          {
+            "label": "获取标签列表",
+            "link": "wecom/90216.md"
+          }
+        ]
+      },
+      {
+        "label": "通讯录回调通知",
+        "items": [
+          {
+            "label": "概述",
+            "link": "wecom/90967.md"
+          },
+          {
+            "label": "成员变更通知",
+            "link": "wecom/90970.md"
+          },
+          {
+            "label": "部门变更通知",
+            "link": "wecom/90971.md"
+          },
+          {
+            "label": "标签变更通知",
+            "link": "wecom/90972.md"
+          },
+          {
+            "label": "异步任务完成通知",
+            "link": "wecom/90973.md"
+          }
+        ]
+      },
+      {
+        "label": "通讯录查看权限管理",
+        "items": [
+          {
+            "label": "创建规则",
+            "link": "wecom/101536.md"
+          },
+          {
+            "label": "读取规则列表",
+            "link": "wecom/101537.md"
+          },
+          {
+            "label": "修改规则",
+            "link": "wecom/101539.md"
+          },
+          {
+            "label": "删除规则",
+            "link": "wecom/101540.md"
+          }
+        ]
+      },
+      {
+        "label": "部门管理",
+        "items": [
+          {
+            "label": "创建部门",
+            "link": "wecom/90205.md"
+          },
+          {
+            "label": "更新部门",
+            "link": "wecom/90206.md"
+          },
+          {
+            "label": "删除部门",
+            "link": "wecom/90207.md"
+          },
+          {
+            "label": "获取部门列表",
+            "link": "wecom/90208.md"
+          },
+          {
+            "label": "获取子部门ID列表",
+            "link": "wecom/95350.md"
+          },
+          {
+            "label": "获取单个部门详情",
+            "link": "wecom/95351.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "邮件",
+    "items": [
+      {
+        "label": "概述",
+        "link": "wecom/95486.md"
+      },
+      {
+        "label": "禁用/启用邮箱账号",
+        "link": "wecom/95512.md"
+      },
+      {
+        "label": "获取邮件未读数",
+        "link": "wecom/95514.md"
+      },
+      {
+        "label": "回调通知",
+        "link": "wecom/97495.md"
+      },
+      {
+        "label": "其他邮件客户端登录设置",
+        "items": [
+          {
+            "label": "获取用户功能属性",
+            "link": "wecom/95513.md"
+          },
+          {
+            "label": "更改用户功能属性",
+            "link": "wecom/98008.md"
+          }
+        ]
+      },
+      {
+        "label": "发送邮件",
+        "items": [
+          {
+            "label": "发送普通邮件",
+            "link": "wecom/97445.md"
+          },
+          {
+            "label": "发送日程邮件",
+            "link": "wecom/97854.md"
+          },
+          {
+            "label": "发送会议邮件",
+            "link": "wecom/97855.md"
+          }
+        ]
+      },
+      {
+        "label": "管理公共邮箱",
+        "items": [
+          {
+            "label": "回调通知",
+            "link": "wecom/100180.md"
+          },
+          {
+            "label": "获取客户端专用密码列表",
+            "link": "wecom/100183.md"
+          },
+          {
+            "label": "删除客户端专用密码",
+            "link": "wecom/100184.md"
+          },
+          {
+            "label": "创建公共邮箱",
+            "link": "wecom/95511.md"
+          },
+          {
+            "label": "更新公共邮箱",
+            "link": "wecom/98000.md"
+          },
+          {
+            "label": "删除公共邮箱",
+            "link": "wecom/98001.md"
+          },
+          {
+            "label": "获取公共邮箱详情",
+            "link": "wecom/98002.md"
+          },
+          {
+            "label": "模糊搜索公共邮箱",
+            "link": "wecom/98003.md"
+          }
+        ]
+      },
+      {
+        "label": "管理应用邮箱账号",
+        "items": [
+          {
+            "label": "更新应用邮箱账号",
+            "link": "wecom/97373.md"
+          },
+          {
+            "label": "查询应用邮箱账号",
+            "link": "wecom/97991.md"
+          }
+        ]
+      },
+      {
+        "label": "管理邮件群组",
+        "items": [
+          {
+            "label": "创建邮件群组",
+            "link": "wecom/95510.md"
+          },
+          {
+            "label": "更新邮件群组",
+            "link": "wecom/97995.md"
+          },
+          {
+            "label": "删除邮件群组",
+            "link": "wecom/97996.md"
+          },
+          {
+            "label": "获取邮件群组详情",
+            "link": "wecom/97997.md"
+          },
+          {
+            "label": "模糊搜索邮件群组",
+            "link": "wecom/97998.md"
+          }
+        ]
+      },
+      {
+        "label": "获取接收的邮件",
+        "items": [
+          {
+            "label": "获取收件箱邮件列表",
+            "link": "wecom/97369.md"
+          },
+          {
+            "label": "获取邮件内容",
+            "link": "wecom/97979.md"
+          }
+        ]
+      },
+      {
+        "label": "高级功能账号管理",
+        "items": [
+          {
+            "label": "分配高级功能账号",
+            "link": "wecom/99316.md"
+          },
+          {
+            "label": "取消高级功能账号",
+            "link": "wecom/99317.md"
+          },
+          {
+            "label": "获取高级功能账号列表",
+            "link": "wecom/99318.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "高级功能",
+    "items": [
+      {
+        "label": "概述",
+        "link": "wecom/99860.md"
+      },
+      {
+        "label": "成员申请的提交回调",
+        "link": "wecom/99876.md"
+      },
+      {
+        "label": "成员申请的终止回调",
+        "link": "wecom/99877.md"
+      },
+      {
+        "label": "设置审批单审批信息",
+        "link": "wecom/99880.md"
+      },
+      {
+        "label": "批量获取申请单ID",
+        "link": "wecom/99883.md"
+      },
+      {
+        "label": "获取申请单详细信息",
+        "link": "wecom/99885.md"
+      }
+    ]
+  }
+]

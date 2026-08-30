@@ -2159,9 +2159,9 @@ def test_real_sync_still_updates_stats_and_failures_normally(tmp_path, monkeypat
     assert manifest["converter_version"] == fw.CONVERTER_VERSION
 
 
-def test_formal_711_manifest_and_zero_missing_files_invariants():
+def test_formal_983_manifest_and_zero_missing_files_invariants():
     """Validates that repository's formal docs/docs_manifest.json, SUMMARY.md,
-    and starlight_sidebar.json have 711 synchronized items, matching HEAD stats."""
+    and starlight_sidebar.json have 983 synchronized items, matching HEAD stats."""
     docs_root = Path(__file__).resolve().parents[1] / "docs"
     manifest = json.loads((docs_root / "docs_manifest.json").read_text(encoding="utf-8"))
     summary_text = (docs_root / "SUMMARY.md").read_text(encoding="utf-8")
@@ -2171,13 +2171,13 @@ def test_formal_711_manifest_and_zero_missing_files_invariants():
     summary_links = fw.extract_summary_links(summary_text)
     sidebar_leaves = fw.extract_sidebar_leaf_paths(sidebar_data)
 
-    assert len(manifest_keys) == 711
+    assert len(manifest_keys) == 983
     assert manifest_keys == summary_links == sidebar_leaves
 
     missing_files = [k for k in sorted(manifest_keys) if not (docs_root / k).is_file()]
     assert missing_files == []
 
-    assert manifest["stats"] == {"total_pages": 735, "successful_pages": 114, "failed_pages": 24}
-    assert len(manifest["failed"]) == 24
-    assert manifest["converter_version"] in (3, "3")
+    assert manifest["stats"] == {"total_pages": 983, "successful_pages": 83, "failed_pages": 0}
+    assert len(manifest["failed"]) == 0
+    assert manifest["converter_version"] in (6, "6")
     assert manifest["strict_fetch"] is False
