@@ -1090,6 +1090,82 @@
     ]
   },
   {
+    "label": "企业数据存档",
+    "items": [
+      {
+        "label": "概述",
+        "link": "wecom/101680.md"
+      },
+      {
+        "label": "获取存档成员",
+        "link": "wecom/101700.md"
+      },
+      {
+        "label": "回调通知",
+        "link": "wecom/101701.md"
+      },
+      {
+        "label": "微盘内容存档",
+        "items": [
+          {
+            "label": "获取成员授权空间",
+            "link": "wecom/101674.md"
+          },
+          {
+            "label": "获取文件列表",
+            "link": "wecom/101676.md"
+          },
+          {
+            "label": "下载文件",
+            "link": "wecom/101677.md"
+          },
+          {
+            "label": "回调通知",
+            "link": "wecom/101678.md"
+          }
+        ]
+      },
+      {
+        "label": "文档内容存档",
+        "items": [
+          {
+            "label": "创建导出任务",
+            "link": "wecom/101689.md"
+          },
+          {
+            "label": "查询导出结果",
+            "link": "wecom/101690.md"
+          },
+          {
+            "label": "回调通知",
+            "link": "wecom/101691.md"
+          },
+          {
+            "label": "获取成员文档列表",
+            "link": "wecom/101704.md"
+          }
+        ]
+      },
+      {
+        "label": "日程内容存档",
+        "items": [
+          {
+            "label": "获取日程列表",
+            "link": "wecom/101696.md"
+          },
+          {
+            "label": "获取日程详情",
+            "link": "wecom/101697.md"
+          },
+          {
+            "label": "回调通知",
+            "link": "wecom/101698.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "label": "会议",
     "items": [
       {
@@ -3526,7 +3602,7 @@
             "link": "wecom/99974.md"
           },
           {
-            "label": "管理企业知识集",
+            "label": "管理知识集",
             "link": "wecom/99975.md"
           },
           {
@@ -3608,11 +3684,15 @@
             "link": "wecom/100174.md"
           },
           {
+            "label": "获取文件内容存档授权成员列表",
+            "link": "wecom/101873.md"
+          },
+          {
             "label": "设置公钥",
             "link": "wecom/99961.md"
           },
           {
-            "label": "获取授权存档的成员列表",
+            "label": "获取会话存档授权成员列表",
             "link": "wecom/99962.md"
           },
           {
@@ -3947,6 +4027,14 @@
       {
         "label": "素材管理",
         "items": [
+          {
+            "label": "上传文档文件",
+            "link": "wecom/101870.md"
+          },
+          {
+            "label": "分块上传文档文件",
+            "link": "wecom/101871.md"
+          },
           {
             "label": "上传文档图片",
             "link": "wecom/99933.md"
