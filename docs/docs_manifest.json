@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-12T02:44:11Z",
+  "generated_at": "2026-09-19T02:45:38Z",
   "tool": "scripts/fetch_wecom_docs.py",
   "converter_version": "6",
   "strict_fetch": false,
@@ -15,7 +15,7 @@
   ],
   "stats": {
     "total_pages": 986,
-    "successful_pages": 100,
+    "successful_pages": 86,
     "failed_pages": 0
   },
   "failed": [],
@@ -267,14 +267,14 @@
         "安全管理"
       ],
       "url": "https://developer.work.weixin.qq.com/document/path/100128",
-      "sha256": "ee9eb895f836ef2ed50c377f59e20b5235ef19b27dc363f804e564a279aebb1e",
-      "bytes": 3084,
-      "html_sha256": "0e3074db3ad3c83082cb080ca8a71f80ee94be663c9c5bfb470d1791f1c8646a",
-      "html_bytes": 10617,
+      "sha256": "8204a544b0e88feacd548acc8024f86168217b9e488655454fa956370c5956d1",
+      "bytes": 5173,
+      "html_sha256": "4d1dd80277af5c6734110f88b7dcd189407daa6ef2596bd1db53190ca153605f",
+      "html_bytes": 17860,
       "converter_version": "6",
       "first_seen_at": "2026-08-20T17:57:46Z",
       "last_verified_at": "2026-08-30T02:43:45Z",
-      "fetched_at": "2026-08-30T02:43:45Z",
+      "fetched_at": "2026-09-13T02:20:25Z",
       "missing_since": null,
       "fetch_failures": 0
     },
@@ -3037,14 +3037,14 @@
         "接收外部数据到智能表格"
       ],
       "url": "https://developer.work.weixin.qq.com/document/path/101240",
-      "sha256": "4422a4faea93177250706b5235fa6d6e3bf709027b6246aa3e1e11c9deb59e34",
-      "bytes": 6862,
-      "html_sha256": "184f7f8c4d7d149b8fb2e5c9227fe22110bc7225f098e7c8695e1abff197b6a2",
-      "html_bytes": 21047,
+      "sha256": "a05f46d366aa4cc676a178fe5aeb5c488d561bcc06a9c067191a6864815a2cf4",
+      "bytes": 7117,
+      "html_sha256": "ae390691810558d8be124d4d8bc64ffc9b314f28d514cff5f53d829326940add",
+      "html_bytes": 21900,
       "converter_version": "6",
       "first_seen_at": "2026-08-20T18:06:08Z",
       "last_verified_at": "2026-08-30T03:13:15Z",
-      "fetched_at": "2026-08-30T03:13:15Z",
+      "fetched_at": "2026-09-13T02:48:27Z",
       "missing_since": null,
       "fetch_failures": 0
     },
@@ -3162,20 +3162,20 @@
       "source": "wecom",
       "doc_id": "101501",
       "slug": "101501",
-      "label": "文档存档",
+      "label": "文件内容存档",
       "section": "数据与智能专区",
       "category_path": [
         "数据与智能专区"
       ],
       "url": "https://developer.work.weixin.qq.com/document/path/101501",
-      "sha256": "ca486baf3c6d9d53a3b82f8e035ab9b40af5c4a3cec8e9f34e5328fbc2720304",
-      "bytes": 2020,
-      "html_sha256": "57e157771bfaaf25fdff002677170cb0ad8593cbba67c4f65e4478b61d800d8f",
-      "html_bytes": 5088,
+      "sha256": "3b207231e4f77eee54cfa947cac8f0fab877e9354f9a250119d744ff56e653e8",
+      "bytes": 1913,
+      "html_sha256": "8ed1a6dd2be490a07894065929e21e152fb384616548e022ea695fe894ff83c0",
+      "html_bytes": 4953,
       "converter_version": "6",
       "first_seen_at": "2026-08-20T18:07:04Z",
       "last_verified_at": "2026-08-30T03:14:41Z",
-      "fetched_at": "2026-08-30T03:14:41Z",
+      "fetched_at": "2026-09-13T02:49:46Z",
       "missing_since": null,
       "fetch_failures": 0
     },
@@ -3789,8 +3789,9 @@
       "first_seen_at": "2026-09-11T02:13:57Z",
       "last_verified_at": "2026-09-11T02:13:57Z",
       "fetched_at": "2026-09-11T02:13:57Z",
-      "missing_since": null,
-      "fetch_failures": 0
+      "missing_since": "2026-09-19T02:45:38Z",
+      "fetch_failures": 0,
+      "missing_run_count": 1
     },
     "wecom/101676.md": {
       "source": "wecom",
@@ -3811,8 +3812,9 @@
       "first_seen_at": "2026-09-11T02:14:13Z",
       "last_verified_at": "2026-09-11T02:14:13Z",
       "fetched_at": "2026-09-11T02:14:13Z",
-      "missing_since": null,
-      "fetch_failures": 0
+      "missing_since": "2026-09-19T02:45:38Z",
+      "fetch_failures": 0,
+      "missing_run_count": 1
     },
     "wecom/101677.md": {
       "source": "wecom",
@@ -3833,8 +3835,9 @@
       "first_seen_at": "2026-09-11T02:14:30Z",
       "last_verified_at": "2026-09-11T02:14:30Z",
       "fetched_at": "2026-09-11T02:14:30Z",
-      "missing_since": null,
-      "fetch_failures": 0
+      "missing_since": "2026-09-19T02:45:38Z",
+      "fetch_failures": 0,
+      "missing_run_count": 1
     },
     "wecom/101678.md": {
       "source": "wecom",
@@ -3855,8 +3858,9 @@
       "first_seen_at": "2026-09-11T02:14:45Z",
       "last_verified_at": "2026-09-11T02:14:45Z",
       "fetched_at": "2026-09-11T02:14:45Z",
-      "missing_since": null,
-      "fetch_failures": 0
+      "missing_since": "2026-09-19T02:45:38Z",
+      "fetch_failures": 0,
+      "missing_run_count": 1
     },
     "wecom/101680.md": {
       "source": "wecom",
@@ -3876,8 +3880,9 @@
       "first_seen_at": "2026-09-11T02:14:56Z",
       "last_verified_at": "2026-09-11T02:14:56Z",
       "fetched_at": "2026-09-11T02:14:56Z",
-      "missing_since": null,
-      "fetch_failures": 0
+      "missing_since": "2026-09-19T02:45:38Z",
+      "fetch_failures": 0,
+      "missing_run_count": 1
     },
     "wecom/101689.md": {
       "source": "wecom",
@@ -3898,8 +3903,9 @@
       "first_seen_at": "2026-09-11T02:15:08Z",
       "last_verified_at": "2026-09-11T02:15:08Z",
       "fetched_at": "2026-09-11T02:15:08Z",
-      "missing_since": null,
-      "fetch_failures": 0
+      "missing_since": "2026-09-19T02:45:38Z",
+      "fetch_failures": 0,
+      "missing_run_count": 1
     },
     "wecom/101690.md": {
       "source": "wecom",
@@ -3920,8 +3926,9 @@
       "first_seen_at": "2026-09-11T02:15:22Z",
       "last_verified_at": "2026-09-11T02:15:22Z",
       "fetched_at": "2026-09-11T02:15:22Z",
-      "missing_since": null,
-      "fetch_failures": 0
+      "missing_since": "2026-09-19T02:45:38Z",
+      "fetch_failures": 0,
+      "missing_run_count": 1
     },
     "wecom/101691.md": {
       "source": "wecom",
@@ -3942,8 +3949,9 @@
       "first_seen_at": "2026-09-11T02:15:34Z",
       "last_verified_at": "2026-09-11T02:15:34Z",
       "fetched_at": "2026-09-11T02:15:34Z",
-      "missing_since": null,
-      "fetch_failures": 0
+      "missing_since": "2026-09-19T02:45:38Z",
+      "fetch_failures": 0,
+      "missing_run_count": 1
     },
     "wecom/101696.md": {
       "source": "wecom",
@@ -3964,8 +3972,9 @@
       "first_seen_at": "2026-09-11T02:15:47Z",
       "last_verified_at": "2026-09-11T02:15:47Z",
       "fetched_at": "2026-09-11T02:15:47Z",
-      "missing_since": null,
-      "fetch_failures": 0
+      "missing_since": "2026-09-19T02:45:38Z",
+      "fetch_failures": 0,
+      "missing_run_count": 1
     },
     "wecom/101697.md": {
       "source": "wecom",
@@ -3986,8 +3995,9 @@
       "first_seen_at": "2026-09-11T02:16:01Z",
       "last_verified_at": "2026-09-11T02:16:01Z",
       "fetched_at": "2026-09-11T02:16:01Z",
-      "missing_since": null,
-      "fetch_failures": 0
+      "missing_since": "2026-09-19T02:45:38Z",
+      "fetch_failures": 0,
+      "missing_run_count": 1
     },
     "wecom/101698.md": {
       "source": "wecom",
@@ -4008,8 +4018,9 @@
       "first_seen_at": "2026-09-11T02:16:14Z",
       "last_verified_at": "2026-09-11T02:16:14Z",
       "fetched_at": "2026-09-11T02:16:14Z",
-      "missing_since": null,
-      "fetch_failures": 0
+      "missing_since": "2026-09-19T02:45:38Z",
+      "fetch_failures": 0,
+      "missing_run_count": 1
     },
     "wecom/101700.md": {
       "source": "wecom",
@@ -4029,8 +4040,9 @@
       "first_seen_at": "2026-09-11T02:16:28Z",
       "last_verified_at": "2026-09-11T02:16:28Z",
       "fetched_at": "2026-09-11T02:16:28Z",
-      "missing_since": null,
-      "fetch_failures": 0
+      "missing_since": "2026-09-19T02:45:38Z",
+      "fetch_failures": 0,
+      "missing_run_count": 1
     },
     "wecom/101701.md": {
       "source": "wecom",
@@ -4050,8 +4062,9 @@
       "first_seen_at": "2026-09-11T02:16:41Z",
       "last_verified_at": "2026-09-11T02:16:41Z",
       "fetched_at": "2026-09-11T02:16:41Z",
-      "missing_since": null,
-      "fetch_failures": 0
+      "missing_since": "2026-09-19T02:45:38Z",
+      "fetch_failures": 0,
+      "missing_run_count": 1
     },
     "wecom/101704.md": {
       "source": "wecom",
@@ -4072,8 +4085,9 @@
       "first_seen_at": "2026-09-11T02:16:55Z",
       "last_verified_at": "2026-09-11T02:16:55Z",
       "fetched_at": "2026-09-11T02:16:55Z",
-      "missing_since": null,
-      "fetch_failures": 0
+      "missing_since": "2026-09-19T02:45:38Z",
+      "fetch_failures": 0,
+      "missing_run_count": 1
     },
     "wecom/101870.md": {
       "source": "wecom",
@@ -4086,14 +4100,14 @@
         "素材管理"
       ],
       "url": "https://developer.work.weixin.qq.com/document/path/101870",
-      "sha256": "30e76129590bb80ccb02ccc0491ebb0342d2b56b38e4b813ed7a1ec46e641e4d",
-      "bytes": 1461,
+      "sha256": "e50409c73e66ddc19b3d513ffd54aa5d46ea6d42b83deb48d58c1fda76ac281e",
+      "bytes": 1466,
       "html_sha256": "8827cee995a08f28e30ba9b3c28792f2e69d5fe42d3542ad368bf3f84ca3beaa",
       "html_bytes": 4491,
       "converter_version": "6",
       "first_seen_at": "2026-09-11T02:17:08Z",
       "last_verified_at": "2026-09-11T02:17:08Z",
-      "fetched_at": "2026-09-11T02:17:08Z",
+      "fetched_at": "2026-09-14T02:40:36Z",
       "missing_since": null,
       "fetch_failures": 0
     },
@@ -8806,14 +8820,14 @@
       "section": "",
       "category_path": [],
       "url": "https://developer.work.weixin.qq.com/document/path/93221",
-      "sha256": "f22b945f7bc36ff02610dd6f4459622aae568cf7bce6f6eeaf4ed8c20820a595",
-      "bytes": 110955,
-      "html_sha256": "d21359aeb3421e852dc0553e7199c447176f8539dc490b9109a6a7852469dbc4",
-      "html_bytes": 223804,
+      "sha256": "bc57b6269a9b9e89c3f33bd5bcc83f89354efecac449bba424a9cdddd0b29995",
+      "bytes": 77109,
+      "html_sha256": "404b803b124865b37bb9c4aca1bf6934c43f5fb4e06e28433fa1d1aff2d0a42b",
+      "html_bytes": 168553,
       "converter_version": "6",
       "first_seen_at": "2026-08-25T01:06:14Z",
       "last_verified_at": "2026-08-25T01:06:14Z",
-      "fetched_at": "2026-09-01T03:08:30Z",
+      "fetched_at": "2026-09-15T02:59:43Z",
       "missing_since": null,
       "fetch_failures": 0
     },
@@ -13085,14 +13099,14 @@
         "应用管理"
       ],
       "url": "https://developer.work.weixin.qq.com/document/path/95536",
-      "sha256": "d3b5455b2697de67b224984d9cbec6de7ef54f4115ab38278d895c94cedfc81a",
-      "bytes": 4314,
-      "html_sha256": "44573d91b459407a135aa0fff80b0b8df7965f2a79f9cc77f026f3f1aedb9cfd",
-      "html_bytes": 16426,
+      "sha256": "5e0db3b5b0a74e5e52fec00632bc898eebbde9518875224717840bd39312e26f",
+      "bytes": 4211,
+      "html_sha256": "13812b6466b349ebe182fecdc87998765093b4fb53e317853fb0ee35ed10213c",
+      "html_bytes": 16290,
       "converter_version": "6",
       "first_seen_at": "2026-08-26T01:19:21Z",
       "last_verified_at": "2026-08-26T01:19:21Z",
-      "fetched_at": "2026-08-26T01:19:21Z",
+      "fetched_at": "2026-09-16T03:05:38Z",
       "missing_since": null,
       "fetch_failures": 0
     },
@@ -13107,14 +13121,14 @@
         "应用管理"
       ],
       "url": "https://developer.work.weixin.qq.com/document/path/95537",
-      "sha256": "31536ab59d2ee189dfa9fd162907cd6369eeabd8da26520291a5dc3a90153cd9",
-      "bytes": 2921,
-      "html_sha256": "5ad7e9a7218d3bb8e4b9e86ec92d0665c14c7e2aef716e30e4314350bdda1539",
-      "html_bytes": 7318,
+      "sha256": "5750a9b356540f71a4cee9c89f523860c94f10b98cdd5c89da912570823df950",
+      "bytes": 3083,
+      "html_sha256": "16b0d040b660b69c304f37f1f66175172386673a0a0927ccc91a0f43b36e5b84",
+      "html_bytes": 7555,
       "converter_version": "6",
       "first_seen_at": "2026-08-26T01:19:37Z",
       "last_verified_at": "2026-08-26T01:19:37Z",
-      "fetched_at": "2026-08-26T01:19:37Z",
+      "fetched_at": "2026-09-16T03:05:52Z",
       "missing_since": null,
       "fetch_failures": 0
     },
@@ -14550,14 +14564,14 @@
         "设置文档权限"
       ],
       "url": "https://developer.work.weixin.qq.com/document/path/97461",
-      "sha256": "a2518f536a278cd6e441c63a098fff902e9d0e5d326e58467bed6eb2111212c4",
-      "bytes": 3805,
-      "html_sha256": "9230ca9f47af3150571084cb6edaeda7f211f4468572a00f03090f31ad4ab92e",
-      "html_bytes": 12231,
+      "sha256": "64e2facc5dc1d5db6dacc3c20d90d5ba04b865f87b4201b1f2da634749575d18",
+      "bytes": 3820,
+      "html_sha256": "5ea2cae51a6aa0e8698faa36d463ad89fd4b5e70dbb843bfa3eb9bd17133bf47",
+      "html_bytes": 12246,
       "converter_version": "6",
       "first_seen_at": "2026-08-27T06:10:25Z",
       "last_verified_at": "2026-08-27T06:10:25Z",
-      "fetched_at": "2026-09-03T02:27:19Z",
+      "fetched_at": "2026-09-17T02:50:22Z",
       "missing_since": null,
       "fetch_failures": 0
     },
