@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-21T05:15:14Z",
+  "generated_at": "2026-11-28T05:59:09Z",
   "tool": "scripts/fetch_wecom_docs.py",
   "converter_version": "6",
   "strict_fetch": false,
@@ -6348,14 +6348,14 @@
         "会话内容存档"
       ],
       "url": "https://developer.work.weixin.qq.com/document/path/91551",
-      "sha256": "f2d8593102e7dcd7798bb98a36475492c03fa7a49b39ec3b23f38b80a3405f2f",
-      "bytes": 9799,
-      "html_sha256": "9df03c51a056c935d3128fc7681ce6994d49ebb75dbc680ab956c16457371e26",
-      "html_bytes": 58383,
+      "sha256": "2c74d486d6d7ffb0efc78bcb05664d60c3508eeada7c54c365a1511eddaa84cf",
+      "bytes": 9805,
+      "html_sha256": "75e1039a40f253c981b4c0c6f506b8c046b74591dd7862499930ba0f63950a32",
+      "html_bytes": 58535,
       "converter_version": "6",
       "first_seen_at": "2026-08-20T18:31:26Z",
       "last_verified_at": "2026-08-24T01:18:13Z",
-      "fetched_at": "2026-08-24T01:18:13Z",
+      "fetched_at": "2026-11-23T05:27:06Z",
       "missing_since": null,
       "fetch_failures": 0
     },
